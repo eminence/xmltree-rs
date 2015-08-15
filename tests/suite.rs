@@ -8,6 +8,11 @@ use xmltree::parse;
 fn test_01() {
     let e: Element = parse("tests/data/01.xml");
     println!("{:#?}", e);
+    assert_eq!(e.name, "project");
+    let e2: &Element = e.get_child("libraries").expect("Missing libraries child element");
+    assert_eq!(e2.name, "libraries");
+
+    assert!(e.get_child("doesnotexist").is_none());
 
 }
 #[test]

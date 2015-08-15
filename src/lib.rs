@@ -46,7 +46,20 @@ fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Element {
         }
     }
 
-    elem
+}
+
+impl Element {
+    /// Attempts to find a child element with the given name
+    pub fn get_child<K>(&self, k: K) -> Option<&Element> 
+      where String: PartialEq<K> {
+        for elem in &self.children {
+            if elem.name == k{
+                return Some(&elem);
+            }
+        }
+        None
+    }
+
 }
 
 /// Parses a file into an Element 
