@@ -1,4 +1,6 @@
-
+//! A simple library for parsing an XML file into an in-memory tree structure
+//!
+//! Not well tested, and not recommended for large XML files
 extern crate xml;
 
 use std::convert::AsRef;
@@ -12,9 +14,16 @@ use xml::reader::events::XmlEvent;
 
 #[derive(Debug)]
 pub struct Element {
+    /// The name of the Element.  Does not include any namespace info
     pub name: String,
+
+    /// The Element attributes
     pub attributes: HashMap<String, String>,
+
+    /// Children
     pub children: Vec<Element>,
+
+    /// The text data for this element
     pub text: Option<String>
 }
 
@@ -40,6 +49,11 @@ fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Element {
     elem
 }
 
+/// Parses a file into an Element 
+///
+/// # Panics
+///
+/// Panics on error or other unhandled condition
 pub fn parse<P: AsRef<Path>>(p: P) -> Element {
     let f = File::open(p).unwrap();
     let mut reader = EventReader::new(f);
@@ -65,4 +79,3 @@ pub fn parse<P: AsRef<Path>>(p: P) -> Element {
 
 
 }
-
