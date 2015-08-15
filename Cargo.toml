@@ -1,7 +1,10 @@
 [package]
 name = "xmltree"
-version = "0.1.1"
+version = "0.2.0"
 authors = ["Andrew Chin <achin@eminence32.net>"]
 
 [dependencies]
 xml-rs = "0.1"
+
+[dev-dependencies]
+tempfile = "~1.1"
