@@ -118,12 +118,12 @@ impl Element {
     /// Attempts to find a child element with the given name
     pub fn get_child<K>(&self, k: K) -> Option<&Element> 
       where String: PartialEq<K> {
-        for elem in &self.children {
-            if elem.name == k{
-                return Some(&elem);
-            }
-        }
-        None
+          self.children.iter().find(|e| e.name == k)
+    }
+
+    pub fn get_mut_child<'a, K>(&'a mut self, k: K) -> Option<&'a mut Element> 
+      where String: PartialEq<K> {
+          self.children.iter_mut().find(|e| e.name == k)
     }
 
 }

@@ -62,5 +62,18 @@ fn test_rw() {
 
     assert_eq!(e, e2);
 
+}
+
+
+#[test]
+fn test_mut() {
+
+    let mut e: Element = Element::parse(File::open("tests/data/rw.xml").unwrap());
+    {
+        let name = e.get_mut_child("name").unwrap();
+        name.attributes.insert("suffix".to_owned(), "mr".to_owned());
+    }
+
+
 
 }
