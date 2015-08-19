@@ -170,20 +170,71 @@
 <span id="128">128</span>
 <span id="129">129</span>
 <span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! A simple library for parsing an XML file into an in-memory tree structure</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! Not well tested, and not recommended for large XML files</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! # Example</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! ```no_run</span>
+<span class='doccomment'>//! use xmltree::Element;</span>
+<span class='doccomment'>//! use std::fs::File;</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! let data: &amp;&#39;static str = r##&quot;</span>
+<span class='doccomment'>//! &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; standalone=&quot;yes&quot;?&gt;</span>
+<span class='doccomment'>//! &lt;names&gt;</span>
+<span class='doccomment'>//!     &lt;name first=&quot;bob&quot; last=&quot;jones&quot; /&gt;</span>
+<span class='doccomment'>//!     &lt;name first=&quot;elizabeth&quot; last=&quot;smith&quot; /&gt;</span>
+<span class='doccomment'>//! &lt;/names&gt;</span>
+<span class='doccomment'>//! &quot;##;</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! let mut names_element = Element::parse(data.as_bytes());</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! println!(&quot;{:#?}&quot;, names_element);</span>
+<span class='doccomment'>//! {</span>
+<span class='doccomment'>//!     // get first `name` element</span>
+<span class='doccomment'>//!     let name = names_element.get_mut_child(&quot;name&quot;).expect(&quot;Can&#39;t find name element&quot;);</span>
+<span class='doccomment'>//!     name.attributes.insert(&quot;suffix&quot;.to_owned(), &quot;mr&quot;.to_owned());</span>
+<span class='doccomment'>//! }</span>
+<span class='doccomment'>//! names_element.write(File::create(&quot;result.xml&quot;).unwrap());</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! </span>
+<span class='doccomment'>//! ```</span>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>xml</span>;
 
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>convert</span>::<span class='ident'>AsRef</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>path</span>::<span class='ident'>Path</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>collections</span>::<span class='ident'>HashMap</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fs</span>::<span class='ident'>File</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::{<span class='ident'>Read</span>, <span class='ident'>Write</span>};
 
 <span class='kw'>use</span> <span class='ident'>xml</span>::<span class='ident'>reader</span>::<span class='ident'>EventReader</span>;
 
+<span class='doccomment'>/// Represents an XML element.  </span>
 <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Eq</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Element</span> {
     <span class='doccomment'>/// The name of the Element.  Does not include any namespace info</span>
@@ -222,7 +273,7 @@
 
 <span class='kw'>impl</span> <span class='ident'>Element</span> {
 
-    <span class='doccomment'>/// Parses a file into an Element </span>
+    <span class='doccomment'>/// Parses some data into an Element </span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// # Panics</span>
     <span class='doccomment'>///</span>
@@ -294,6 +345,7 @@
           <span class='self'>self</span>.<span class='ident'>children</span>.<span class='ident'>iter</span>().<span class='ident'>find</span>(<span class='op'>|</span><span class='ident'>e</span><span class='op'>|</span> <span class='ident'>e</span>.<span class='ident'>name</span> <span class='op'>==</span> <span class='ident'>k</span>)
     }
 
+    <span class='doccomment'>/// Mutable version of the above API</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_mut_child</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>K</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>k</span>: <span class='ident'>K</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>Element</span><span class='op'>&gt;</span> 
       <span class='kw'>where</span> <span class='ident'>String</span>: <span class='ident'>PartialEq</span><span class='op'>&lt;</span><span class='ident'>K</span><span class='op'>&gt;</span> {
           <span class='self'>self</span>.<span class='ident'>children</span>.<span class='ident'>iter_mut</span>().<span class='ident'>find</span>(<span class='op'>|</span><span class='ident'>e</span><span class='op'>|</span> <span class='ident'>e</span>.<span class='ident'>name</span> <span class='op'>==</span> <span class='ident'>k</span>)
