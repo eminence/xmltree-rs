@@ -1,16 +1,41 @@
 //! A simple library for parsing an XML file into an in-memory tree structure
 //!
 //! Not well tested, and not recommended for large XML files
+//!
+//! # Example
+//!
+//! ```no_run
+//! use xmltree::Element;
+//! use std::fs::File;
+//!
+//! let data: &'static str = r##"
+//! <?xml version="1.0" encoding="utf-8" standalone="yes"?>
+//! <names>
+//!     <name first="bob" last="jones" />
+//!     <name first="elizabeth" last="smith" />
+//! </names>
+//! "##;
+//!
+//! let mut names_element = Element::parse(data.as_bytes());
+//!
+//! println!("{:#?}", names_element);
+//! {
+//!     // get first `name` element
+//!     let name = names_element.get_mut_child("name").expect("Can't find name element");
+//!     name.attributes.insert("suffix".to_owned(), "mr".to_owned());
+//! }
+//! names_element.write(File::create("result.xml").unwrap());
+//!
+//! 
+//! ```
 extern crate xml;
 
-use std::convert::AsRef;
-use std::path::Path;
 use std::collections::HashMap;
-use std::fs::File;
 use std::io::{Read, Write};
 
 use xml::reader::EventReader;
 
+/// Represents an XML element.  
 #[derive(Debug, PartialEq, Eq)]
 pub struct Element {
     /// The name of the Element.  Does not include any namespace info
@@ -49,7 +74,7 @@ fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Element {
 
 impl Element {
 
-    /// Parses a file into an Element 
+    /// Parses some data into an Element 
     ///
     /// # Panics
     ///
@@ -121,6 +146,7 @@ impl Element {
           self.children.iter().find(|e| e.name == k)
     }
 
+    /// Mutable version of the above API
     pub fn get_mut_child<'a, K>(&'a mut self, k: K) -> Option<&'a mut Element> 
       where String: PartialEq<K> {
           self.children.iter_mut().find(|e| e.name == k)
