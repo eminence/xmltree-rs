@@ -2,6 +2,11 @@
 name = "xmltree"
 version = "0.2.1"
 authors = ["Andrew Chin <achin@eminence32.net>"]
+description = "Parse an XML file into a simple tree-like structure"
+documentation = "http://eminence.github.io/xmltree-rs/doc/xmltree/index.html"
+repository = "https://github.com/eminence/xmltree-rs"
+keywords = ["xml", "parse", "xmltree"]
+license = "MIT"
 
 [dependencies]
 xml-rs = "0.1"
