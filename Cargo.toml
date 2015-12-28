@@ -4,7 +4,7 @@ version = "0.2.1"
 authors = ["Andrew Chin <achin@eminence32.net>"]
 
 [dependencies]
-xml-rs = "0.1"
+xml-rs = "0.2"
 
 [dev-dependencies]
 tempfile = "~1.1"

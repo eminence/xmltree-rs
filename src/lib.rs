@@ -16,7 +16,7 @@
 //! </names>
 //! "##;
 //!
-//! let mut names_element = Element::parse(data.as_bytes());
+//! let mut names_element = Element::parse(data.as_bytes()).unwrap();
 //!
 //! println!("{:#?}", names_element);
 //! {
@@ -32,10 +32,12 @@ extern crate xml;
 
 use std::collections::HashMap;
 use std::io::{Read, Write};
+use std::borrow::Cow;
+use std::fmt;
 
-use xml::reader::EventReader;
+use xml::reader::{EventReader, XmlEvent};
 
-/// Represents an XML element.  
+/// Represents an XML element.
 #[derive(Debug, PartialEq, Eq)]
 pub struct Element {
     /// The name of the Element.  Does not include any namespace info
@@ -51,22 +53,66 @@ pub struct Element {
     pub text: Option<String>
 }
 
+/// Errors that can occur parsing XML
+#[derive(Debug)]
+pub enum ParseError {
+    /// The XML is invalid
+    MalformedXml(xml::reader::Error),
+    /// This library is unable to process this XML. This can occur if, for
+    /// example, the XML contains processing instructions.
+    CannotParse,
+}
 
-fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Element {
-    use xml::reader::events::XmlEvent;
+impl fmt::Display for ParseError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            &ParseError::MalformedXml(ref e) => write!(f, "Malformed XML. {}", e),
+            &ParseError::CannotParse => write!(f, "Cannot parse"),
+        }
+    }
+}
+
+impl std::error::Error for ParseError {
+    fn description(&self) -> &str {
+        match self {
+            &ParseError::MalformedXml(..) => "Malformed XML",
+            &ParseError::CannotParse      => "Cannot parse",
+        }
+    }
+
+    fn cause(&self) -> Option<&std::error::Error> {
+        match self {
+            &ParseError::MalformedXml(ref e) => Some(e),
+            &ParseError::CannotParse => None,
+        }
+    }
+}
+
+fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Result<Element, ParseError> {
     loop {
         match reader.next() {
-            XmlEvent::EndElement{ref name} if name.local_name == elem.name => { return elem; }
-            XmlEvent::StartElement{name, attributes, namespace} => {
+            Ok(XmlEvent::EndElement{ref name}) => {
+                if name.local_name == elem.name {
+                    return Ok(elem);
+                }
+                else {
+                    return Err(ParseError::CannotParse);
+                }
+            },
+            Ok(XmlEvent::StartElement{name, attributes, ..}) => {
                 let mut attr_map = HashMap::new();
                 for attr in attributes { attr_map.insert(attr.name.local_name, attr.value); }
                 let new_elem = Element{name: name.local_name, attributes: attr_map, children: Vec::new(), text: None};
-                elem.children.push(build(reader, new_elem));
+                elem.children.push(try!(build(reader, new_elem)));
             }
-            XmlEvent::Characters(s) => { elem.text = Some(s); }
-            XmlEvent::Whitespace(..) => (),
-            XmlEvent::CData(s) => { elem.text = Some(s) }
-            x => {panic!("Unsure what to do with {:?}", x)}
+            Ok(XmlEvent::Characters(s)) => { elem.text = Some(s); }
+            Ok(XmlEvent::Whitespace(..)) => (),
+            Ok(XmlEvent::CData(s)) => { elem.text = Some(s) }
+            Ok(XmlEvent::Comment(..)) => (),
+            Ok(XmlEvent::StartDocument { .. }) |
+            Ok(XmlEvent::EndDocument) |
+            Ok(XmlEvent::ProcessingInstruction { .. }) => return Err(ParseError::CannotParse),
+            Err(e) => return Err(ParseError::MalformedXml(e)),
         }
     }
 
@@ -74,33 +120,29 @@ fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Element {
 
 impl Element {
 
-    /// Parses some data into an Element 
-    ///
-    /// # Panics
-    ///
-    /// Panics on error or other unhandled condition
-    pub fn parse<R: Read>(r: R) -> Element {
-        use xml::reader::events::XmlEvent;
-
+    /// Parses some data into an Element
+    pub fn parse<R: Read>(r: R) -> Result<Element, ParseError> {
         let mut reader = EventReader::new(r);
-
-
         loop {
             match reader.next() {
-                XmlEvent::StartElement{name, attributes, namespace} => {
+                Ok(XmlEvent::StartElement{name, attributes, ..}) => {
                     let mut attr_map = HashMap::new();
                     for attr in attributes { attr_map.insert(attr.name.local_name, attr.value); }
 
                     let root = Element{name: name.local_name, attributes: attr_map, children: Vec::new(), text: None};
                     return build(&mut reader, root);
                 }
-                XmlEvent::EndDocument => break,
-                XmlEvent::Error(e) => panic!("{:?}", e),
-                _ => ()
-
+                Ok(XmlEvent::Comment(..)) |
+                Ok(XmlEvent::Whitespace(..)) |
+                Ok(XmlEvent::StartDocument { .. }) => continue,
+                Ok(XmlEvent::EndDocument) |
+                Ok(XmlEvent::EndElement { .. }) |
+                Ok(XmlEvent::Characters(..)) |
+                Ok(XmlEvent::CData(..)) |
+                Ok(XmlEvent::ProcessingInstruction { .. }) => return Err(ParseError::CannotParse),
+                Err(e) => return Err(ParseError::MalformedXml(e)),
             }
         }
-        panic!("Error")
     }
 
     fn _write<B: Write>(&self, emitter: &mut xml::writer::EventWriter<B>) {
@@ -118,14 +160,14 @@ impl Element {
         let namespace = Namespace::empty();
 
 
-        emitter.write(XmlEvent::StartElement{name: name, attributes:attributes, namespace: &namespace}).unwrap();
+        emitter.write(XmlEvent::StartElement{name: name, attributes: Cow::Owned(attributes), namespace: Cow::Borrowed(&namespace)}).unwrap();
         if let Some(ref t) = self.text {
             emitter.write(XmlEvent::Characters(t)).unwrap();
         }
         for elem in &self.children {
             elem._write(emitter);
         }
-        emitter.write(XmlEvent::EndElement{name: name}).unwrap();
+        emitter.write(XmlEvent::EndElement{name: Some(name)}).unwrap();
 
     }
 
