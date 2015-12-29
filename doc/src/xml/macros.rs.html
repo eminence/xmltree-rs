@@ -4,11 +4,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/storage/home/achin/.cargo/registry/src/github.com-0a35038f75765ae4/xml-rs-0.1.25/src/macros.rs`.">
+    <meta name="description" content="Source to the Rust file `/storage/home/achin/.multirust/toolchains/nightly/cargo/registry/src/github.com-88ac128001ac3a9a/xml-rs-0.2.2/src/macros.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>macros.rs.html -- source</title>
 
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
 
     
@@ -24,10 +25,10 @@
 
     
 
-    <section class="sidebar">
+    <nav class="sidebar">
         
         
-    </section>
+    </nav>
 
     <nav class="sub">
         <form class="search-form js-only">
@@ -66,24 +67,26 @@
 <span id="24">24</span>
 <span id="25">25</span>
 <span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
 </pre><pre class='rust '>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>macro_use</span>]</span>
 
 <span class='doccomment'>//! Contains several macros used in this crate.</span>
 
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>for_each</span>(
-    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>ident</span> <span class='kw'>in</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>it</span>:<span class='ident'>expr</span> ; <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>body</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> (
-        <span class='kw'>loop</span> {
-            <span class='kw'>match</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>it</span> {
-                <span class='prelude-val'>Some</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>) <span class='op'>=&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>body</span>,
-                <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>break</span>
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>gen_setter</span> {
+    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>target</span>:<span class='ident'>ty</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>field</span>:<span class='ident'>ident</span> : <span class='ident'>into</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>:<span class='ident'>ty</span>) <span class='op'>=&gt;</span> {
+        <span class='kw'>impl</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>target</span> {
+            <span class='doccomment'>/// Sets the field to the provided value and returns updated config object.</span>
+            <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>field</span><span class='op'>&lt;</span><span class='ident'>T</span>: <span class='ident'>Into</span><span class='op'>&lt;</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span><span class='op'>&gt;&gt;</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>value</span>: <span class='ident'>T</span>) <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>target</span> {
+                <span class='self'>self</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>field</span> <span class='op'>=</span> <span class='ident'>value</span>.<span class='ident'>into</span>();
+                <span class='self'>self</span>
             }
         }
-    )
-);
-
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>gen_setters</span>(
-    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>target</span>:<span class='ident'>ty</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>field</span>:<span class='ident'>ident</span> : <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>:<span class='ident'>ty</span>),<span class='op'>+</span>) <span class='op'>=&gt;</span> ($(
+    };
+    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>target</span>:<span class='ident'>ty</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>field</span>:<span class='ident'>ident</span> : <span class='ident'>val</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>:<span class='ident'>ty</span>) <span class='op'>=&gt;</span> {
         <span class='kw'>impl</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>target</span> {
             <span class='doccomment'>/// Sets the field to the provided value and returns updated config object.</span>
             <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>field</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>value</span>: <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>t</span>) <span class='op'>-&gt;</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>target</span> {
@@ -91,18 +94,26 @@
                 <span class='self'>self</span>
             }
         }
+    }
+}
+
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>gen_setters</span> {
+    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>target</span>:<span class='ident'>ty</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>field</span>:<span class='ident'>ident</span> : <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>k</span>:<span class='ident'>tt</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tpe</span>:<span class='ident'>ty</span>),<span class='op'>+</span>) <span class='op'>=&gt;</span> ($(
+        <span class='macro'>gen_setter</span><span class='macro'>!</span> { <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>target</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>field</span> : <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>k</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>tpe</span> }
     )<span class='op'>+</span>)
-);
+}
 </pre>
 </section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>
 
-    <div id="help" class="hidden">
+    <aside id="help" class="hidden">
         <div>
+            <h1 class="hidden">Help</h1>
+
             <div class="shortcuts">
-                <h1>Keyboard Shortcuts</h1>
+                <h2>Keyboard Shortcuts</h2>
 
                 <dl>
                     <dt>?</dt>
@@ -119,7 +130,7 @@
             </div>
 
             <div class="infos">
-                <h1>Search Tricks</h1>
+                <h2>Search Tricks</h2>
 
                 <p>
                     Prefix searches with a type followed by a colon (e.g.
@@ -129,8 +140,8 @@
                 <p>
                     Accepted types are: <code>fn</code>, <code>mod</code>,
                     <code>struct</code>, <code>enum</code>,
-                    <code>trait</code>, <code>typedef</code> (or
-                    <code>tdef</code>).
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
                 </p>
 
                 <p>
@@ -139,7 +150,7 @@
                 </p>
             </div>
         </div>
-    </div>
+    </aside>
 
     
 
@@ -151,6 +162,6 @@
     <script src="../../jquery.js"></script>
     <script src="../../main.js"></script>
     
-    <script async src="../../search-index.js"></script>
+    <script defer src="../../search-index.js"></script>
 </body>
 </html>
