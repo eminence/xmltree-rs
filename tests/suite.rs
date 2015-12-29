@@ -2,6 +2,7 @@ extern crate xmltree;
 extern crate tempfile;
 
 use xmltree::Element;
+use xmltree::ParseError;
 use std::fs::File;
 use tempfile::TempFile;
 
@@ -70,3 +71,68 @@ fn test_mut() {
     }
 }
 
+
+#[test]
+fn test_mal_01() {
+    // some tests for error handling
+   
+    let data = r##"
+        <?xml version="1.0" encoding="utf-8" standalone="yes"?>
+        <names>
+            <name first="bob" last="jones />
+            <name first="elizabeth" last="smith" />
+        </names>
+    "##;
+
+    let names_element = Element::parse(data.as_bytes());
+    if let Err(ParseError::MalformedXml(..)) = names_element {
+        // OK 
+    } else {
+        panic!("unexpected parse result");
+    }
+    println!("{:?}", names_element);
+
+}
+
+
+#[test]
+fn test_mal_02() {
+    // some tests for error handling
+   
+    let data = r##"
+            this is not even close 
+            to XML
+    "##;
+
+    let names_element = Element::parse(data.as_bytes());
+    if let Err(ParseError::MalformedXml(..)) = names_element {
+        // OK 
+    } else {
+        panic!("unexpected parse result");
+    }
+    println!("{:?}", names_element);
+
+}
+
+
+#[test]
+fn test_mal_03() {
+    // some tests for error handling
+   
+    let data = r##"
+        <?xml version="1.0" encoding="utf-8" standalone="yes"?>
+        <names>
+            <name first="bob" last="jones"></badtag>
+            <name first="elizabeth" last="smith" />
+        </names>
+    "##;
+
+    let names_element = Element::parse(data.as_bytes());
+    if let Err(ParseError::MalformedXml(..)) = names_element {
+        // OK 
+    } else {
+        panic!("unexpected parse result");
+    }
+    println!("{:?}", names_element);
+
+}
