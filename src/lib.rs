@@ -1,6 +1,6 @@
 //! A simple library for parsing an XML file into an in-memory tree structure
 //!
-//! Not well tested, and not recommended for large XML files
+//! Not recommended for large XML files, as it will load the entire file into memory.
 //!
 //! # Example
 //!
