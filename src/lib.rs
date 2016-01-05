@@ -38,7 +38,7 @@ use std::fmt;
 use xml::reader::{EventReader, XmlEvent};
 
 /// Represents an XML element.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Element {
     /// The name of the Element.  Does not include any namespace info
     pub name: String,
@@ -119,7 +119,6 @@ fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Result<Elem
 }
 
 impl Element {
-
     /// Parses some data into an Element
     pub fn parse<R: Read>(r: R) -> Result<Element, ParseError> {
         let mut reader = EventReader::new(r);
@@ -182,17 +181,22 @@ impl Element {
         self._write(&mut emitter);
     }
 
-    /// Attempts to find a child element with the given name
+    /// Find a child element with the given name and return a reference to it.
     pub fn get_child<K>(&self, k: K) -> Option<&Element> 
       where String: PartialEq<K> {
           self.children.iter().find(|e| e.name == k)
     }
 
-    /// Mutable version of the above API
+    /// Find a child element with the given name and return a mutable reference to it.
     pub fn get_mut_child<'a, K>(&'a mut self, k: K) -> Option<&'a mut Element> 
       where String: PartialEq<K> {
           self.children.iter_mut().find(|e| e.name == k)
     }
 
+    /// Find a child element with the given name, remove and return it.
+    pub fn take_child<'a, K>(&'a mut self, k: K) -> Option<Element>
+      where String: PartialEq<K> {
+          self.children.iter().position(|e| e.name == k).map(|i| self.children.remove(i))
+    }
 }
 
