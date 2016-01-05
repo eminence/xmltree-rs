@@ -136,3 +136,39 @@ fn test_mal_03() {
     println!("{:?}", names_element);
 
 }
+
+
+#[test]
+fn test_take() {
+    let data_xml_1 = r##"
+        <?xml version="1.0" encoding="utf-8" standalone="yes"?>
+        <names>
+            <name first="bob" last="jones"></name>
+            <name first="elizabeth" last="smith" />
+            <remove_me key="value">
+                <child />
+            </remove_me>
+        </names>
+    "##;
+    
+    let data_xml_2 = r##"
+        <?xml version="1.0" encoding="utf-8" standalone="yes"?>
+        <names>
+            <name first="bob" last="jones"></name>
+            <name first="elizabeth" last="smith" />
+        </names>
+    "##;
+
+    let mut data_1 = Element::parse(data_xml_1.as_bytes()).unwrap();
+    let data_2 = Element::parse(data_xml_2.as_bytes()).unwrap();
+
+    if let Some(removed) = data_1.take_child("remove_me") {
+        assert_eq!(removed.children.len(), 1);
+
+    } else {
+        panic!("take_child failed");
+    }
+
+
+    assert_eq!(data_1, data_2);
+}
