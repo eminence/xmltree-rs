@@ -5,6 +5,8 @@ xmltree-rs
 
 A small library for parsing an XML file into an in-memory tree structure.
 
-Untested, and not recommended for large XML files.
+Needs more testing, not recommended for large XML files.
 
-Not (yet) hosted on crates.io
+https://crates.io/crates/xmltree
+
+
