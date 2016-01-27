@@ -1,4 +1,3 @@
-
 extern crate xmltree;
 extern crate tempfile;
 
@@ -9,7 +8,7 @@ use tempfile::TempFile;
 
 #[test]
 fn test_01() {
-    let e: Element = Element::parse(File::open("tests/data/01.xml").unwrap());
+    let e: Element = Element::parse(File::open("tests/data/01.xml").unwrap()).unwrap();
     println!("E:=======\n{:#?}", e);
     assert_eq!(e.name, "project");
     let e2: &Element = e.get_child("libraries").expect("Missing libraries child element");
@@ -22,58 +21,52 @@ fn test_01() {
     let t2 = tmp.remove(0);
     e.write(t1);
 
-    let e2 = Element::parse(t2);
+    let e2 = Element::parse(t2).unwrap();
     println!("E2:======\n{:#?}", e2);
 
     assert_eq!(e, e2);
-
 }
+
 #[test]
 fn test_02() {
-    let e: Element = Element::parse(File::open("tests/data/02.xml").unwrap());
+    let e: Element = Element::parse(File::open("tests/data/02.xml").unwrap()).unwrap();
     println!("{:#?}", e);
-
 }
+
 #[test]
 fn test_03() {
-    let e: Element = Element::parse(File::open("tests/data/03.xml").unwrap());
+    let e: Element = Element::parse(File::open("tests/data/03.xml").unwrap()).unwrap();
     println!("{:#?}", e);
-
 }
+
 #[test]
 fn test_04() {
-    let e: Element = Element::parse(File::open("tests/data/04.xml").unwrap());
+    let e: Element = Element::parse(File::open("tests/data/04.xml").unwrap()).unwrap();
     println!("{:#?}", e);
-
 }
-
 
 #[test]
 fn test_rw() {
 
-    let e: Element = Element::parse(File::open("tests/data/rw.xml").unwrap());
+    let e: Element = Element::parse(File::open("tests/data/rw.xml").unwrap()).unwrap();
 
     let mut tmp = TempFile::shared(2).unwrap();
     let t1 = tmp.remove(0);
     let t2 = tmp.remove(0);
     e.write(t1);
 
-    let e2 = Element::parse(t2);
+    let e2 = Element::parse(t2).unwrap();
 
     assert_eq!(e, e2);
-
 }
-
 
 #[test]
 fn test_mut() {
 
-    let mut e: Element = Element::parse(File::open("tests/data/rw.xml").unwrap());
+    let mut e: Element = Element::parse(File::open("tests/data/rw.xml").unwrap()).unwrap();
     {
         let name = e.get_mut_child("name").unwrap();
         name.attributes.insert("suffix".to_owned(), "mr".to_owned());
     }
-
-
-
 }
+

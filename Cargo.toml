@@ -1,6 +1,6 @@
 [package]
 name = "xmltree"
-version = "0.2.1"
+version = "0.3.0"
 authors = ["Andrew Chin <achin@eminence32.net>"]
 description = "Parse an XML file into a simple tree-like structure"
 documentation = "http://eminence.github.io/xmltree-rs/doc/xmltree/index.html"
@@ -9,7 +9,7 @@ keywords = ["xml", "parse", "xmltree"]
 license = "MIT"
 
 [dependencies]
-xml-rs = "0.1"
+xml-rs = "0.2"
 
 [dev-dependencies]
 tempfile = "~1.1"
