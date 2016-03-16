@@ -9,7 +9,7 @@ keywords = ["xml", "parse", "xmltree"]
 license = "MIT"
 
 [dependencies]
-xml-rs = "0.2"
+xml-rs = "0.3"
 
 [dev-dependencies]
 tempfile = "~1.1"
