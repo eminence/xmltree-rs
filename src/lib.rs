@@ -119,23 +119,16 @@ fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Result<Elem
 }
 
 impl Element {
-    /// Create a new, empty element 
-    pub fn new() -> Element {
+    /// Create a new empty element with given name
+    pub fn new(name: &str) -> Element {
         Element {
-            name: "".to_owned(),
+            name: String::from(name),
             attributes: HashMap::new(),
             children: Vec::new(),
             text: None,
         }
     }
     
-    /// Create a new empty element with given name
-    pub fn named(name: &str) -> Element {
-        let mut e = Element::new();
-        e.name = String::from(name);
-        e
-    }
-
     /// Parses some data into an Element
     pub fn parse<R: Read>(r: R) -> Result<Element, ParseError> {
         let mut reader = EventReader::new(r);
