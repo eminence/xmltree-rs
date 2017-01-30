@@ -40,6 +40,10 @@ use xml::reader::{EventReader, XmlEvent};
 /// Represents an XML element.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Element {
+    pub prefix: Option<String>,
+
+    pub namespace: Option<String>,
+
     /// The name of the Element.  Does not include any namespace info
     pub name: String,
 
@@ -102,7 +106,15 @@ fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Result<Elem
             Ok(XmlEvent::StartElement{name, attributes, ..}) => {
                 let mut attr_map = HashMap::new();
                 for attr in attributes { attr_map.insert(attr.name.local_name, attr.value); }
-                let new_elem = Element{name: name.local_name, attributes: attr_map, children: Vec::new(), text: None};
+
+                let new_elem = Element {
+                    prefix: name.prefix,
+                    namespace: name.namespace,
+                    name: name.local_name,
+                    attributes: attr_map,
+                    children: Vec::new(),
+                    text: None
+                };
                 elem.children.push(try!(build(reader, new_elem)));
             }
             Ok(XmlEvent::Characters(s)) => { elem.text = Some(s); }
@@ -124,11 +136,18 @@ impl Element {
         let mut reader = EventReader::new(r);
         loop {
             match reader.next() {
-                Ok(XmlEvent::StartElement{name, attributes, ..}) => {
+                Ok(XmlEvent::StartElement { name, attributes, .. }) => {
                     let mut attr_map = HashMap::new();
                     for attr in attributes { attr_map.insert(attr.name.local_name, attr.value); }
 
-                    let root = Element{name: name.local_name, attributes: attr_map, children: Vec::new(), text: None};
+                    let root = Element {
+                        prefix: name.prefix,
+                        namespace: name.namespace,
+                        name: name.local_name,
+                        attributes: attr_map,
+                        children: Vec::new(),
+                        text: None
+                    };
                     return build(&mut reader, root);
                 }
                 Ok(XmlEvent::Comment(..)) |
@@ -167,11 +186,10 @@ impl Element {
             elem._write(emitter);
         }
         emitter.write(XmlEvent::EndElement{name: Some(name)}).unwrap();
-
     }
 
     /// Writes out this element as the root element in an new XML document
-    pub fn write<W: Write>(&self, w:W) {
+    pub fn write<W: Write>(&self, w: W) {
         use xml::writer::EventWriter;
         use xml::writer::events::XmlEvent;
         use xml::common::XmlVersion;
