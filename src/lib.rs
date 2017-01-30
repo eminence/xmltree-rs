@@ -26,7 +26,7 @@
 //! }
 //! names_element.write(File::create("result.xml").unwrap());
 //!
-//! 
+//!
 //! ```
 extern crate xml;
 
@@ -40,6 +40,10 @@ use xml::reader::{EventReader, XmlEvent};
 /// Represents an XML element.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Element {
+    pub prefix: Option<String>,
+
+    pub namespace: Option<String>,
+
     /// The name of the Element.  Does not include any namespace info
     pub name: String,
 
@@ -88,21 +92,30 @@ impl std::error::Error for ParseError {
     }
 }
 
-fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Result<Element, ParseError> {
+fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element)
+                  -> Result<Element, ParseError> {
     loop {
         match reader.next() {
             Ok(XmlEvent::EndElement{ref name}) => {
                 if name.local_name == elem.name {
                     return Ok(elem);
-                }
-                else {
+                } else {
                     return Err(ParseError::CannotParse);
                 }
             },
             Ok(XmlEvent::StartElement{name, attributes, ..}) => {
                 let mut attr_map = HashMap::new();
-                for attr in attributes { attr_map.insert(attr.name.local_name, attr.value); }
-                let new_elem = Element{name: name.local_name, attributes: attr_map, children: Vec::new(), text: None};
+                for attr in attributes {
+                    attr_map.insert(attr.name.local_name, attr.value);
+                }
+                let new_elem = Element {
+                    prefix: name.prefix,
+                    namespace: name.namespace,
+                    name: name.local_name,
+                    attributes: attr_map,
+                    children: Vec::new(),
+                    text: None
+                };
                 elem.children.push(try!(build(reader, new_elem)));
             }
             Ok(XmlEvent::Characters(s)) => { elem.text = Some(s); }
@@ -124,11 +137,20 @@ impl Element {
         let mut reader = EventReader::new(r);
         loop {
             match reader.next() {
-                Ok(XmlEvent::StartElement{name, attributes, ..}) => {
+                Ok(XmlEvent::StartElement { name, attributes, .. }) => {
                     let mut attr_map = HashMap::new();
-                    for attr in attributes { attr_map.insert(attr.name.local_name, attr.value); }
+                    for attr in attributes {
+                        attr_map.insert(attr.name.local_name, attr.value);
+                    }
 
-                    let root = Element{name: name.local_name, attributes: attr_map, children: Vec::new(), text: None};
+                    let root = Element {
+                        prefix: name.prefix,
+                        namespace: name.namespace,
+                        name: name.local_name,
+                        attributes: attr_map,
+                        children: Vec::new(),
+                        text: None
+                    };
                     return build(&mut reader, root);
                 }
                 Ok(XmlEvent::Comment(..)) |
@@ -138,7 +160,8 @@ impl Element {
                 Ok(XmlEvent::EndElement { .. }) |
                 Ok(XmlEvent::Characters(..)) |
                 Ok(XmlEvent::CData(..)) |
-                Ok(XmlEvent::ProcessingInstruction { .. }) => return Err(ParseError::CannotParse),
+                Ok(XmlEvent::ProcessingInstruction { .. }) =>
+                    return Err(ParseError::CannotParse),
                 Err(e) => return Err(ParseError::MalformedXml(e)),
             }
         }
@@ -159,7 +182,11 @@ impl Element {
         let namespace = Namespace::empty();
 
 
-        emitter.write(XmlEvent::StartElement{name: name, attributes: Cow::Owned(attributes), namespace: Cow::Borrowed(&namespace)}).unwrap();
+        emitter.write(XmlEvent::StartElement {
+            name: name,
+            attributes: Cow::Owned(attributes),
+            namespace: Cow::Borrowed(&namespace)
+        }).unwrap();
         if let Some(ref t) = self.text {
             emitter.write(XmlEvent::Characters(t)).unwrap();
         }
@@ -167,36 +194,42 @@ impl Element {
             elem._write(emitter);
         }
         emitter.write(XmlEvent::EndElement{name: Some(name)}).unwrap();
-
     }
 
     /// Writes out this element as the root element in an new XML document
-    pub fn write<W: Write>(&self, w:W) {
+    pub fn write<W: Write>(&self, w: W) {
         use xml::writer::EventWriter;
         use xml::writer::events::XmlEvent;
         use xml::common::XmlVersion;
 
         let mut emitter = EventWriter::new(w);
-        emitter.write(XmlEvent::StartDocument{version: XmlVersion::Version10, encoding: None, standalone: None}).unwrap();
+        emitter.write(XmlEvent::StartDocument {
+            version: XmlVersion::Version10,
+            encoding: None,
+            standalone: None
+        }).unwrap();
         self._write(&mut emitter);
     }
 
-    /// Find a child element with the given name and return a reference to it.
-    pub fn get_child<K>(&self, k: K) -> Option<&Element> 
+    /// Find a child element with the given name and
+    /// return a reference to it.
+    pub fn get_child<K>(&self, k: K) -> Option<&Element>
       where String: PartialEq<K> {
           self.children.iter().find(|e| e.name == k)
     }
 
-    /// Find a child element with the given name and return a mutable reference to it.
-    pub fn get_mut_child<'a, K>(&'a mut self, k: K) -> Option<&'a mut Element> 
-      where String: PartialEq<K> {
-          self.children.iter_mut().find(|e| e.name == k)
+    /// Find a child element with the given name and
+    /// return a mutable reference to it.
+    pub fn get_mut_child<'a, K>(&'a mut self, k: K) -> Option<&'a mut Element>
+        where String: PartialEq<K> {
+        self.children.iter_mut().find(|e| e.name == k)
     }
 
     /// Find a child element with the given name, remove and return it.
-    pub fn take_child<'a, K>(&'a mut self, k: K) -> Option<Element>
-      where String: PartialEq<K> {
-          self.children.iter().position(|e| e.name == k).map(|i| self.children.remove(i))
+    pub fn take_child<'a, K>(&'a mut self, k: K)
+                             -> Option<Element> where String: PartialEq<K> {
+        self.children.iter()
+            .position(|e| e.name == k)
+            .map(|i| self.children.remove(i))
     }
 }
-
