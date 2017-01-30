@@ -26,7 +26,7 @@
 //! }
 //! names_element.write(File::create("result.xml").unwrap());
 //!
-//! 
+//!
 //! ```
 extern crate xml;
 
@@ -182,13 +182,13 @@ impl Element {
     }
 
     /// Find a child element with the given name and return a reference to it.
-    pub fn get_child<K>(&self, k: K) -> Option<&Element> 
+    pub fn get_child<K>(&self, k: K) -> Option<&Element>
       where String: PartialEq<K> {
           self.children.iter().find(|e| e.name == k)
     }
 
     /// Find a child element with the given name and return a mutable reference to it.
-    pub fn get_mut_child<'a, K>(&'a mut self, k: K) -> Option<&'a mut Element> 
+    pub fn get_mut_child<'a, K>(&'a mut self, k: K) -> Option<&'a mut Element>
       where String: PartialEq<K> {
           self.children.iter_mut().find(|e| e.name == k)
     }
@@ -199,4 +199,3 @@ impl Element {
           self.children.iter().position(|e| e.name == k).map(|i| self.children.remove(i))
     }
 }
-
