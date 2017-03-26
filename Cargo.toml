@@ -11,5 +11,3 @@ license = "MIT"
 [dependencies]
 xml-rs = "0.4"
 
-[dev-dependencies]
-tempfile = "~1.1"

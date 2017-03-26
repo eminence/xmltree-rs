@@ -1,10 +1,9 @@
 extern crate xmltree;
-extern crate tempfile;
 
 use xmltree::Element;
 use xmltree::ParseError;
 use std::fs::File;
-use tempfile::TempFile;
+use std::io::Cursor;
 
 
 #[test]
@@ -17,12 +16,10 @@ fn test_01() {
 
     assert!(e.get_child("doesnotexist").is_none());
 
-    let mut tmp = TempFile::shared(2).unwrap();
-    let t1 = tmp.remove(0);
-    let t2 = tmp.remove(0);
-    e.write(t1);
+    let mut buf = Vec::new();
+    e.write(&mut buf);
 
-    let e2 = Element::parse(t2).unwrap();
+    let e2 = Element::parse(Cursor::new(buf)).unwrap();
     println!("E2:======\n{:#?}", e2);
 
     assert_eq!(e, e2);
@@ -51,12 +48,10 @@ fn test_rw() {
 
     let e: Element = Element::parse(File::open("tests/data/rw.xml").unwrap()).unwrap();
 
-    let mut tmp = TempFile::shared(2).unwrap();
-    let t1 = tmp.remove(0);
-    let t2 = tmp.remove(0);
-    e.write(t1);
+    let mut buf = Vec::new();
+    e.write(&mut buf);
 
-    let e2 = Element::parse(t2).unwrap();
+    let e2 = Element::parse(Cursor::new(buf)).unwrap();
 
     assert_eq!(e, e2);
 }
@@ -178,24 +173,20 @@ fn test_ns_rw() {
     {
         let e: Element = Element::parse(File::open("tests/data/ns1.xml").unwrap()).unwrap();
 
-        let mut tmp = TempFile::shared(2).unwrap();
-        let t1 = tmp.remove(0);
-        let t2 = tmp.remove(0);
-        e.write(t1);
+        let mut buf = Vec::new();
+        e.write(&mut buf);
 
-        let e2 = Element::parse(t2).unwrap();
+        let e2 = Element::parse(Cursor::new(buf)).unwrap();
 
         assert_eq!(e, e2);
     }
     {
         let e: Element = Element::parse(File::open("tests/data/ns2.xml").unwrap()).unwrap();
 
-        let mut tmp = TempFile::shared(2).unwrap();
-        let t1 = tmp.remove(0);
-        let t2 = tmp.remove(0);
-        e.write(t1);
+        let mut buf = Vec::new();
+        e.write(&mut buf);
 
-        let e2 = Element::parse(t2).unwrap();
+        let e2 = Element::parse(Cursor::new(buf)).unwrap();
 
         assert_eq!(e, e2);
     }
