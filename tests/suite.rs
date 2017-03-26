@@ -172,3 +172,32 @@ fn test_take() {
 
     assert_eq!(data_1, data_2);
 }
+
+#[test]
+fn test_ns_rw() {
+    {
+        let e: Element = Element::parse(File::open("tests/data/ns1.xml").unwrap()).unwrap();
+
+        let mut tmp = TempFile::shared(2).unwrap();
+        let t1 = tmp.remove(0);
+        let t2 = tmp.remove(0);
+        e.write(t1);
+
+        let e2 = Element::parse(t2).unwrap();
+
+        assert_eq!(e, e2);
+    }
+    {
+        let e: Element = Element::parse(File::open("tests/data/ns2.xml").unwrap()).unwrap();
+
+        let mut tmp = TempFile::shared(2).unwrap();
+        let t1 = tmp.remove(0);
+        let t2 = tmp.remove(0);
+        e.write(t1);
+
+        let e2 = Element::parse(t2).unwrap();
+
+        assert_eq!(e, e2);
+    }
+}
+

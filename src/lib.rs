@@ -36,6 +36,7 @@ use std::borrow::Cow;
 use std::fmt;
 
 use xml::reader::{EventReader, XmlEvent};
+pub use xml::namespace::Namespace;
 
 /// Represents an XML element.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -43,6 +44,8 @@ pub struct Element {
     pub prefix: Option<String>,
 
     pub namespace: Option<String>,
+
+    pub namespaces: Option<Namespace>,
 
     /// The name of the Element.  Does not include any namespace info
     pub name: String,
@@ -103,13 +106,14 @@ fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Result<Elem
                     return Err(ParseError::CannotParse);
                 }
             },
-            Ok(XmlEvent::StartElement{name, attributes, ..}) => {
+            Ok(XmlEvent::StartElement{name, attributes, namespace}) => {
                 let mut attr_map = HashMap::new();
                 for attr in attributes { attr_map.insert(attr.name.local_name, attr.value); }
 
                 let new_elem = Element {
                     prefix: name.prefix,
                     namespace: name.namespace,
+                    namespaces: if namespace.is_essentially_empty() { None } else { Some(namespace) },
                     name: name.local_name,
                     attributes: attr_map,
                     children: Vec::new(),
@@ -136,13 +140,14 @@ impl Element {
         let mut reader = EventReader::new(r);
         loop {
             match reader.next() {
-                Ok(XmlEvent::StartElement { name, attributes, .. }) => {
+                Ok(XmlEvent::StartElement { name, attributes, namespace}) => {
                     let mut attr_map = HashMap::new();
                     for attr in attributes { attr_map.insert(attr.name.local_name, attr.value); }
 
                     let root = Element {
                         prefix: name.prefix,
                         namespace: name.namespace,
+                        namespaces: if namespace.is_essentially_empty() { None } else { Some(namespace) },
                         name: name.local_name,
                         attributes: attr_map,
                         children: Vec::new(),
@@ -169,16 +174,28 @@ impl Element {
         use xml::namespace::Namespace;
         use xml::attribute::Attribute;
 
-        let name = Name::local(&self.name);
+        let mut name = Name::local(&self.name);
+        if let Some(ref ns) = self.namespace {
+            name.namespace = Some(ns);
+        }
+        if let Some(ref p) = self.prefix {
+            name.prefix = Some(p);
+        }
+
         let mut attributes = Vec::with_capacity(self.attributes.len());
         for (k, v) in self.attributes.iter() {
             attributes.push(Attribute{name: Name::local(k), value: v});
         }
 
-        let namespace = Namespace::empty();
+        let empty_ns = Namespace::empty(); 
+        let namespace = if let Some(ref ns) = self.namespaces {
+            Cow::Borrowed(ns)
+        } else {
+            Cow::Borrowed(&empty_ns)
+        };
 
 
-        emitter.write(XmlEvent::StartElement{name: name, attributes: Cow::Owned(attributes), namespace: Cow::Borrowed(&namespace)}).unwrap();
+        emitter.write(XmlEvent::StartElement{name: name, attributes: Cow::Owned(attributes), namespace: namespace}).unwrap();
         if let Some(ref t) = self.text {
             emitter.write(XmlEvent::Characters(t)).unwrap();
         }
