@@ -70,7 +70,7 @@ fn test_mut() {
 #[test]
 fn test_mal_01() {
     // some tests for error handling
-   
+
     let data = r##"
         <?xml version="1.0" encoding="utf-8" standalone="yes"?>
         <names>
@@ -81,7 +81,7 @@ fn test_mal_01() {
 
     let names_element = Element::parse(data.as_bytes());
     if let Err(ParseError::MalformedXml(..)) = names_element {
-        // OK 
+        // OK
     } else {
         panic!("unexpected parse result");
     }
@@ -93,15 +93,15 @@ fn test_mal_01() {
 #[test]
 fn test_mal_02() {
     // some tests for error handling
-   
+
     let data = r##"
-            this is not even close 
+            this is not even close
             to XML
     "##;
 
     let names_element = Element::parse(data.as_bytes());
     if let Err(ParseError::MalformedXml(..)) = names_element {
-        // OK 
+        // OK
     } else {
         panic!("unexpected parse result");
     }
@@ -113,7 +113,7 @@ fn test_mal_02() {
 #[test]
 fn test_mal_03() {
     // some tests for error handling
-   
+
     let data = r##"
         <?xml version="1.0" encoding="utf-8" standalone="yes"?>
         <names>
@@ -124,7 +124,7 @@ fn test_mal_03() {
 
     let names_element = Element::parse(data.as_bytes());
     if let Err(ParseError::MalformedXml(..)) = names_element {
-        // OK 
+        // OK
     } else {
         panic!("unexpected parse result");
     }
@@ -153,7 +153,7 @@ fn test_take() {
             </remove_me>
         </names>
     "##;
-    
+
     let data_xml_2 = r##"
         <?xml version="1.0" encoding="utf-8" standalone="yes"?>
         <names>
@@ -199,4 +199,3 @@ fn test_ns_rw() {
         assert_eq!(e, e2);
     }
 }
-

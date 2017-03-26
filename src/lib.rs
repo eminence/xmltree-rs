@@ -26,7 +26,7 @@
 //! }
 //! names_element.write(File::create("result.xml").unwrap());
 //!
-//! 
+//!
 //! ```
 extern crate xml;
 
@@ -62,7 +62,7 @@ pub struct Element {
     pub children: Vec<Element>,
 
     /// The text data for this element
-    pub text: Option<String>
+    pub text: Option<String>,
 }
 
 /// Errors that can occur parsing XML
@@ -88,7 +88,7 @@ impl std::error::Error for ParseError {
     fn description(&self) -> &str {
         match self {
             &ParseError::MalformedXml(..) => "Malformed XML",
-            &ParseError::CannotParse      => "Cannot parse",
+            &ParseError::CannotParse => "Cannot parse",
         }
     }
 
@@ -103,32 +103,39 @@ impl std::error::Error for ParseError {
 fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Result<Element, ParseError> {
     loop {
         match reader.next() {
-            Ok(XmlEvent::EndElement{ref name}) => {
+            Ok(XmlEvent::EndElement { ref name }) => {
                 if name.local_name == elem.name {
                     return Ok(elem);
-                }
-                else {
+                } else {
                     return Err(ParseError::CannotParse);
                 }
-            },
-            Ok(XmlEvent::StartElement{name, attributes, namespace}) => {
+            }
+            Ok(XmlEvent::StartElement { name, attributes, namespace }) => {
                 let mut attr_map = HashMap::new();
-                for attr in attributes { attr_map.insert(attr.name.local_name, attr.value); }
+                for attr in attributes {
+                    attr_map.insert(attr.name.local_name, attr.value);
+                }
 
                 let new_elem = Element {
                     prefix: name.prefix,
                     namespace: name.namespace,
-                    namespaces: if namespace.is_essentially_empty() { None } else { Some(namespace) },
+                    namespaces: if namespace.is_essentially_empty() {
+                        None
+                    } else {
+                        Some(namespace)
+                    },
                     name: name.local_name,
                     attributes: attr_map,
                     children: Vec::new(),
-                    text: None
+                    text: None,
                 };
                 elem.children.push(try!(build(reader, new_elem)));
             }
-            Ok(XmlEvent::Characters(s)) => { elem.text = Some(s); }
+            Ok(XmlEvent::Characters(s)) => {
+                elem.text = Some(s);
+            }
             Ok(XmlEvent::Whitespace(..)) => (),
-            Ok(XmlEvent::CData(s)) => { elem.text = Some(s) }
+            Ok(XmlEvent::CData(s)) => elem.text = Some(s),
             Ok(XmlEvent::Comment(..)) => (),
             Ok(XmlEvent::StartDocument { .. }) |
             Ok(XmlEvent::EndDocument) |
@@ -154,24 +161,30 @@ impl Element {
             text: None,
         }
     }
-    
+
     /// Parses some data into an Element
     pub fn parse<R: Read>(r: R) -> Result<Element, ParseError> {
         let mut reader = EventReader::new(r);
         loop {
             match reader.next() {
-                Ok(XmlEvent::StartElement { name, attributes, namespace}) => {
+                Ok(XmlEvent::StartElement { name, attributes, namespace }) => {
                     let mut attr_map = HashMap::new();
-                    for attr in attributes { attr_map.insert(attr.name.local_name, attr.value); }
+                    for attr in attributes {
+                        attr_map.insert(attr.name.local_name, attr.value);
+                    }
 
                     let root = Element {
                         prefix: name.prefix,
                         namespace: name.namespace,
-                        namespaces: if namespace.is_essentially_empty() { None } else { Some(namespace) },
+                        namespaces: if namespace.is_essentially_empty() {
+                            None
+                        } else {
+                            Some(namespace)
+                        },
                         name: name.local_name,
                         attributes: attr_map,
                         children: Vec::new(),
-                        text: None
+                        text: None,
                     };
                     return build(&mut reader, root);
                 }
@@ -204,10 +217,13 @@ impl Element {
 
         let mut attributes = Vec::with_capacity(self.attributes.len());
         for (k, v) in self.attributes.iter() {
-            attributes.push(Attribute{name: Name::local(k), value: v});
+            attributes.push(Attribute {
+                                name: Name::local(k),
+                                value: v,
+                            });
         }
 
-        let empty_ns = Namespace::empty(); 
+        let empty_ns = Namespace::empty();
         let namespace = if let Some(ref ns) = self.namespaces {
             Cow::Borrowed(ns)
         } else {
@@ -215,14 +231,19 @@ impl Element {
         };
 
 
-        emitter.write(XmlEvent::StartElement{name: name, attributes: Cow::Owned(attributes), namespace: namespace}).unwrap();
+        emitter.write(XmlEvent::StartElement {
+                          name: name,
+                          attributes: Cow::Owned(attributes),
+                          namespace: namespace,
+                      })
+            .unwrap();
         if let Some(ref t) = self.text {
             emitter.write(XmlEvent::Characters(t)).unwrap();
         }
         for elem in &self.children {
             elem._write(emitter);
         }
-        emitter.write(XmlEvent::EndElement{name: Some(name)}).unwrap();
+        emitter.write(XmlEvent::EndElement { name: Some(name) }).unwrap();
     }
 
     /// Writes out this element as the root element in an new XML document
@@ -232,26 +253,36 @@ impl Element {
         use xml::common::XmlVersion;
 
         let mut emitter = EventWriter::new(w);
-        emitter.write(XmlEvent::StartDocument{version: XmlVersion::Version10, encoding: None, standalone: None}).unwrap();
+        emitter.write(XmlEvent::StartDocument {
+                          version: XmlVersion::Version10,
+                          encoding: None,
+                          standalone: None,
+                      })
+            .unwrap();
         self._write(&mut emitter);
     }
 
     /// Find a child element with the given name and return a reference to it.
-    pub fn get_child<K>(&self, k: K) -> Option<&Element> 
-      where String: PartialEq<K> {
-          self.children.iter().find(|e| e.name == k)
+    pub fn get_child<K>(&self, k: K) -> Option<&Element>
+        where String: PartialEq<K>
+    {
+        self.children.iter().find(|e| e.name == k)
     }
 
     /// Find a child element with the given name and return a mutable reference to it.
-    pub fn get_mut_child<'a, K>(&'a mut self, k: K) -> Option<&'a mut Element> 
-      where String: PartialEq<K> {
-          self.children.iter_mut().find(|e| e.name == k)
+    pub fn get_mut_child<'a, K>(&'a mut self, k: K) -> Option<&'a mut Element>
+        where String: PartialEq<K>
+    {
+        self.children.iter_mut().find(|e| e.name == k)
     }
 
     /// Find a child element with the given name, remove and return it.
     pub fn take_child<'a, K>(&'a mut self, k: K) -> Option<Element>
-      where String: PartialEq<K> {
-          self.children.iter().position(|e| e.name == k).map(|i| self.children.remove(i))
+        where String: PartialEq<K>
+    {
+        self.children
+            .iter()
+            .position(|e| e.name == k)
+            .map(|i| self.children.remove(i))
     }
 }
-
