@@ -4,13 +4,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/storage/home/achin/.multirust/toolchains/nightly/cargo/registry/src/github.com-88ac128001ac3a9a/xml-rs-0.2.2/src/writer/config.rs`.">
+    <meta name="description" content="Source to the Rust file `/storage/home/achin/.cargo/registry/src/github.com-1ecc6299db9ec823/xml-rs-0.4.1/src/writer/config.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>config.rs.html -- source</title>
 
+    <link rel="stylesheet" type="text/css" href="../../../normalize.css">
     <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
 
     
     
@@ -187,152 +189,152 @@
 <span id="144">144</span>
 <span id="145">145</span>
 <span id="146">146</span>
-</pre><pre class='rust '>
-<span class='doccomment'>//! Contains emitter configuration structure.</span>
+</pre><pre class="rust ">
+<span class="doccomment">//! Contains emitter configuration structure.</span>
 
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Write</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>borrow</span>::<span class='ident'>Cow</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Write</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">borrow</span>::<span class="ident">Cow</span>;
 
-<span class='kw'>use</span> <span class='ident'>writer</span>::<span class='ident'>EventWriter</span>;
+<span class="kw">use</span> <span class="ident">writer</span>::<span class="ident">EventWriter</span>;
 
-<span class='doccomment'>/// Emitter configuration structure.</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// This structure contains various options which control XML document emitter behavior.</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Eq</span>, <span class='ident'>Debug</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>EmitterConfig</span> {
-    <span class='doccomment'>/// Line separator used to separate lines in formatted output. Default is `&quot;\n&quot;`.</span>
-    <span class='kw'>pub</span> <span class='ident'>line_separator</span>: <span class='ident'>Cow</span><span class='op'>&lt;</span><span class='lifetime'>&#39;static</span>, <span class='ident'>str</span><span class='op'>&gt;</span>,
+<span class="doccomment">/// Emitter configuration structure.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This structure contains various options which control XML document emitter behavior.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">EmitterConfig</span> {
+    <span class="doccomment">/// Line separator used to separate lines in formatted output. Default is `&quot;\n&quot;`.</span>
+    <span class="kw">pub</span> <span class="ident">line_separator</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span>,
 
-    <span class='doccomment'>/// A string which will be used for a single level of indentation. Default is `&quot;  &quot;`</span>
-    <span class='doccomment'>/// (two spaces).</span>
-    <span class='kw'>pub</span> <span class='ident'>indent_string</span>: <span class='ident'>Cow</span><span class='op'>&lt;</span><span class='lifetime'>&#39;static</span>, <span class='ident'>str</span><span class='op'>&gt;</span>,
+    <span class="doccomment">/// A string which will be used for a single level of indentation. Default is `&quot;  &quot;`</span>
+    <span class="doccomment">/// (two spaces).</span>
+    <span class="kw">pub</span> <span class="ident">indent_string</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span>,
 
-    <span class='doccomment'>/// Whether or not the emitted document should be indented. Default is false.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// The emitter is capable to perform automatic indentation of the emitted XML document.</span>
-    <span class='doccomment'>/// It is done in stream-like fashion and does not require the knowledge of the whole</span>
-    <span class='doccomment'>/// document in advance.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// Sometimes, however, automatic indentation is undesirable, e.g. when you want to keep</span>
-    <span class='doccomment'>/// existing layout when processing an existing XML document. Also the indentiation algorithm</span>
-    <span class='doccomment'>/// is not thoroughly tested. Hence by default it is disabled.</span>
-    <span class='kw'>pub</span> <span class='ident'>perform_indent</span>: <span class='ident'>bool</span>,
+    <span class="doccomment">/// Whether or not the emitted document should be indented. Default is false.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// The emitter is capable to perform automatic indentation of the emitted XML document.</span>
+    <span class="doccomment">/// It is done in stream-like fashion and does not require the knowledge of the whole</span>
+    <span class="doccomment">/// document in advance.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Sometimes, however, automatic indentation is undesirable, e.g. when you want to keep</span>
+    <span class="doccomment">/// existing layout when processing an existing XML document. Also the indentiation algorithm</span>
+    <span class="doccomment">/// is not thoroughly tested. Hence by default it is disabled.</span>
+    <span class="kw">pub</span> <span class="ident">perform_indent</span>: <span class="ident">bool</span>,
 
-    <span class='doccomment'>/// Whether or not characters in output events will be escaped. Default is true.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// The emitter can automatically escape characters which can&#39;t appear in PCDATA sections</span>
-    <span class='doccomment'>/// or element attributes of an XML document, like `&lt;` or `&quot;` (in attributes). This may</span>
-    <span class='doccomment'>/// introduce some overhead because then every corresponding piece of character data</span>
-    <span class='doccomment'>/// should be scanned for invalid characters.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// If this option is disabled, the XML writer may produce non-well-formed documents, so</span>
-    <span class='doccomment'>/// use `false` value for this option with care.</span>
-    <span class='kw'>pub</span> <span class='ident'>perform_escaping</span>: <span class='ident'>bool</span>,
+    <span class="doccomment">/// Whether or not characters in output events will be escaped. Default is true.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// The emitter can automatically escape characters which can&#39;t appear in PCDATA sections</span>
+    <span class="doccomment">/// or element attributes of an XML document, like `&lt;` or `&quot;` (in attributes). This may</span>
+    <span class="doccomment">/// introduce some overhead because then every corresponding piece of character data</span>
+    <span class="doccomment">/// should be scanned for invalid characters.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// If this option is disabled, the XML writer may produce non-well-formed documents, so</span>
+    <span class="doccomment">/// use `false` value for this option with care.</span>
+    <span class="kw">pub</span> <span class="ident">perform_escaping</span>: <span class="ident">bool</span>,
 
-    <span class='doccomment'>/// Whether or not to write XML document declaration at the beginning of a document.</span>
-    <span class='doccomment'>/// Default is true.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// This option controls whether the document declaration should be emitted automatically</span>
-    <span class='doccomment'>/// before a root element is written if it was not emitted explicitly by the user.</span>
-    <span class='kw'>pub</span> <span class='ident'>write_document_declaration</span>: <span class='ident'>bool</span>,
+    <span class="doccomment">/// Whether or not to write XML document declaration at the beginning of a document.</span>
+    <span class="doccomment">/// Default is true.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This option controls whether the document declaration should be emitted automatically</span>
+    <span class="doccomment">/// before a root element is written if it was not emitted explicitly by the user.</span>
+    <span class="kw">pub</span> <span class="ident">write_document_declaration</span>: <span class="ident">bool</span>,
 
-    <span class='doccomment'>/// Whether or not to convert elements with empty content to empty elements. Default is true.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// This option allows turning elements like `&lt;a&gt;&lt;/a&gt;` (an element with empty content)</span>
-    <span class='doccomment'>/// into `&lt;a /&gt;` (an empty element).</span>
-    <span class='kw'>pub</span> <span class='ident'>normalize_empty_elements</span>: <span class='ident'>bool</span>,
+    <span class="doccomment">/// Whether or not to convert elements with empty content to empty elements. Default is true.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This option allows turning elements like `&lt;a&gt;&lt;/a&gt;` (an element with empty content)</span>
+    <span class="doccomment">/// into `&lt;a /&gt;` (an empty element).</span>
+    <span class="kw">pub</span> <span class="ident">normalize_empty_elements</span>: <span class="ident">bool</span>,
 
-    <span class='doccomment'>/// Whether or not to emit CDATA events as plain characters. Default is false.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// This option forces the emitter to convert CDATA events into regular character events,</span>
-    <span class='doccomment'>/// performing all the necessary escaping beforehand. This may be occasionally useful</span>
-    <span class='doccomment'>/// for feeding the document into incorrect parsers which do not support CDATA.</span>
-    <span class='kw'>pub</span> <span class='ident'>cdata_to_characters</span>: <span class='ident'>bool</span>,
+    <span class="doccomment">/// Whether or not to emit CDATA events as plain characters. Default is false.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This option forces the emitter to convert CDATA events into regular character events,</span>
+    <span class="doccomment">/// performing all the necessary escaping beforehand. This may be occasionally useful</span>
+    <span class="doccomment">/// for feeding the document into incorrect parsers which do not support CDATA.</span>
+    <span class="kw">pub</span> <span class="ident">cdata_to_characters</span>: <span class="ident">bool</span>,
 
-    <span class='doccomment'>/// Whether or not to keep element names to support `EndElement` events without explicit names.</span>
-    <span class='doccomment'>/// Default is true.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// This option makes the emitter to keep names of written elements in order to allow</span>
-    <span class='doccomment'>/// omitting names when writing closing element tags. This could incur some memory overhead.</span>
-    <span class='kw'>pub</span> <span class='ident'>keep_element_names_stack</span>: <span class='ident'>bool</span>,
+    <span class="doccomment">/// Whether or not to keep element names to support `EndElement` events without explicit names.</span>
+    <span class="doccomment">/// Default is true.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This option makes the emitter to keep names of written elements in order to allow</span>
+    <span class="doccomment">/// omitting names when writing closing element tags. This could incur some memory overhead.</span>
+    <span class="kw">pub</span> <span class="ident">keep_element_names_stack</span>: <span class="ident">bool</span>,
 
-    <span class='doccomment'>/// Whether or not to automatically insert leading and trailing spaces in emitted comments,</span>
-    <span class='doccomment'>/// if necessary. Default is true.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// This is a convenience option in order for the user not to append spaces before and after</span>
-    <span class='doccomment'>/// comments text in order to get more pretty comments: `&lt;!-- something --&gt;` instead of</span>
-    <span class='doccomment'>/// `&lt;!--something--&gt;`.</span>
-    <span class='kw'>pub</span> <span class='ident'>autopad_comments</span>: <span class='ident'>bool</span>,
+    <span class="doccomment">/// Whether or not to automatically insert leading and trailing spaces in emitted comments,</span>
+    <span class="doccomment">/// if necessary. Default is true.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This is a convenience option in order for the user not to append spaces before and after</span>
+    <span class="doccomment">/// comments text in order to get more pretty comments: `&lt;!-- something --&gt;` instead of</span>
+    <span class="doccomment">/// `&lt;!--something--&gt;`.</span>
+    <span class="kw">pub</span> <span class="ident">autopad_comments</span>: <span class="ident">bool</span>,
 }
 
-<span class='kw'>impl</span> <span class='ident'>EmitterConfig</span> {
-    <span class='doccomment'>/// Creates an emitter configuration with default values.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// You can tweak default options with builder-like pattern:</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// ```rust</span>
-    <span class='doccomment'>/// use xml::writer::EmitterConfig;</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// let config = EmitterConfig::new()</span>
-    <span class='doccomment'>///     .line_separator(&quot;\r\n&quot;)</span>
-    <span class='doccomment'>///     .perform_indent(true)</span>
-    <span class='doccomment'>///     .normalize_empty_elements(false);</span>
-    <span class='doccomment'>/// ```</span>
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>() <span class='op'>-&gt;</span> <span class='ident'>EmitterConfig</span> {
-        <span class='ident'>EmitterConfig</span> {
-            <span class='ident'>line_separator</span>: <span class='string'>&quot;\n&quot;</span>.<span class='ident'>into</span>(),
-            <span class='ident'>indent_string</span>: <span class='string'>&quot;  &quot;</span>.<span class='ident'>into</span>(),  <span class='comment'>// two spaces</span>
-            <span class='ident'>perform_indent</span>: <span class='boolval'>false</span>,
-            <span class='ident'>perform_escaping</span>: <span class='boolval'>true</span>,
-            <span class='ident'>write_document_declaration</span>: <span class='boolval'>true</span>,
-            <span class='ident'>normalize_empty_elements</span>: <span class='boolval'>true</span>,
-            <span class='ident'>cdata_to_characters</span>: <span class='boolval'>false</span>,
-            <span class='ident'>keep_element_names_stack</span>: <span class='boolval'>true</span>,
-            <span class='ident'>autopad_comments</span>: <span class='boolval'>true</span>
+<span class="kw">impl</span> <span class="ident">EmitterConfig</span> {
+    <span class="doccomment">/// Creates an emitter configuration with default values.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// You can tweak default options with builder-like pattern:</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```rust</span>
+    <span class="doccomment">/// use xml::writer::EmitterConfig;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let config = EmitterConfig::new()</span>
+    <span class="doccomment">///     .line_separator(&quot;\r\n&quot;)</span>
+    <span class="doccomment">///     .perform_indent(true)</span>
+    <span class="doccomment">///     .normalize_empty_elements(false);</span>
+    <span class="doccomment">/// ```</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-&gt;</span> <span class="ident">EmitterConfig</span> {
+        <span class="ident">EmitterConfig</span> {
+            <span class="ident">line_separator</span>: <span class="string">&quot;\n&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">indent_string</span>: <span class="string">&quot;  &quot;</span>.<span class="ident">into</span>(),  <span class="comment">// two spaces</span>
+            <span class="ident">perform_indent</span>: <span class="bool-val">false</span>,
+            <span class="ident">perform_escaping</span>: <span class="bool-val">true</span>,
+            <span class="ident">write_document_declaration</span>: <span class="bool-val">true</span>,
+            <span class="ident">normalize_empty_elements</span>: <span class="bool-val">true</span>,
+            <span class="ident">cdata_to_characters</span>: <span class="bool-val">false</span>,
+            <span class="ident">keep_element_names_stack</span>: <span class="bool-val">true</span>,
+            <span class="ident">autopad_comments</span>: <span class="bool-val">true</span>
         }
     }
 
-    <span class='doccomment'>/// Creates an XML writer with this configuration.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// This is a convenience method for configuring and creating a writer at the same time:</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// ```rust</span>
-    <span class='doccomment'>/// use xml::writer::EmitterConfig;</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// let mut target: Vec&lt;u8&gt; = Vec::new();</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// let writer = EmitterConfig::new()</span>
-    <span class='doccomment'>///     .line_separator(&quot;\r\n&quot;)</span>
-    <span class='doccomment'>///     .perform_indent(true)</span>
-    <span class='doccomment'>///     .normalize_empty_elements(false)</span>
-    <span class='doccomment'>///     .create_writer(&amp;mut target);</span>
-    <span class='doccomment'>/// ```</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// This method is exactly equivalent to calling `EventWriter::new_with_config()` with</span>
-    <span class='doccomment'>/// this configuration object.</span>
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>create_writer</span><span class='op'>&lt;</span><span class='ident'>W</span>: <span class='ident'>Write</span><span class='op'>&gt;</span>(<span class='self'>self</span>, <span class='ident'>sink</span>: <span class='ident'>W</span>) <span class='op'>-&gt;</span> <span class='ident'>EventWriter</span><span class='op'>&lt;</span><span class='ident'>W</span><span class='op'>&gt;</span> {
-        <span class='ident'>EventWriter</span>::<span class='ident'>new_with_config</span>(<span class='ident'>sink</span>, <span class='self'>self</span>)
+    <span class="doccomment">/// Creates an XML writer with this configuration.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This is a convenience method for configuring and creating a writer at the same time:</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```rust</span>
+    <span class="doccomment">/// use xml::writer::EmitterConfig;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let mut target: Vec&lt;u8&gt; = Vec::new();</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let writer = EmitterConfig::new()</span>
+    <span class="doccomment">///     .line_separator(&quot;\r\n&quot;)</span>
+    <span class="doccomment">///     .perform_indent(true)</span>
+    <span class="doccomment">///     .normalize_empty_elements(false)</span>
+    <span class="doccomment">///     .create_writer(&amp;mut target);</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This method is exactly equivalent to calling `EventWriter::new_with_config()` with</span>
+    <span class="doccomment">/// this configuration object.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_writer</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">Write</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">sink</span>: <span class="ident">W</span>) <span class="op">-&gt;</span> <span class="ident">EventWriter</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span> {
+        <span class="ident">EventWriter</span>::<span class="ident">new_with_config</span>(<span class="ident">sink</span>, <span class="self">self</span>)
     }
 }
 
-<span class='kw'>impl</span> <span class='ident'>Default</span> <span class='kw'>for</span> <span class='ident'>EmitterConfig</span> {
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>default</span>() <span class='op'>-&gt;</span> <span class='ident'>EmitterConfig</span> {
-        <span class='ident'>EmitterConfig</span>::<span class='ident'>new</span>()
+<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">EmitterConfig</span> {
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-&gt;</span> <span class="ident">EmitterConfig</span> {
+        <span class="ident">EmitterConfig</span>::<span class="ident">new</span>()
     }
 }
 
-<span class='macro'>gen_setters</span><span class='macro'>!</span>(<span class='ident'>EmitterConfig</span>,
-    <span class='ident'>line_separator</span>: <span class='ident'>into</span> <span class='ident'>Cow</span><span class='op'>&lt;</span><span class='lifetime'>&#39;static</span>, <span class='ident'>str</span><span class='op'>&gt;</span>,
-    <span class='ident'>indent_string</span>: <span class='ident'>into</span> <span class='ident'>Cow</span><span class='op'>&lt;</span><span class='lifetime'>&#39;static</span>, <span class='ident'>str</span><span class='op'>&gt;</span>,
-    <span class='ident'>perform_indent</span>: <span class='ident'>val</span> <span class='ident'>bool</span>,
-    <span class='ident'>write_document_declaration</span>: <span class='ident'>val</span> <span class='ident'>bool</span>,
-    <span class='ident'>normalize_empty_elements</span>: <span class='ident'>val</span> <span class='ident'>bool</span>,
-    <span class='ident'>cdata_to_characters</span>: <span class='ident'>val</span> <span class='ident'>bool</span>,
-    <span class='ident'>keep_element_names_stack</span>: <span class='ident'>val</span> <span class='ident'>bool</span>,
-    <span class='ident'>autopad_comments</span>: <span class='ident'>val</span> <span class='ident'>bool</span>
+<span class="macro">gen_setters</span><span class="macro">!</span>(<span class="ident">EmitterConfig</span>,
+    <span class="ident">line_separator</span>: <span class="ident">into</span> <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span>,
+    <span class="ident">indent_string</span>: <span class="ident">into</span> <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span>,
+    <span class="ident">perform_indent</span>: <span class="ident">val</span> <span class="ident">bool</span>,
+    <span class="ident">write_document_declaration</span>: <span class="ident">val</span> <span class="ident">bool</span>,
+    <span class="ident">normalize_empty_elements</span>: <span class="ident">val</span> <span class="ident">bool</span>,
+    <span class="ident">cdata_to_characters</span>: <span class="ident">val</span> <span class="ident">bool</span>,
+    <span class="ident">keep_element_names_stack</span>: <span class="ident">val</span> <span class="ident">bool</span>,
+    <span class="ident">autopad_comments</span>: <span class="ident">val</span> <span class="ident">bool</span>
 );
 </pre>
 </section>
@@ -358,6 +360,8 @@
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 
@@ -378,7 +382,7 @@
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>
@@ -389,11 +393,9 @@
     <script>
         window.rootPath = "../../../";
         window.currentCrate = "xml";
-        window.playgroundUrl = "";
     </script>
     <script src="../../../jquery.js"></script>
     <script src="../../../main.js"></script>
-    
     <script defer src="../../../search-index.js"></script>
 </body>
 </html>

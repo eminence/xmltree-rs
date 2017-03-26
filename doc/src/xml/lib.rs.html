@@ -4,13 +4,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/storage/home/achin/.multirust/toolchains/nightly/cargo/registry/src/github.com-88ac128001ac3a9a/xml-rs-0.2.2/src/lib.rs`.">
+    <meta name="description" content="Source to the Rust file `/storage/home/achin/.cargo/registry/src/github.com-1ecc6299db9ec823/xml-rs-0.4.1/src/lib.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>lib.rs.html -- source</title>
 
+    <link rel="stylesheet" type="text/css" href="../../normalize.css">
     <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
+    
 
     
     
@@ -65,31 +67,31 @@
 <span id="22">22</span>
 <span id="23">23</span>
 <span id="24">24</span>
-</pre><pre class='rust '>
-<span class='comment'>//#![warn(missing_doc)]</span>
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>dead_code</span>)]</span>
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>unused_variables</span>)]</span>
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>forbid</span>(<span class='ident'>non_camel_case_types</span>)]</span>
+</pre><pre class="rust ">
+<span class="comment">//#![warn(missing_doc)]</span>
+<span class="attribute">#<span class="op">!</span>[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
+<span class="attribute">#<span class="op">!</span>[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
+<span class="attribute">#<span class="op">!</span>[<span class="ident">forbid</span>(<span class="ident">non_camel_case_types</span>)]</span>
 
-<span class='doccomment'>//! This crate currently provides almost XML 1.0/1.1-compliant pull parser.</span>
+<span class="doccomment">//! This crate currently provides an almost XML 1.0/1.1-compliant pull parser.</span>
 
-<span class='attribute'>#[<span class='ident'>macro_use</span>]</span>
-<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>bitflags</span>;
+<span class="attribute">#[<span class="ident">macro_use</span>]</span>
+<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">bitflags</span>;
 
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>reader</span>::<span class='ident'>EventReader</span>;
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>reader</span>::<span class='ident'>ParserConfig</span>;
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>writer</span>::<span class='ident'>EventWriter</span>;
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>writer</span>::<span class='ident'>EmitterConfig</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">reader</span>::<span class="ident">EventReader</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">reader</span>::<span class="ident">ParserConfig</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">writer</span>::<span class="ident">EventWriter</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">writer</span>::<span class="ident">EmitterConfig</span>;
 
-<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>macros</span>;
-<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>name</span>;
-<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>attribute</span>;
-<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>common</span>;
-<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>escape</span>;
-<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>namespace</span>;
-<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>reader</span>;
-<span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>writer</span>;
-<span class='kw'>mod</span> <span class='ident'>util</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">macros</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">name</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">attribute</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">common</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">escape</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">namespace</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">reader</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">writer</span>;
+<span class="kw">mod</span> <span class="ident">util</span>;
 </pre>
 </section>
     <section id='search' class="content hidden"></section>
@@ -114,6 +116,8 @@
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 
@@ -134,7 +138,7 @@
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>
@@ -145,11 +149,9 @@
     <script>
         window.rootPath = "../../";
         window.currentCrate = "xml";
-        window.playgroundUrl = "";
     </script>
     <script src="../../jquery.js"></script>
     <script src="../../main.js"></script>
-    
     <script defer src="../../search-index.js"></script>
 </body>
 </html>

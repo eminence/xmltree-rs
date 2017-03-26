@@ -9,8 +9,10 @@
 
     <title>xml::reader - Rust</title>
 
+    <link rel="stylesheet" type="text/css" href="../../normalize.css">
     <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
+    
 
     
     
@@ -42,73 +44,68 @@
     </nav>
 
     <section id='main' class="content mod">
-<h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>xml</a>::<wbr><a class='mod' href=''>reader</a></span><span class='out-of-band'><span id='render-detail'>
-            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
-                [<span class='inner'>&#x2212;</span>]
-            </a>
-        </span><a id='src-763' class='srclink' href='../../src/xml/reader/mod.rs.html#1-151' title='goto source code'>[src]</a></span></h1>
+<h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>xml</a>::<wbr><a class="mod" href=''>reader</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a class='srclink' href='../../src/xml/reader/mod.rs.html#1-125' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Contains high-level interface for a pull-based XML parser.</p>
 
 <p>The most important type in this module is <code>EventReader</code>, which provides an iterator
 view for events in XML document.</p>
 </div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
 <table>
-                    <tr class=' module-item'>
-                        <td><a class='struct' href='struct.Error.html'
-                               title='xml::reader::Error'>Error</a></td>
-                        <td class='docblock short'>
-                             <p>An XML parsing error.</p>
-
-                        </td>
-                    </tr>
-                
-                    <tr class=' module-item'>
-                        <td><a class='struct' href='struct.EventReader.html'
-                               title='xml::reader::EventReader'>EventReader</a></td>
-                        <td class='docblock short'>
-                             <p>A wrapper around an <code>std::io::Read</code> instance which provides pull-based XML parsing.</p>
-
-                        </td>
-                    </tr>
-                
-                    <tr class=' module-item'>
-                        <td><a class='struct' href='struct.Events.html'
-                               title='xml::reader::Events'>Events</a></td>
-                        <td class='docblock short'>
-                             <p>An iterator over XML events created from some type implementing <code>Read</code>.</p>
-
-                        </td>
-                    </tr>
-                
-                    <tr class=' module-item'>
-                        <td><a class='struct' href='struct.ParserConfig.html'
-                               title='xml::reader::ParserConfig'>ParserConfig</a></td>
-                        <td class='docblock short'>
-                             <p>Parser configuration structure.</p>
-
-                        </td>
-                    </tr>
-                </table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.Error.html"
+                                  title='struct xml::reader::Error'>Error</a></td>
+                           <td class='docblock-short'>
+                                <p>An XML parsing error.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.EventReader.html"
+                                  title='struct xml::reader::EventReader'>EventReader</a></td>
+                           <td class='docblock-short'>
+                                <p>A wrapper around an <code>std::io::Read</code> instance which provides pull-based XML parsing.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.Events.html"
+                                  title='struct xml::reader::Events'>Events</a></td>
+                           <td class='docblock-short'>
+                                <p>An iterator over XML events created from some type implementing <code>Read</code>.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.ParserConfig.html"
+                                  title='struct xml::reader::ParserConfig'>ParserConfig</a></td>
+                           <td class='docblock-short'>
+                                <p>Parser configuration structure.</p>
+                           </td>
+                       </tr></table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
 <table>
-                    <tr class=' module-item'>
-                        <td><a class='enum' href='enum.XmlEvent.html'
-                               title='xml::reader::XmlEvent'>XmlEvent</a></td>
-                        <td class='docblock short'>
-                             <p>An element of an XML input stream.</p>
-
-                        </td>
-                    </tr>
-                </table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
+                       <tr class=' module-item'>
+                           <td><a class="enum" href="enum.ErrorKind.html"
+                                  title='enum xml::reader::ErrorKind'>ErrorKind</a></td>
+                           <td class='docblock-short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="enum" href="enum.XmlEvent.html"
+                                  title='enum xml::reader::XmlEvent'>XmlEvent</a></td>
+                           <td class='docblock-short'>
+                                <p>An element of an XML input stream.</p>
+                           </td>
+                       </tr></table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
 <table>
-                    <tr class=' module-item'>
-                        <td><a class='type' href='type.Result.html'
-                               title='xml::reader::Result'>Result</a></td>
-                        <td class='docblock short'>
-                             <p>A result type yielded by <code>XmlReader</code>.</p>
-
-                        </td>
-                    </tr>
-                </table></section>
+                       <tr class=' module-item'>
+                           <td><a class="type" href="type.Result.html"
+                                  title='type xml::reader::Result'>Result</a></td>
+                           <td class='docblock-short'>
+                                <p>A result type yielded by <code>XmlReader</code>.</p>
+                           </td>
+                       </tr></table></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>
@@ -131,6 +128,8 @@ view for events in XML document.</p>
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 
@@ -151,7 +150,7 @@ view for events in XML document.</p>
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>
@@ -162,11 +161,9 @@ view for events in XML document.</p>
     <script>
         window.rootPath = "../../";
         window.currentCrate = "xml";
-        window.playgroundUrl = "";
     </script>
     <script src="../../jquery.js"></script>
     <script src="../../main.js"></script>
-    
     <script defer src="../../search-index.js"></script>
 </body>
 </html>

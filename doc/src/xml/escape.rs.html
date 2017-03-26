@@ -4,13 +4,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/storage/home/achin/.multirust/toolchains/nightly/cargo/registry/src/github.com-88ac128001ac3a9a/xml-rs-0.2.2/src/escape.rs`.">
+    <meta name="description" content="Source to the Rust file `/storage/home/achin/.cargo/registry/src/github.com-1ecc6299db9ec823/xml-rs-0.4.1/src/escape.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>escape.rs.html -- source</title>
 
+    <link rel="stylesheet" type="text/css" href="../../normalize.css">
     <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
+    
 
     
     
@@ -153,119 +155,143 @@
 <span id="110">110</span>
 <span id="111">111</span>
 <span id="112">112</span>
-</pre><pre class='rust '>
-<span class='doccomment'>//! Contains functions for performing XML special characters escaping.</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+</pre><pre class="rust ">
+<span class="doccomment">//! Contains functions for performing XML special characters escaping.</span>
 
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>borrow</span>::<span class='ident'>Cow</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">borrow</span>::<span class="ident">Cow</span>;
 
-<span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>Value</span>::{<span class='ident'>C</span>, <span class='ident'>S</span>};
-<span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>Process</span>::{<span class='ident'>B</span>, <span class='ident'>O</span>};
-
-<span class='kw'>enum</span> <span class='ident'>Value</span> {
-    <span class='ident'>C</span>(<span class='ident'>char</span>),
-    <span class='ident'>S</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span>)
+<span class="kw">enum</span> <span class="ident">Value</span> {
+    <span class="ident">Char</span>(<span class="ident">char</span>),
+    <span class="ident">Str</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>)
 }
 
-<span class='kw'>impl</span> <span class='ident'>Value</span> {
-    <span class='kw'>fn</span> <span class='ident'>dispatch_for_attribute</span>(<span class='ident'>c</span>: <span class='ident'>char</span>) <span class='op'>-&gt;</span> <span class='ident'>Value</span> {
-        <span class='kw'>match</span> <span class='ident'>c</span> {
-            <span class='string'>&#39;&lt;&#39;</span>  <span class='op'>=&gt;</span> <span class='ident'>S</span>(<span class='string'>&quot;&amp;lt;&quot;</span>),
-            <span class='string'>&#39;&gt;&#39;</span>  <span class='op'>=&gt;</span> <span class='ident'>S</span>(<span class='string'>&quot;&amp;gt;&quot;</span>),
-            <span class='string'>&#39;&quot;&#39;</span>  <span class='op'>=&gt;</span> <span class='ident'>S</span>(<span class='string'>&quot;&amp;quot;&quot;</span>),
-            <span class='string'>&#39;\&#39;&#39;</span> <span class='op'>=&gt;</span> <span class='ident'>S</span>(<span class='string'>&quot;&amp;apos;&quot;</span>),
-            <span class='string'>&#39;&amp;&#39;</span>  <span class='op'>=&gt;</span> <span class='ident'>S</span>(<span class='string'>&quot;&amp;amp;&quot;</span>),
-            _    <span class='op'>=&gt;</span> <span class='ident'>C</span>(<span class='ident'>c</span>)
+<span class="kw">impl</span> <span class="ident">Value</span> {
+    <span class="kw">fn</span> <span class="ident">dispatch_for_attribute</span>(<span class="ident">c</span>: <span class="ident">char</span>) <span class="op">-&gt;</span> <span class="ident">Value</span> {
+        <span class="kw">match</span> <span class="ident">c</span> {
+            <span class="string">&#39;&lt;&#39;</span>  <span class="op">=&gt;</span> <span class="ident">Value</span>::<span class="ident">Str</span>(<span class="string">&quot;&amp;lt;&quot;</span>),
+            <span class="string">&#39;&gt;&#39;</span>  <span class="op">=&gt;</span> <span class="ident">Value</span>::<span class="ident">Str</span>(<span class="string">&quot;&amp;gt;&quot;</span>),
+            <span class="string">&#39;&quot;&#39;</span>  <span class="op">=&gt;</span> <span class="ident">Value</span>::<span class="ident">Str</span>(<span class="string">&quot;&amp;quot;&quot;</span>),
+            <span class="string">&#39;\&#39;&#39;</span> <span class="op">=&gt;</span> <span class="ident">Value</span>::<span class="ident">Str</span>(<span class="string">&quot;&amp;apos;&quot;</span>),
+            <span class="string">&#39;&amp;&#39;</span>  <span class="op">=&gt;</span> <span class="ident">Value</span>::<span class="ident">Str</span>(<span class="string">&quot;&amp;amp;&quot;</span>),
+            _    <span class="op">=&gt;</span> <span class="ident">Value</span>::<span class="ident">Char</span>(<span class="ident">c</span>)
         }
     }
 
-    <span class='kw'>fn</span> <span class='ident'>dispatch_for_pcdata</span>(<span class='ident'>c</span>: <span class='ident'>char</span>) <span class='op'>-&gt;</span> <span class='ident'>Value</span> {
-        <span class='kw'>match</span> <span class='ident'>c</span> {
-            <span class='string'>&#39;&lt;&#39;</span>  <span class='op'>=&gt;</span> <span class='ident'>S</span>(<span class='string'>&quot;&amp;lt;&quot;</span>),
-            <span class='string'>&#39;&amp;&#39;</span>  <span class='op'>=&gt;</span> <span class='ident'>S</span>(<span class='string'>&quot;&amp;amp;&quot;</span>),
-            _    <span class='op'>=&gt;</span> <span class='ident'>C</span>(<span class='ident'>c</span>)
+    <span class="kw">fn</span> <span class="ident">dispatch_for_pcdata</span>(<span class="ident">c</span>: <span class="ident">char</span>) <span class="op">-&gt;</span> <span class="ident">Value</span> {
+        <span class="kw">match</span> <span class="ident">c</span> {
+            <span class="string">&#39;&lt;&#39;</span>  <span class="op">=&gt;</span> <span class="ident">Value</span>::<span class="ident">Str</span>(<span class="string">&quot;&amp;lt;&quot;</span>),
+            <span class="string">&#39;&amp;&#39;</span>  <span class="op">=&gt;</span> <span class="ident">Value</span>::<span class="ident">Str</span>(<span class="string">&quot;&amp;amp;&quot;</span>),
+            _    <span class="op">=&gt;</span> <span class="ident">Value</span>::<span class="ident">Char</span>(<span class="ident">c</span>)
         }
     }
 }
 
-<span class='kw'>enum</span> <span class='ident'>Process</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-    <span class='ident'>B</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>),
-    <span class='ident'>O</span>(<span class='ident'>String</span>)
+<span class="kw">enum</span> <span class="ident">Process</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="ident">Borrowed</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>),
+    <span class="ident">Owned</span>(<span class="ident">String</span>)
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>Process</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-    <span class='kw'>fn</span> <span class='ident'>process</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, (<span class='ident'>i</span>, <span class='ident'>next</span>): (<span class='ident'>usize</span>, <span class='ident'>Value</span>)) {
-        <span class='kw'>match</span> <span class='ident'>next</span> {
-            <span class='ident'>S</span>(<span class='ident'>s</span>) <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='ident'>O</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>o</span>) <span class='op'>=</span> <span class='op'>*</span><span class='self'>self</span> {
-                <span class='ident'>o</span>.<span class='ident'>push_str</span>(<span class='ident'>s</span>);
-            } <span class='kw'>else</span> <span class='kw'>if</span> <span class='kw'>let</span> <span class='ident'>B</span>(<span class='ident'>b</span>) <span class='op'>=</span> <span class='op'>*</span><span class='self'>self</span> {
-                <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>r</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>with_capacity</span>(<span class='ident'>b</span>.<span class='ident'>len</span>() <span class='op'>+</span> <span class='ident'>s</span>.<span class='ident'>len</span>());
-                <span class='ident'>r</span>.<span class='ident'>push_str</span>(<span class='kw-2'>&amp;</span><span class='ident'>b</span>[..<span class='ident'>i</span>]);
-                <span class='ident'>r</span>.<span class='ident'>push_str</span>(<span class='ident'>s</span>);
-                <span class='op'>*</span><span class='self'>self</span> <span class='op'>=</span> <span class='ident'>O</span>(<span class='ident'>r</span>);
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Process</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">process</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, (<span class="ident">i</span>, <span class="ident">next</span>): (<span class="ident">usize</span>, <span class="ident">Value</span>)) {
+        <span class="kw">match</span> <span class="ident">next</span> {
+            <span class="ident">Value</span>::<span class="ident">Str</span>(<span class="ident">s</span>) <span class="op">=&gt;</span> <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
+                <span class="ident">Process</span>::<span class="ident">Owned</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">o</span>) <span class="op">=&gt;</span> <span class="ident">o</span>.<span class="ident">push_str</span>(<span class="ident">s</span>),
+                <span class="ident">Process</span>::<span class="ident">Borrowed</span>(<span class="ident">b</span>) <span class="op">=&gt;</span> {
+                    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">with_capacity</span>(<span class="ident">b</span>.<span class="ident">len</span>() <span class="op">+</span> <span class="ident">s</span>.<span class="ident">len</span>());
+                    <span class="ident">r</span>.<span class="ident">push_str</span>(<span class="kw-2">&amp;</span><span class="ident">b</span>[..<span class="ident">i</span>]);
+                    <span class="ident">r</span>.<span class="ident">push_str</span>(<span class="ident">s</span>);
+                    <span class="kw-2">*</span><span class="self">self</span> <span class="op">=</span> <span class="ident">Process</span>::<span class="ident">Owned</span>(<span class="ident">r</span>);
+                }
             },
-            <span class='ident'>C</span>(<span class='ident'>c</span>) <span class='op'>=&gt;</span> <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span> {
-                <span class='ident'>B</span>(_) <span class='op'>=&gt;</span> {}
-                <span class='ident'>O</span>(<span class='kw-2'>ref</span> <span class='kw-2'>mut</span> <span class='ident'>o</span>) <span class='op'>=&gt;</span> <span class='ident'>o</span>.<span class='ident'>push</span>(<span class='ident'>c</span>)
+            <span class="ident">Value</span>::<span class="ident">Char</span>(<span class="ident">c</span>) <span class="op">=&gt;</span> <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
+                <span class="ident">Process</span>::<span class="ident">Borrowed</span>(_) <span class="op">=&gt;</span> {}
+                <span class="ident">Process</span>::<span class="ident">Owned</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">o</span>) <span class="op">=&gt;</span> <span class="ident">o</span>.<span class="ident">push</span>(<span class="ident">c</span>)
             }
         }
     }
 
-    <span class='kw'>fn</span> <span class='ident'>into_result</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Cow</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>str</span><span class='op'>&gt;</span> {
-        <span class='kw'>match</span> <span class='self'>self</span> {
-            <span class='ident'>B</span>(<span class='ident'>b</span>) <span class='op'>=&gt;</span> <span class='ident'>Cow</span>::<span class='ident'>Borrowed</span>(<span class='ident'>b</span>),
-            <span class='ident'>O</span>(<span class='ident'>o</span>) <span class='op'>=&gt;</span> <span class='ident'>Cow</span>::<span class='ident'>Owned</span>(<span class='ident'>o</span>)
+    <span class="kw">fn</span> <span class="ident">into_result</span>(<span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">str</span><span class="op">&gt;</span> {
+        <span class="kw">match</span> <span class="self">self</span> {
+            <span class="ident">Process</span>::<span class="ident">Borrowed</span>(<span class="ident">b</span>) <span class="op">=&gt;</span> <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="ident">b</span>),
+            <span class="ident">Process</span>::<span class="ident">Owned</span>(<span class="ident">o</span>) <span class="op">=&gt;</span> <span class="ident">Cow</span>::<span class="ident">Owned</span>(<span class="ident">o</span>)
         }
     }
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>Extend</span><span class='op'>&lt;</span><span class='ident'>Value</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>Process</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-    <span class='kw'>fn</span> <span class='ident'>extend</span><span class='op'>&lt;</span><span class='ident'>I</span>: <span class='ident'>IntoIterator</span><span class='op'>&lt;</span><span class='ident'>Item</span><span class='op'>=</span><span class='ident'>Value</span><span class='op'>&gt;&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>it</span>: <span class='ident'>I</span>) {
-        <span class='kw'>for</span> <span class='ident'>v</span> <span class='kw'>in</span> <span class='ident'>it</span>.<span class='ident'>into_iter</span>().<span class='ident'>enumerate</span>() {
-            <span class='self'>self</span>.<span class='ident'>process</span>(<span class='ident'>v</span>);
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Extend</span><span class="op">&lt;</span>(<span class="ident">usize</span>, <span class="ident">Value</span>)<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Process</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">extend</span><span class="op">&lt;</span><span class="ident">I</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span><span class="op">=</span>(<span class="ident">usize</span>, <span class="ident">Value</span>)<span class="op">&gt;&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">it</span>: <span class="ident">I</span>) {
+        <span class="kw">for</span> <span class="ident">v</span> <span class="kw">in</span> <span class="ident">it</span>.<span class="ident">into_iter</span>() {
+            <span class="self">self</span>.<span class="ident">process</span>(<span class="ident">v</span>);
         }
     }
 }
 
-<span class='kw'>fn</span> <span class='ident'>escape_str</span>(<span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>dispatch</span>: <span class='kw'>fn</span>(<span class='ident'>char</span>) <span class='op'>-&gt;</span> <span class='ident'>Value</span>) <span class='op'>-&gt;</span> <span class='ident'>Cow</span><span class='op'>&lt;</span><span class='ident'>str</span><span class='op'>&gt;</span> {
-    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>p</span> <span class='op'>=</span> <span class='ident'>B</span>(<span class='ident'>s</span>);
-    <span class='ident'>p</span>.<span class='ident'>extend</span>(<span class='ident'>s</span>.<span class='ident'>chars</span>().<span class='ident'>map</span>(<span class='ident'>dispatch</span>));
-    <span class='ident'>p</span>.<span class='ident'>into_result</span>()
+<span class="kw">fn</span> <span class="ident">escape_str</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">dispatch</span>: <span class="kw">fn</span>(<span class="ident">char</span>) <span class="op">-&gt;</span> <span class="ident">Value</span>) <span class="op">-&gt;</span> <span class="ident">Cow</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">Process</span>::<span class="ident">Borrowed</span>(<span class="ident">s</span>);
+    <span class="ident">p</span>.<span class="ident">extend</span>(<span class="ident">s</span>.<span class="ident">char_indices</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">ind</span>, <span class="ident">c</span>)<span class="op">|</span> (<span class="ident">ind</span>, <span class="ident">dispatch</span>(<span class="ident">c</span>))));
+    <span class="ident">p</span>.<span class="ident">into_result</span>()
 }
 
-<span class='doccomment'>/// Performs escaping of common XML characters inside an attribute value.</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// This function replaces several important markup characters with their</span>
-<span class='doccomment'>/// entity equivalents:</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// * `&lt;` → `&amp;lt;`</span>
-<span class='doccomment'>/// * `&gt;` → `&amp;gt;`</span>
-<span class='doccomment'>/// * `&quot;` → `&amp;quot;`</span>
-<span class='doccomment'>/// * `&#39;` → `&amp;apos;`</span>
-<span class='doccomment'>/// * `&amp;` → `&amp;amp;`</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// The resulting string is safe to use inside XML attribute values or in PCDATA sections.</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// Does not perform allocations if the given string does not contain escapable characters.</span>
-<span class='attribute'>#[<span class='ident'>inline</span>]</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>escape_str_attribute</span>(<span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>Cow</span><span class='op'>&lt;</span><span class='ident'>str</span><span class='op'>&gt;</span> {
-    <span class='ident'>escape_str</span>(<span class='ident'>s</span>, <span class='ident'>Value</span>::<span class='ident'>dispatch_for_attribute</span>)
+<span class="doccomment">/// Performs escaping of common XML characters inside an attribute value.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This function replaces several important markup characters with their</span>
+<span class="doccomment">/// entity equivalents:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `&lt;` → `&amp;lt;`</span>
+<span class="doccomment">/// * `&gt;` → `&amp;gt;`</span>
+<span class="doccomment">/// * `&quot;` → `&amp;quot;`</span>
+<span class="doccomment">/// * `&#39;` → `&amp;apos;`</span>
+<span class="doccomment">/// * `&amp;` → `&amp;amp;`</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// The resulting string is safe to use inside XML attribute values or in PCDATA sections.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Does not perform allocations if the given string does not contain escapable characters.</span>
+<span class="attribute">#[<span class="ident">inline</span>]</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">escape_str_attribute</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="ident">Cow</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span> {
+    <span class="ident">escape_str</span>(<span class="ident">s</span>, <span class="ident">Value</span>::<span class="ident">dispatch_for_attribute</span>)
 }
 
-<span class='doccomment'>/// Performs escaping of common XML characters inside PCDATA.</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// This function replaces several important markup characters with their</span>
-<span class='doccomment'>/// entity equivalents:</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// * `&lt;` → `&amp;lt;`</span>
-<span class='doccomment'>/// * `&amp;` → `&amp;amp;`</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// The resulting string is safe to use inside PCDATA sections but NOT inside attribute values.</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// Does not perform allocations if the given string does not contain escapable characters.</span>
-<span class='attribute'>#[<span class='ident'>inline</span>]</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>escape_str_pcdata</span>(<span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>Cow</span><span class='op'>&lt;</span><span class='ident'>str</span><span class='op'>&gt;</span> {
-    <span class='ident'>escape_str</span>(<span class='ident'>s</span>, <span class='ident'>Value</span>::<span class='ident'>dispatch_for_pcdata</span>)
+<span class="doccomment">/// Performs escaping of common XML characters inside PCDATA.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This function replaces several important markup characters with their</span>
+<span class="doccomment">/// entity equivalents:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `&lt;` → `&amp;lt;`</span>
+<span class="doccomment">/// * `&amp;` → `&amp;amp;`</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// The resulting string is safe to use inside PCDATA sections but NOT inside attribute values.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Does not perform allocations if the given string does not contain escapable characters.</span>
+<span class="attribute">#[<span class="ident">inline</span>]</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">escape_str_pcdata</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="ident">Cow</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span> {
+    <span class="ident">escape_str</span>(<span class="ident">s</span>, <span class="ident">Value</span>::<span class="ident">dispatch_for_pcdata</span>)
 }
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
+<span class="kw">mod</span> <span class="ident">tests</span> {
+    <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">escape_str_pcdata</span>, <span class="ident">escape_str_attribute</span>};
+
+    <span class="comment">// TODO: add more tests</span>
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">test_escape_multibyte_code_points</span>() {
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">escape_str_attribute</span>(<span class="string">&quot;☃&lt;&quot;</span>), <span class="string">&quot;☃&amp;lt;&quot;</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">escape_str_pcdata</span>(<span class="string">&quot;☃&lt;&quot;</span>), <span class="string">&quot;☃&amp;lt;&quot;</span>);
+    }
+}
+
 </pre>
 </section>
     <section id='search' class="content hidden"></section>
@@ -290,6 +316,8 @@
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 
@@ -310,7 +338,7 @@
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>
@@ -321,11 +349,9 @@
     <script>
         window.rootPath = "../../";
         window.currentCrate = "xml";
-        window.playgroundUrl = "";
     </script>
     <script src="../../jquery.js"></script>
     <script src="../../main.js"></script>
-    
     <script defer src="../../search-index.js"></script>
 </body>
 </html>

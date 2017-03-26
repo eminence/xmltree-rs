@@ -4,13 +4,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/storage/home/achin/.multirust/toolchains/nightly/cargo/registry/src/github.com-88ac128001ac3a9a/xml-rs-0.2.2/src/writer/events.rs`.">
+    <meta name="description" content="Source to the Rust file `/storage/home/achin/.cargo/registry/src/github.com-1ecc6299db9ec823/xml-rs-0.4.1/src/writer/events.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>events.rs.html -- source</title>
 
+    <link rel="stylesheet" type="text/css" href="../../../normalize.css">
     <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
 
     
     
@@ -281,244 +283,246 @@
 <span id="238">238</span>
 <span id="239">239</span>
 <span id="240">240</span>
-</pre><pre class='rust '>
-<span class='doccomment'>//! Contains `XmlEvent` datatype, instances of which are consumed by the writer.</span>
+<span id="241">241</span>
+</pre><pre class="rust ">
+<span class="doccomment">//! Contains `XmlEvent` datatype, instances of which are consumed by the writer.</span>
 
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>borrow</span>::<span class='ident'>Cow</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">borrow</span>::<span class="ident">Cow</span>;
 
-<span class='kw'>use</span> <span class='ident'>name</span>::<span class='ident'>Name</span>;
-<span class='kw'>use</span> <span class='ident'>attribute</span>::<span class='ident'>Attribute</span>;
-<span class='kw'>use</span> <span class='ident'>common</span>::<span class='ident'>XmlVersion</span>;
-<span class='kw'>use</span> <span class='ident'>namespace</span>::{<span class='ident'>Namespace</span>, <span class='ident'>NS_NO_PREFIX</span>};
+<span class="kw">use</span> <span class="ident">name</span>::<span class="ident">Name</span>;
+<span class="kw">use</span> <span class="ident">attribute</span>::<span class="ident">Attribute</span>;
+<span class="kw">use</span> <span class="ident">common</span>::<span class="ident">XmlVersion</span>;
+<span class="kw">use</span> <span class="ident">namespace</span>::{<span class="ident">Namespace</span>, <span class="ident">NS_NO_PREFIX</span>};
 
-<span class='doccomment'>/// A part of an XML output stream.</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// Objects of this enum are consumed by `EventWriter`. They correspond to different parts of</span>
-<span class='doccomment'>/// an XML document.</span>
-<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>XmlEvent</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-    <span class='doccomment'>/// Corresponds to XML document declaration.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// This event should always be written before any other event. If it is not written</span>
-    <span class='doccomment'>/// at all, a default XML declaration will be outputted if the corresponding option</span>
-    <span class='doccomment'>/// is set in the configuration. Otherwise an error will be returned.</span>
-    <span class='ident'>StartDocument</span> {
-        <span class='doccomment'>/// XML version.</span>
-        <span class='doccomment'>///</span>
-        <span class='doccomment'>/// Defaults to `XmlVersion::Version10`.</span>
-        <span class='ident'>version</span>: <span class='ident'>XmlVersion</span>,
+<span class="doccomment">/// A part of an XML output stream.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Objects of this enum are consumed by `EventWriter`. They correspond to different parts of</span>
+<span class="doccomment">/// an XML document.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">XmlEvent</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Corresponds to XML document declaration.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This event should always be written before any other event. If it is not written</span>
+    <span class="doccomment">/// at all, a default XML declaration will be outputted if the corresponding option</span>
+    <span class="doccomment">/// is set in the configuration. Otherwise an error will be returned.</span>
+    <span class="ident">StartDocument</span> {
+        <span class="doccomment">/// XML version.</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// Defaults to `XmlVersion::Version10`.</span>
+        <span class="ident">version</span>: <span class="ident">XmlVersion</span>,
 
-        <span class='doccomment'>/// XML document encoding.</span>
-        <span class='doccomment'>///</span>
-        <span class='doccomment'>/// Defaults to `Some(&quot;UTF-8&quot;)`.</span>
-        <span class='ident'>encoding</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span><span class='op'>&gt;</span>,
+        <span class="doccomment">/// XML document encoding.</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// Defaults to `Some(&quot;UTF-8&quot;)`.</span>
+        <span class="ident">encoding</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>,
 
-        <span class='doccomment'>/// XML standalone declaration.</span>
-        <span class='doccomment'>///</span>
-        <span class='doccomment'>/// Defaults to `None`.</span>
-        <span class='ident'>standalone</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>bool</span><span class='op'>&gt;</span>
+        <span class="doccomment">/// XML standalone declaration.</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// Defaults to `None`.</span>
+        <span class="ident">standalone</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span>
     },
 
-    <span class='doccomment'>/// Denotes an XML processing instruction.</span>
-    <span class='ident'>ProcessingInstruction</span> {
-        <span class='doccomment'>/// Processing instruction target.</span>
-        <span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>,
+    <span class="doccomment">/// Denotes an XML processing instruction.</span>
+    <span class="ident">ProcessingInstruction</span> {
+        <span class="doccomment">/// Processing instruction target.</span>
+        <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>,
 
-        <span class='doccomment'>/// Processing instruction content.</span>
-        <span class='ident'>data</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span><span class='op'>&gt;</span>
+        <span class="doccomment">/// Processing instruction content.</span>
+        <span class="ident">data</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>
     },
 
-    <span class='doccomment'>/// Denotes a beginning of an XML element.</span>
-    <span class='ident'>StartElement</span> {
-        <span class='doccomment'>/// Qualified name of the element.</span>
-        <span class='ident'>name</span>: <span class='ident'>Name</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>,
+    <span class="doccomment">/// Denotes a beginning of an XML element.</span>
+    <span class="ident">StartElement</span> {
+        <span class="doccomment">/// Qualified name of the element.</span>
+        <span class="ident">name</span>: <span class="ident">Name</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
 
-        <span class='doccomment'>/// A list of attributes associated with the element.</span>
-        <span class='doccomment'>///</span>
-        <span class='doccomment'>/// Currently attributes are not checked for duplicates (TODO). Attribute values</span>
-        <span class='doccomment'>/// will be escaped, and all characters invalid for attribute values like `&quot;` or `&lt;`</span>
-        <span class='doccomment'>/// will be changed into character entities.</span>
-        <span class='ident'>attributes</span>: <span class='ident'>Cow</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, [<span class='ident'>Attribute</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>]<span class='op'>&gt;</span>,
+        <span class="doccomment">/// A list of attributes associated with the element.</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// Currently attributes are not checked for duplicates (TODO). Attribute values</span>
+        <span class="doccomment">/// will be escaped, and all characters invalid for attribute values like `&quot;` or `&lt;`</span>
+        <span class="doccomment">/// will be changed into character entities.</span>
+        <span class="ident">attributes</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, [<span class="ident">Attribute</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>]<span class="op">&gt;</span>,
 
-        <span class='doccomment'>/// Contents of the namespace mapping at this point of the document.</span>
-        <span class='doccomment'>///</span>
-        <span class='doccomment'>/// This mapping will be inspected for &quot;new&quot; entries, and if at this point of the document</span>
-        <span class='doccomment'>/// a particular pair of prefix and namespace URI is already defined, no namespace</span>
-        <span class='doccomment'>/// attributes will be emitted.</span>
-        <span class='ident'>namespace</span>: <span class='ident'>Cow</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>Namespace</span><span class='op'>&gt;</span>,
+        <span class="doccomment">/// Contents of the namespace mapping at this point of the document.</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// This mapping will be inspected for &quot;new&quot; entries, and if at this point of the document</span>
+        <span class="doccomment">/// a particular pair of prefix and namespace URI is already defined, no namespace</span>
+        <span class="doccomment">/// attributes will be emitted.</span>
+        <span class="ident">namespace</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Namespace</span><span class="op">&gt;</span>,
     },
 
-    <span class='doccomment'>/// Denotes an end of an XML element.</span>
-    <span class='ident'>EndElement</span> {
-        <span class='doccomment'>/// Optional qualified name of the element.</span>
-        <span class='doccomment'>///</span>
-        <span class='doccomment'>/// If `None`, then it is assumed that the element name should be the last valid one.</span>
-        <span class='doccomment'>/// If `Some` and element names tracking is enabled, then the writer will check it for</span>
-        <span class='doccomment'>/// correctness.</span>
-        <span class='ident'>name</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Name</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;&gt;</span>
+    <span class="doccomment">/// Denotes an end of an XML element.</span>
+    <span class="ident">EndElement</span> {
+        <span class="doccomment">/// Optional qualified name of the element.</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// If `None`, then it is assumed that the element name should be the last valid one.</span>
+        <span class="doccomment">/// If `Some` and element names tracking is enabled, then the writer will check it for</span>
+        <span class="doccomment">/// correctness.</span>
+        <span class="ident">name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Name</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;&gt;</span>
     },
 
-    <span class='doccomment'>/// Denotes CDATA content.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// This event contains unparsed data, and no escaping will be performed when writing it</span>
-    <span class='doccomment'>/// to the output stream.</span>
-    <span class='ident'>CData</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>),
+    <span class="doccomment">/// Denotes CDATA content.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This event contains unparsed data, and no escaping will be performed when writing it</span>
+    <span class="doccomment">/// to the output stream.</span>
+    <span class="ident">CData</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>),
 
-    <span class='doccomment'>/// Denotes a comment.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// The string will be checked for invalid sequences and error will be returned by the</span>
-    <span class='doccomment'>/// write operation</span>
-    <span class='ident'>Comment</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>),
+    <span class="doccomment">/// Denotes a comment.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// The string will be checked for invalid sequences and error will be returned by the</span>
+    <span class="doccomment">/// write operation</span>
+    <span class="ident">Comment</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>),
 
-    <span class='doccomment'>/// Denotes character data outside of tags.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// Contents of this event will be escaped if `perform_escaping` option is enabled,</span>
-    <span class='doccomment'>/// that is, every character invalid for PCDATA will appear as a character entity.</span>
-    <span class='ident'>Characters</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>)
+    <span class="doccomment">/// Denotes character data outside of tags.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Contents of this event will be escaped if `perform_escaping` option is enabled,</span>
+    <span class="doccomment">/// that is, every character invalid for PCDATA will appear as a character entity.</span>
+    <span class="ident">Characters</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>)
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>XmlEvent</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-    <span class='doccomment'>/// Returns an writer event for a processing instruction.</span>
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>processing_instruction</span>(<span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>, <span class='ident'>data</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>XmlEvent</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-        <span class='ident'>XmlEvent</span>::<span class='ident'>ProcessingInstruction</span> { <span class='ident'>name</span>: <span class='ident'>name</span>, <span class='ident'>data</span>: <span class='ident'>data</span> }
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">XmlEvent</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Returns an writer event for a processing instruction.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">processing_instruction</span>(<span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>, <span class="ident">data</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="ident">XmlEvent</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+        <span class="ident">XmlEvent</span>::<span class="ident">ProcessingInstruction</span> { <span class="ident">name</span>: <span class="ident">name</span>, <span class="ident">data</span>: <span class="ident">data</span> }
     }
 
-    <span class='doccomment'>/// Returns a builder for a starting element.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// This builder can then be used to tweak attributes and namespace starting at</span>
-    <span class='doccomment'>/// this element.</span>
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>start_element</span><span class='op'>&lt;</span><span class='ident'>S</span><span class='op'>&gt;</span>(<span class='ident'>name</span>: <span class='ident'>S</span>) <span class='op'>-&gt;</span> <span class='ident'>StartElementBuilder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>Name</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;&gt;</span> {
-        <span class='ident'>StartElementBuilder</span> {
-            <span class='ident'>name</span>: <span class='ident'>name</span>.<span class='ident'>into</span>(),
-            <span class='ident'>attributes</span>: <span class='ident'>Vec</span>::<span class='ident'>new</span>(),
-            <span class='ident'>namespace</span>: <span class='ident'>Namespace</span>::<span class='ident'>empty</span>().<span class='ident'>into</span>()
+    <span class="doccomment">/// Returns a builder for a starting element.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This builder can then be used to tweak attributes and namespace starting at</span>
+    <span class="doccomment">/// this element.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">start_element</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="ident">name</span>: <span class="ident">S</span>) <span class="op">-&gt;</span> <span class="ident">StartElementBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Name</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;&gt;</span> {
+        <span class="ident">StartElementBuilder</span> {
+            <span class="ident">name</span>: <span class="ident">name</span>.<span class="ident">into</span>(),
+            <span class="ident">attributes</span>: <span class="ident">Vec</span>::<span class="ident">new</span>(),
+            <span class="ident">namespace</span>: <span class="ident">Namespace</span>::<span class="ident">empty</span>().<span class="ident">into</span>()
         }
     }
 
-    <span class='doccomment'>/// Returns a builder for an closing element.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// This method, unline `start_element()`, does not accept a name because by default</span>
-    <span class='doccomment'>/// the writer is able to determine it automatically. However, when this functionality</span>
-    <span class='doccomment'>/// is disabled, it is possible to specify the name with `name()` method on the builder.</span>
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>end_element</span>() <span class='op'>-&gt;</span> <span class='ident'>EndElementBuilder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-        <span class='ident'>EndElementBuilder</span> { <span class='ident'>name</span>: <span class='prelude-val'>None</span> }
+    <span class="doccomment">/// Returns a builder for an closing element.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This method, unline `start_element()`, does not accept a name because by default</span>
+    <span class="doccomment">/// the writer is able to determine it automatically. However, when this functionality</span>
+    <span class="doccomment">/// is disabled, it is possible to specify the name with `name()` method on the builder.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">end_element</span>() <span class="op">-&gt;</span> <span class="ident">EndElementBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+        <span class="ident">EndElementBuilder</span> { <span class="ident">name</span>: <span class="prelude-val">None</span> }
     }
 
-    <span class='doccomment'>/// Returns a CDATA event.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// Naturally, the provided string won&#39;t be escaped, except for closing CDATA token `]]&gt;`</span>
-    <span class='doccomment'>/// (depending on the configuration).</span>
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>cdata</span>(<span class='ident'>data</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>XmlEvent</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> { <span class='ident'>XmlEvent</span>::<span class='ident'>CData</span>(<span class='ident'>data</span>) }
+    <span class="doccomment">/// Returns a CDATA event.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Naturally, the provided string won&#39;t be escaped, except for closing CDATA token `]]&gt;`</span>
+    <span class="doccomment">/// (depending on the configuration).</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cdata</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) <span class="op">-&gt;</span> <span class="ident">XmlEvent</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> { <span class="ident">XmlEvent</span>::<span class="ident">CData</span>(<span class="ident">data</span>) }
 
-    <span class='doccomment'>/// Returns a regular characters (PCDATA) event.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// All offending symbols, in particular, `&amp;` and `&lt;`, will be escaped by the writer.</span>
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>characters</span>(<span class='ident'>data</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>XmlEvent</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> { <span class='ident'>XmlEvent</span>::<span class='ident'>Characters</span>(<span class='ident'>data</span>) }
+    <span class="doccomment">/// Returns a regular characters (PCDATA) event.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// All offending symbols, in particular, `&amp;` and `&lt;`, will be escaped by the writer.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">characters</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) <span class="op">-&gt;</span> <span class="ident">XmlEvent</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> { <span class="ident">XmlEvent</span>::<span class="ident">Characters</span>(<span class="ident">data</span>) }
 
-    <span class='doccomment'>/// Returns a comment event.</span>
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>comment</span>(<span class='ident'>data</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>XmlEvent</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> { <span class='ident'>XmlEvent</span>::<span class='ident'>Comment</span>(<span class='ident'>data</span>) }
+    <span class="doccomment">/// Returns a comment event.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">comment</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) <span class="op">-&gt;</span> <span class="ident">XmlEvent</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> { <span class="ident">XmlEvent</span>::<span class="ident">Comment</span>(<span class="ident">data</span>) }
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>From</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>XmlEvent</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>from</span>(<span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>XmlEvent</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> { <span class='ident'>XmlEvent</span>::<span class='ident'>Characters</span>(<span class='ident'>s</span>) }
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">XmlEvent</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) <span class="op">-&gt;</span> <span class="ident">XmlEvent</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> { <span class="ident">XmlEvent</span>::<span class="ident">Characters</span>(<span class="ident">s</span>) }
 }
 
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>EndElementBuilder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-    <span class='ident'>name</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Name</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;&gt;</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">EndElementBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="ident">name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Name</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;&gt;</span>
 }
 
-<span class='doccomment'>/// A builder for a closing element event.</span>
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>EndElementBuilder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-    <span class='doccomment'>/// Sets the name of this closing element.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// Usually the writer is able to determine closing element names automatically. If</span>
-    <span class='doccomment'>/// this functionality is enabled (by default it is), then this name is checked for correctness.</span>
-    <span class='doccomment'>/// It is possible, however, to disable such behavior; then the user must ensure that</span>
-    <span class='doccomment'>/// closing element name is correct manually.</span>
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>name</span><span class='op'>&lt;</span><span class='ident'>N</span><span class='op'>&gt;</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>name</span>: <span class='ident'>N</span>) <span class='op'>-&gt;</span> <span class='ident'>EndElementBuilder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='kw'>where</span> <span class='ident'>N</span>: <span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>Name</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;&gt;</span> {
-        <span class='self'>self</span>.<span class='ident'>name</span> <span class='op'>=</span> <span class='prelude-val'>Some</span>(<span class='ident'>name</span>.<span class='ident'>into</span>());
-        <span class='self'>self</span>
-    }
-}
-
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>From</span><span class='op'>&lt;</span><span class='ident'>EndElementBuilder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;&gt;</span> <span class='kw'>for</span> <span class='ident'>XmlEvent</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-    <span class='kw'>fn</span> <span class='ident'>from</span>(<span class='ident'>b</span>: <span class='ident'>EndElementBuilder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>XmlEvent</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-        <span class='ident'>XmlEvent</span>::<span class='ident'>EndElement</span> { <span class='ident'>name</span>: <span class='ident'>b</span>.<span class='ident'>name</span> }
+<span class="doccomment">/// A builder for a closing element event.</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">EndElementBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Sets the name of this closing element.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Usually the writer is able to determine closing element names automatically. If</span>
+    <span class="doccomment">/// this functionality is enabled (by default it is), then this name is checked for correctness.</span>
+    <span class="doccomment">/// It is possible, however, to disable such behavior; then the user must ensure that</span>
+    <span class="doccomment">/// closing element name is correct manually.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">name</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="ident">N</span>) <span class="op">-&gt;</span> <span class="ident">EndElementBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">N</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Name</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;&gt;</span> {
+        <span class="self">self</span>.<span class="ident">name</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">name</span>.<span class="ident">into</span>());
+        <span class="self">self</span>
     }
 }
 
-<span class='doccomment'>/// A builder for a starting element event.</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>StartElementBuilder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-    <span class='ident'>name</span>: <span class='ident'>Name</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>,
-    <span class='ident'>attributes</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Attribute</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;&gt;</span>,
-    <span class='ident'>namespace</span>: <span class='ident'>Namespace</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">EndElementBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;&gt;</span> <span class="kw">for</span> <span class="ident">XmlEvent</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">b</span>: <span class="ident">EndElementBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="ident">XmlEvent</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+        <span class="ident">XmlEvent</span>::<span class="ident">EndElement</span> { <span class="ident">name</span>: <span class="ident">b</span>.<span class="ident">name</span> }
+    }
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>StartElementBuilder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-    <span class='doccomment'>/// Sets an attribute value of this element to the given string.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// This method can be used to add attributes to the starting element. Name is a qualified</span>
-    <span class='doccomment'>/// name; its namespace is ignored, but its prefix is checked for correctness, that is,</span>
-    <span class='doccomment'>/// it is checked that the prefix is bound to some namespace in the current context.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// Currently attributes are not checked for duplicates. Note that duplicate attributes</span>
-    <span class='doccomment'>/// are a violation of XML document well-formedness.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// The writer checks that you don&#39;t specify reserved prefix names, for example `xmlns`.</span>
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>attr</span><span class='op'>&lt;</span><span class='ident'>N</span><span class='op'>&gt;</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>name</span>: <span class='ident'>N</span>, <span class='ident'>value</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>StartElementBuilder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>
-        <span class='kw'>where</span> <span class='ident'>N</span>: <span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>Name</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;&gt;</span>
+<span class="doccomment">/// A builder for a starting element event.</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">StartElementBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="ident">name</span>: <span class="ident">Name</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
+    <span class="ident">attributes</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Attribute</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;&gt;</span>,
+    <span class="ident">namespace</span>: <span class="ident">Namespace</span>
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">StartElementBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Sets an attribute value of this element to the given string.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This method can be used to add attributes to the starting element. Name is a qualified</span>
+    <span class="doccomment">/// name; its namespace is ignored, but its prefix is checked for correctness, that is,</span>
+    <span class="doccomment">/// it is checked that the prefix is bound to some namespace in the current context.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Currently attributes are not checked for duplicates. Note that duplicate attributes</span>
+    <span class="doccomment">/// are a violation of XML document well-formedness.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// The writer checks that you don&#39;t specify reserved prefix names, for example `xmlns`.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">attr</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="ident">N</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) <span class="op">-&gt;</span> <span class="ident">StartElementBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>
+        <span class="kw">where</span> <span class="ident">N</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Name</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;&gt;</span>
     {
-        <span class='self'>self</span>.<span class='ident'>attributes</span>.<span class='ident'>push</span>(<span class='ident'>Attribute</span>::<span class='ident'>new</span>(<span class='ident'>name</span>.<span class='ident'>into</span>(), <span class='ident'>value</span>));
-        <span class='self'>self</span>
+        <span class="self">self</span>.<span class="ident">attributes</span>.<span class="ident">push</span>(<span class="ident">Attribute</span>::<span class="ident">new</span>(<span class="ident">name</span>.<span class="ident">into</span>(), <span class="ident">value</span>));
+        <span class="self">self</span>
     }
 
-    <span class='doccomment'>/// Adds a namespace to the current namespace context.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// If no namespace URI was bound to the provided prefix at this point of the document,</span>
-    <span class='doccomment'>/// then the mapping from the prefix to the provided namespace URI will be written as</span>
-    <span class='doccomment'>/// a part of this element attribute set.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// If the same namespace URI was bound to the provided prefix at this point of the document,</span>
-    <span class='doccomment'>/// then no namespace attributes will be emitted.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// If some other namespace URI was bound to the provided prefix at this point of the document,</span>
-    <span class='doccomment'>/// then another binding will be added as a part of this element attribute set, shadowing</span>
-    <span class='doccomment'>/// the outer binding.</span>
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>ns</span><span class='op'>&lt;</span><span class='ident'>S1</span>, <span class='ident'>S2</span><span class='op'>&gt;</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>prefix</span>: <span class='ident'>S1</span>, <span class='ident'>uri</span>: <span class='ident'>S2</span>) <span class='op'>-&gt;</span> <span class='ident'>StartElementBuilder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>
-        <span class='kw'>where</span> <span class='ident'>S1</span>: <span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>, <span class='ident'>S2</span>: <span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>
+    <span class="doccomment">/// Adds a namespace to the current namespace context.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// If no namespace URI was bound to the provided prefix at this point of the document,</span>
+    <span class="doccomment">/// then the mapping from the prefix to the provided namespace URI will be written as</span>
+    <span class="doccomment">/// a part of this element attribute set.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// If the same namespace URI was bound to the provided prefix at this point of the document,</span>
+    <span class="doccomment">/// then no namespace attributes will be emitted.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// If some other namespace URI was bound to the provided prefix at this point of the document,</span>
+    <span class="doccomment">/// then another binding will be added as a part of this element attribute set, shadowing</span>
+    <span class="doccomment">/// the outer binding.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ns</span><span class="op">&lt;</span><span class="ident">S1</span>, <span class="ident">S2</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">prefix</span>: <span class="ident">S1</span>, <span class="ident">uri</span>: <span class="ident">S2</span>) <span class="op">-&gt;</span> <span class="ident">StartElementBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>
+        <span class="kw">where</span> <span class="ident">S1</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>, <span class="ident">S2</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>
     {
-        <span class='self'>self</span>.<span class='ident'>namespace</span>.<span class='ident'>put</span>(<span class='ident'>prefix</span>, <span class='ident'>uri</span>);
-        <span class='self'>self</span>
+        <span class="self">self</span>.<span class="ident">namespace</span>.<span class="ident">put</span>(<span class="ident">prefix</span>, <span class="ident">uri</span>);
+        <span class="self">self</span>
     }
 
-    <span class='doccomment'>/// Adds a default namespace mapping to the current namespace context.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// Same rules as for `ns()` are also valid for the default namespace mapping.</span>
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>default_ns</span><span class='op'>&lt;</span><span class='ident'>S</span><span class='op'>&gt;</span>(<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>uri</span>: <span class='ident'>S</span>) <span class='op'>-&gt;</span> <span class='ident'>StartElementBuilder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>
-        <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>Into</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>
+    <span class="doccomment">/// Adds a default namespace mapping to the current namespace context.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Same rules as for `ns()` are also valid for the default namespace mapping.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">default_ns</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">uri</span>: <span class="ident">S</span>) <span class="op">-&gt;</span> <span class="ident">StartElementBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>
+        <span class="kw">where</span> <span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>
     {
-        <span class='self'>self</span>.<span class='ident'>namespace</span>.<span class='ident'>put</span>(<span class='ident'>NS_NO_PREFIX</span>, <span class='ident'>uri</span>);
-        <span class='self'>self</span>
+        <span class="self">self</span>.<span class="ident">namespace</span>.<span class="ident">put</span>(<span class="ident">NS_NO_PREFIX</span>, <span class="ident">uri</span>);
+        <span class="self">self</span>
     }
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> <span class='ident'>From</span><span class='op'>&lt;</span><span class='ident'>StartElementBuilder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;&gt;</span> <span class='kw'>for</span> <span class='ident'>XmlEvent</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>from</span>(<span class='ident'>b</span>: <span class='ident'>StartElementBuilder</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>XmlEvent</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span> {
-        <span class='ident'>XmlEvent</span>::<span class='ident'>StartElement</span> {
-            <span class='ident'>name</span>: <span class='ident'>b</span>.<span class='ident'>name</span>,
-            <span class='ident'>attributes</span>: <span class='ident'>Cow</span>::<span class='ident'>Owned</span>(<span class='ident'>b</span>.<span class='ident'>attributes</span>),
-            <span class='ident'>namespace</span>: <span class='ident'>Cow</span>::<span class='ident'>Owned</span>(<span class='ident'>b</span>.<span class='ident'>namespace</span>)
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">StartElementBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;&gt;</span> <span class="kw">for</span> <span class="ident">XmlEvent</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">b</span>: <span class="ident">StartElementBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="ident">XmlEvent</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+        <span class="ident">XmlEvent</span>::<span class="ident">StartElement</span> {
+            <span class="ident">name</span>: <span class="ident">b</span>.<span class="ident">name</span>,
+            <span class="ident">attributes</span>: <span class="ident">Cow</span>::<span class="ident">Owned</span>(<span class="ident">b</span>.<span class="ident">attributes</span>),
+            <span class="ident">namespace</span>: <span class="ident">Cow</span>::<span class="ident">Owned</span>(<span class="ident">b</span>.<span class="ident">namespace</span>)
         }
     }
 }
@@ -546,6 +550,8 @@
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 
@@ -566,7 +572,7 @@
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>
@@ -577,11 +583,9 @@
     <script>
         window.rootPath = "../../../";
         window.currentCrate = "xml";
-        window.playgroundUrl = "";
     </script>
     <script src="../../../jquery.js"></script>
     <script src="../../../main.js"></script>
-    
     <script defer src="../../../search-index.js"></script>
 </body>
 </html>

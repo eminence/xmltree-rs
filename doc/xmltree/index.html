@@ -9,8 +9,10 @@
 
     <title>xmltree - Rust</title>
 
+    <link rel="stylesheet" type="text/css" href="../normalize.css">
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
+    
 
     
     
@@ -42,20 +44,21 @@
     </nav>
 
     <section id='main' class="content mod">
-<h1 class='fqn'><span class='in-band'>Crate <a class='mod' href=''>xmltree</a></span><span class='out-of-band'><span id='render-detail'>
-            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
-                [<span class='inner'>&#x2212;</span>]
-            </a>
-        </span><a id='src-0' class='srclink' href='../src/xmltree/lib.rs.html#1-201' title='goto source code'>[src]</a></span></h1>
+<h1 class='fqn'><span class='in-band'>Crate <a class="mod" href=''>xmltree</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a class='srclink' href='../src/xmltree/lib.rs.html#1-256' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>A simple library for parsing an XML file into an in-memory tree structure</p>
 
 <p>Not recommended for large XML files, as it will load the entire file into memory.</p>
 
-<h1 id='example' class='section-header'><a href='#example'>Example</a></h1><pre class='rust rust-example-rendered'>
-<span class='kw'>use</span> <span class='ident'>xmltree</span>::<span class='ident'>Element</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fs</span>::<span class='ident'>File</span>;
+<h1 id='example' class='section-header'><a href='#example'>Example</a></h1>
+<pre class="rust rust-example-rendered">
+<span class="kw">use</span> <span class="ident">xmltree</span>::<span class="ident">Element</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">File</span>;
 
-<span class='kw'>let</span> <span class='ident'>data</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;static</span> <span class='ident'>str</span> <span class='op'>=</span> <span class='string'>r##&quot;
+<span class="kw">let</span> <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> <span class="op">=</span> <span class="string">r##&quot;
 &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; standalone=&quot;yes&quot;?&gt;
 &lt;names&gt;
     &lt;name first=&quot;bob&quot; last=&quot;jones&quot; /&gt;
@@ -63,38 +66,41 @@
 &lt;/names&gt;
 &quot;##</span>;
 
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>names_element</span> <span class='op'>=</span> <span class='ident'>Element</span>::<span class='ident'>parse</span>(<span class='ident'>data</span>.<span class='ident'>as_bytes</span>()).<span class='ident'>unwrap</span>();
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">names_element</span> <span class="op">=</span> <span class="ident">Element</span>::<span class="ident">parse</span>(<span class="ident">data</span>.<span class="ident">as_bytes</span>()).<span class="ident">unwrap</span>();
 
-<span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{:#?}&quot;</span>, <span class='ident'>names_element</span>);
+<span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;{:#?}&quot;</span>, <span class="ident">names_element</span>);
 {
-    <span class='comment'>// get first `name` element</span>
-    <span class='kw'>let</span> <span class='ident'>name</span> <span class='op'>=</span> <span class='ident'>names_element</span>.<span class='ident'>get_mut_child</span>(<span class='string'>&quot;name&quot;</span>).<span class='ident'>expect</span>(<span class='string'>&quot;Can&#39;t find name element&quot;</span>);
-    <span class='ident'>name</span>.<span class='ident'>attributes</span>.<span class='ident'>insert</span>(<span class='string'>&quot;suffix&quot;</span>.<span class='ident'>to_owned</span>(), <span class='string'>&quot;mr&quot;</span>.<span class='ident'>to_owned</span>());
+    <span class="comment">// get first `name` element</span>
+    <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">names_element</span>.<span class="ident">get_mut_child</span>(<span class="string">&quot;name&quot;</span>).<span class="ident">expect</span>(<span class="string">&quot;Can&#39;t find name element&quot;</span>);
+    <span class="ident">name</span>.<span class="ident">attributes</span>.<span class="ident">insert</span>(<span class="string">&quot;suffix&quot;</span>.<span class="ident">to_owned</span>(), <span class="string">&quot;mr&quot;</span>.<span class="ident">to_owned</span>());
 }
-<span class='ident'>names_element</span>.<span class='ident'>write</span>(<span class='ident'>File</span>::<span class='ident'>create</span>(<span class='string'>&quot;result.xml&quot;</span>).<span class='ident'>unwrap</span>());
+<span class="ident">names_element</span>.<span class="ident">write</span>(<span class="ident">File</span>::<span class="ident">create</span>(<span class="string">&quot;result.xml&quot;</span>).<span class="ident">unwrap</span>());
 
  </pre>
 </div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
 <table>
-                    <tr class=' module-item'>
-                        <td><a class='struct' href='struct.Element.html'
-                               title='xmltree::Element'>Element</a></td>
-                        <td class='docblock short'>
-                             <p>Represents an XML element.</p>
-
-                        </td>
-                    </tr>
-                </table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.Element.html"
+                                  title='struct xmltree::Element'>Element</a></td>
+                           <td class='docblock-short'>
+                                <p>Represents an XML element.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.Namespace.html"
+                                  title='struct xmltree::Namespace'>Namespace</a></td>
+                           <td class='docblock-short'>
+                                <p>Namespace is a map from prefixes to namespace URIs.</p>
+                           </td>
+                       </tr></table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
 <table>
-                    <tr class=' module-item'>
-                        <td><a class='enum' href='enum.ParseError.html'
-                               title='xmltree::ParseError'>ParseError</a></td>
-                        <td class='docblock short'>
-                             <p>Errors that can occur parsing XML</p>
-
-                        </td>
-                    </tr>
-                </table></section>
+                       <tr class=' module-item'>
+                           <td><a class="enum" href="enum.ParseError.html"
+                                  title='enum xmltree::ParseError'>ParseError</a></td>
+                           <td class='docblock-short'>
+                                <p>Errors that can occur parsing XML</p>
+                           </td>
+                       </tr></table></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>
@@ -117,6 +123,8 @@
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 
@@ -137,7 +145,7 @@
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>
@@ -148,11 +156,9 @@
     <script>
         window.rootPath = "../";
         window.currentCrate = "xmltree";
-        window.playgroundUrl = "";
     </script>
     <script src="../jquery.js"></script>
     <script src="../main.js"></script>
-    
     <script defer src="../search-index.js"></script>
 </body>
 </html>

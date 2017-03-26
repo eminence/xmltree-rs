@@ -9,8 +9,10 @@
 
     <title>xml::name - Rust</title>
 
+    <link rel="stylesheet" type="text/css" href="../../normalize.css">
     <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
+    
 
     
     
@@ -42,42 +44,36 @@
     </nav>
 
     <section id='main' class="content mod">
-<h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>xml</a>::<wbr><a class='mod' href=''>name</a></span><span class='out-of-band'><span id='render-detail'>
-            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
-                [<span class='inner'>&#x2212;</span>]
-            </a>
-        </span><a id='src-11' class='srclink' href='../../src/xml/name.rs.html#1-301' title='goto source code'>[src]</a></span></h1>
+<h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>xml</a>::<wbr><a class="mod" href=''>name</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a class='srclink' href='../../src/xml/name.rs.html#1-301' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Contains XML qualified names manipulation types and functions.</p>
 </div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
 <table>
-                    <tr class=' module-item'>
-                        <td><a class='struct' href='struct.Name.html'
-                               title='xml::name::Name'>Name</a></td>
-                        <td class='docblock short'>
-                             <p>Represents a qualified XML name.</p>
-
-                        </td>
-                    </tr>
-                
-                    <tr class=' module-item'>
-                        <td><a class='struct' href='struct.OwnedName.html'
-                               title='xml::name::OwnedName'>OwnedName</a></td>
-                        <td class='docblock short'>
-                             <p>An owned variant of <code>Name</code>.</p>
-
-                        </td>
-                    </tr>
-                
-                    <tr class=' module-item'>
-                        <td><a class='struct' href='struct.ReprDisplay.html'
-                               title='xml::name::ReprDisplay'>ReprDisplay</a></td>
-                        <td class='docblock short'>
-                             <p>A wrapper around <code>Name</code> whose <code>Display</code> implementation prints the wrapped name as it is
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.Name.html"
+                                  title='struct xml::name::Name'>Name</a></td>
+                           <td class='docblock-short'>
+                                <p>Represents a qualified XML name.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.OwnedName.html"
+                                  title='struct xml::name::OwnedName'>OwnedName</a></td>
+                           <td class='docblock-short'>
+                                <p>An owned variant of <code>Name</code>.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="struct" href="struct.ReprDisplay.html"
+                                  title='struct xml::name::ReprDisplay'>ReprDisplay</a></td>
+                           <td class='docblock-short'>
+                                <p>A wrapper around <code>Name</code> whose <code>Display</code> implementation prints the wrapped name as it is
 displayed in an XML document.</p>
-
-                        </td>
-                    </tr>
-                </table></section>
+                           </td>
+                       </tr></table></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>
@@ -100,6 +96,8 @@ displayed in an XML document.</p>
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 
@@ -120,7 +118,7 @@ displayed in an XML document.</p>
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>
@@ -131,11 +129,9 @@ displayed in an XML document.</p>
     <script>
         window.rootPath = "../../";
         window.currentCrate = "xml";
-        window.playgroundUrl = "";
     </script>
     <script src="../../jquery.js"></script>
     <script src="../../main.js"></script>
-    
     <script defer src="../../search-index.js"></script>
 </body>
 </html>

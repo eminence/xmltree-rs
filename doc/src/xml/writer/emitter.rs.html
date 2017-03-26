@@ -4,13 +4,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/storage/home/achin/.multirust/toolchains/nightly/cargo/registry/src/github.com-88ac128001ac3a9a/xml-rs-0.2.2/src/writer/emitter.rs`.">
+    <meta name="description" content="Source to the Rust file `/storage/home/achin/.cargo/registry/src/github.com-1ecc6299db9ec823/xml-rs-0.4.1/src/writer/emitter.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>emitter.rs.html -- source</title>
 
+    <link rel="stylesheet" type="text/css" href="../../../normalize.css">
     <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
 
     
     
@@ -468,431 +470,459 @@
 <span id="425">425</span>
 <span id="426">426</span>
 <span id="427">427</span>
-</pre><pre class='rust '>
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>prelude</span>::<span class='op'>*</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fmt</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>result</span>;
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>borrow</span>::<span class='ident'>Cow</span>;
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+</pre><pre class="rust ">
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fmt</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">result</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">borrow</span>::<span class="ident">Cow</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span>;
 
-<span class='kw'>use</span> <span class='ident'>common</span>;
-<span class='kw'>use</span> <span class='ident'>name</span>::{<span class='ident'>Name</span>, <span class='ident'>OwnedName</span>};
-<span class='kw'>use</span> <span class='ident'>attribute</span>::<span class='ident'>Attribute</span>;
-<span class='kw'>use</span> <span class='ident'>escape</span>::{<span class='ident'>escape_str_attribute</span>, <span class='ident'>escape_str_pcdata</span>};
-<span class='kw'>use</span> <span class='ident'>common</span>::<span class='ident'>XmlVersion</span>;
-<span class='kw'>use</span> <span class='ident'>namespace</span>::{<span class='ident'>NamespaceStack</span>, <span class='ident'>NS_NO_PREFIX</span>, <span class='ident'>NS_EMPTY_URI</span>, <span class='ident'>NS_XMLNS_PREFIX</span>, <span class='ident'>NS_XML_PREFIX</span>};
+<span class="kw">use</span> <span class="ident">common</span>;
+<span class="kw">use</span> <span class="ident">name</span>::{<span class="ident">Name</span>, <span class="ident">OwnedName</span>};
+<span class="kw">use</span> <span class="ident">attribute</span>::<span class="ident">Attribute</span>;
+<span class="kw">use</span> <span class="ident">escape</span>::{<span class="ident">escape_str_attribute</span>, <span class="ident">escape_str_pcdata</span>};
+<span class="kw">use</span> <span class="ident">common</span>::<span class="ident">XmlVersion</span>;
+<span class="kw">use</span> <span class="ident">namespace</span>::{<span class="ident">NamespaceStack</span>, <span class="ident">NS_NO_PREFIX</span>, <span class="ident">NS_EMPTY_URI</span>, <span class="ident">NS_XMLNS_PREFIX</span>, <span class="ident">NS_XML_PREFIX</span>};
 
-<span class='kw'>use</span> <span class='ident'>writer</span>::<span class='ident'>config</span>::<span class='ident'>EmitterConfig</span>;
+<span class="kw">use</span> <span class="ident">writer</span>::<span class="ident">config</span>::<span class="ident">EmitterConfig</span>;
 
-<span class='doccomment'>/// An error which may be returned by `XmlWriter` when writing XML events.</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Debug</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>EmitterError</span> {
-    <span class='doccomment'>/// An I/O error occured in the underlying `Write` instance.</span>
-    <span class='ident'>Io</span>(<span class='ident'>io</span>::<span class='ident'>Error</span>),
+<span class="doccomment">/// An error which may be returned by `XmlWriter` when writing XML events.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">EmitterError</span> {
+    <span class="doccomment">/// An I/O error occured in the underlying `Write` instance.</span>
+    <span class="ident">Io</span>(<span class="ident">io</span>::<span class="ident">Error</span>),
 
-    <span class='doccomment'>/// Document declaration has already been written to the output stream.</span>
-    <span class='ident'>DocumentStartAlreadyEmitted</span>,
+    <span class="doccomment">/// Document declaration has already been written to the output stream.</span>
+    <span class="ident">DocumentStartAlreadyEmitted</span>,
 
-    <span class='doccomment'>/// The name of the last opening element is not available.</span>
-    <span class='ident'>LastElementNameNotAvailable</span>,
+    <span class="doccomment">/// The name of the last opening element is not available.</span>
+    <span class="ident">LastElementNameNotAvailable</span>,
 
-    <span class='doccomment'>/// The name of the last opening element is not equal to the name of the provided</span>
-    <span class='doccomment'>/// closing element.</span>
-    <span class='ident'>EndElementNameIsNotEqualToLastStartElementName</span>,
+    <span class="doccomment">/// The name of the last opening element is not equal to the name of the provided</span>
+    <span class="doccomment">/// closing element.</span>
+    <span class="ident">EndElementNameIsNotEqualToLastStartElementName</span>,
 
-    <span class='doccomment'>/// End element name is not specified when it is needed, for example, when automatic</span>
-    <span class='doccomment'>/// closing is not enabled in configuration.</span>
-    <span class='ident'>EndElementNameIsNotSpecified</span>
+    <span class="doccomment">/// End element name is not specified when it is needed, for example, when automatic</span>
+    <span class="doccomment">/// closing is not enabled in configuration.</span>
+    <span class="ident">EndElementNameIsNotSpecified</span>
 }
 
-<span class='kw'>impl</span> <span class='ident'>From</span><span class='op'>&lt;</span><span class='ident'>io</span>::<span class='ident'>Error</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>EmitterError</span> {
-    <span class='kw'>fn</span> <span class='ident'>from</span>(<span class='ident'>err</span>: <span class='ident'>io</span>::<span class='ident'>Error</span>) <span class='op'>-&gt;</span> <span class='ident'>EmitterError</span> {
-        <span class='ident'>EmitterError</span>::<span class='ident'>Io</span>(<span class='ident'>err</span>)
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">io</span>::<span class="ident">Error</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">EmitterError</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">err</span>: <span class="ident">io</span>::<span class="ident">Error</span>) <span class="op">-&gt;</span> <span class="ident">EmitterError</span> {
+        <span class="ident">EmitterError</span>::<span class="ident">Io</span>(<span class="ident">err</span>)
     }
 }
 
-<span class='kw'>impl</span> <span class='ident'>fmt</span>::<span class='ident'>Display</span> <span class='kw'>for</span> <span class='ident'>EmitterError</span> {
-    <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
-        <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;emitter error: &quot;</span>));
-        <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span> {
-            <span class='ident'>EmitterError</span>::<span class='ident'>Io</span>(<span class='kw-2'>ref</span> <span class='ident'>e</span>) <span class='op'>=&gt;</span>
-                <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;I/O error: {}&quot;</span>, <span class='ident'>e</span>),
-            <span class='ident'>EmitterError</span>::<span class='ident'>DocumentStartAlreadyEmitted</span> <span class='op'>=&gt;</span>
-                <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;document start event has already been emitted&quot;</span>),
-            <span class='ident'>EmitterError</span>::<span class='ident'>LastElementNameNotAvailable</span> <span class='op'>=&gt;</span>
-                <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;last element name is not available&quot;</span>),
-            <span class='ident'>EmitterError</span>::<span class='ident'>EndElementNameIsNotEqualToLastStartElementName</span> <span class='op'>=&gt;</span>
-                <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;end element name is not equal to last start element name&quot;</span>),
-            <span class='ident'>EmitterError</span>::<span class='ident'>EndElementNameIsNotSpecified</span> <span class='op'>=&gt;</span>
-                <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;end element name is not specified and can&#39;t be inferred&quot;</span>)
+<span class="kw">impl</span> <span class="ident">fmt</span>::<span class="ident">Display</span> <span class="kw">for</span> <span class="ident">EmitterError</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span>) <span class="op">-&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
+        <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span>;
+
+        <span class="macro">try</span><span class="macro">!</span>(<span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;emitter error: &quot;</span>));
+        <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
+            <span class="ident">EmitterError</span>::<span class="ident">Io</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) <span class="op">=&gt;</span>
+                <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;I/O error: {}&quot;</span>, <span class="ident">e</span>),
+            <span class="kw-2">ref</span> <span class="ident">other</span> <span class="op">=&gt;</span>
+                <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">other</span>.<span class="ident">description</span>()),
         }
     }
 }
 
-<span class='doccomment'>/// A result type yielded by `XmlWriter`.</span>
-<span class='kw'>pub</span> <span class='kw'>type</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>result</span>::<span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>T</span>, <span class='ident'>EmitterError</span><span class='op'>&gt;</span>;
-
-<span class='comment'>// TODO: split into a low-level fast writer without any checks and formatting logic and a</span>
-<span class='comment'>// high-level indenting validating writer</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Emitter</span> {
-    <span class='ident'>config</span>: <span class='ident'>EmitterConfig</span>,
-
-    <span class='ident'>nst</span>: <span class='ident'>NamespaceStack</span>,
-
-    <span class='ident'>indent_level</span>: <span class='ident'>usize</span>,
-    <span class='ident'>indent_stack</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>IndentFlags</span><span class='op'>&gt;</span>,
-
-    <span class='ident'>element_names</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>OwnedName</span><span class='op'>&gt;</span>,
-
-    <span class='ident'>start_document_emitted</span>: <span class='ident'>bool</span>,
-    <span class='ident'>just_wrote_start_element</span>: <span class='ident'>bool</span>
-}
-
-<span class='kw'>impl</span> <span class='ident'>Emitter</span> {
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>(<span class='ident'>config</span>: <span class='ident'>EmitterConfig</span>) <span class='op'>-&gt;</span> <span class='ident'>Emitter</span> {
-        <span class='ident'>Emitter</span> {
-            <span class='ident'>config</span>: <span class='ident'>config</span>,
-
-            <span class='ident'>nst</span>: <span class='ident'>NamespaceStack</span>::<span class='ident'>empty</span>(),
-
-            <span class='ident'>indent_level</span>: <span class='number'>0</span>,
-            <span class='ident'>indent_stack</span>: <span class='macro'>vec</span><span class='macro'>!</span>(<span class='ident'>IndentFlags</span>::<span class='ident'>empty</span>()),
-
-            <span class='ident'>element_names</span>: <span class='ident'>Vec</span>::<span class='ident'>new</span>(),
-
-            <span class='ident'>start_document_emitted</span>: <span class='boolval'>false</span>,
-            <span class='ident'>just_wrote_start_element</span>: <span class='boolval'>false</span>
+<span class="kw">impl</span> <span class="ident">Error</span> <span class="kw">for</span> <span class="ident">EmitterError</span> {
+    <span class="kw">fn</span> <span class="ident">description</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="ident">str</span> {
+        <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
+            <span class="ident">EmitterError</span>::<span class="ident">Io</span>(_) <span class="op">=&gt;</span>
+                <span class="string">&quot;I/O error&quot;</span>,
+            <span class="ident">EmitterError</span>::<span class="ident">DocumentStartAlreadyEmitted</span> <span class="op">=&gt;</span>
+                <span class="string">&quot;document start event has already been emitted&quot;</span>,
+            <span class="ident">EmitterError</span>::<span class="ident">LastElementNameNotAvailable</span> <span class="op">=&gt;</span>
+                <span class="string">&quot;last element name is not available&quot;</span>,
+            <span class="ident">EmitterError</span>::<span class="ident">EndElementNameIsNotEqualToLastStartElementName</span> <span class="op">=&gt;</span>
+                <span class="string">&quot;end element name is not equal to last start element name&quot;</span>,
+            <span class="ident">EmitterError</span>::<span class="ident">EndElementNameIsNotSpecified</span> <span class="op">=&gt;</span>
+                <span class="string">&quot;end element name is not specified and can&#39;t be inferred&quot;</span>,
         }
     }
 }
 
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>try_chain</span>(
-    (<span class='ident'>ok_unit</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> ({<span class='macro'>try</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>); <span class='prelude-val'>Ok</span>(())});
-    (<span class='ident'>ignore</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> (<span class='macro'>try</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>));
-    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> (<span class='prelude-val'>Ok</span>(<span class='macro'>try</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>)));
-    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>:<span class='ident'>expr</span>, $(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rest</span>:<span class='ident'>tt</span>)<span class='op'>*</span>) <span class='op'>=&gt;</span> ({
-        <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>e</span>);
-        <span class='macro'>try_chain</span><span class='macro'>!</span>($(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>rest</span>)<span class='op'>*</span>)
+<span class="doccomment">/// A result type yielded by `XmlWriter`.</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">result</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">EmitterError</span><span class="op">&gt;</span>;
+
+<span class="comment">// TODO: split into a low-level fast writer without any checks and formatting logic and a</span>
+<span class="comment">// high-level indenting validating writer</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Emitter</span> {
+    <span class="ident">config</span>: <span class="ident">EmitterConfig</span>,
+
+    <span class="ident">nst</span>: <span class="ident">NamespaceStack</span>,
+
+    <span class="ident">indent_level</span>: <span class="ident">usize</span>,
+    <span class="ident">indent_stack</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">IndentFlags</span><span class="op">&gt;</span>,
+
+    <span class="ident">element_names</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">OwnedName</span><span class="op">&gt;</span>,
+
+    <span class="ident">start_document_emitted</span>: <span class="ident">bool</span>,
+    <span class="ident">just_wrote_start_element</span>: <span class="ident">bool</span>
+}
+
+<span class="kw">impl</span> <span class="ident">Emitter</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">config</span>: <span class="ident">EmitterConfig</span>) <span class="op">-&gt;</span> <span class="ident">Emitter</span> {
+        <span class="ident">Emitter</span> {
+            <span class="ident">config</span>: <span class="ident">config</span>,
+
+            <span class="ident">nst</span>: <span class="ident">NamespaceStack</span>::<span class="ident">empty</span>(),
+
+            <span class="ident">indent_level</span>: <span class="number">0</span>,
+            <span class="ident">indent_stack</span>: <span class="macro">vec</span><span class="macro">!</span>(<span class="ident">IndentFlags</span>::<span class="ident">empty</span>()),
+
+            <span class="ident">element_names</span>: <span class="ident">Vec</span>::<span class="ident">new</span>(),
+
+            <span class="ident">start_document_emitted</span>: <span class="bool-val">false</span>,
+            <span class="ident">just_wrote_start_element</span>: <span class="bool-val">false</span>
+        }
+    }
+}
+
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">try_chain</span>(
+    (<span class="ident">ok_unit</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>:<span class="ident">expr</span>) <span class="op">=&gt;</span> ({<span class="macro">try</span><span class="macro">!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>); <span class="prelude-val">Ok</span>(())});
+    (<span class="ident">ignore</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>:<span class="ident">expr</span>) <span class="op">=&gt;</span> (<span class="macro">try</span><span class="macro">!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>));
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>:<span class="ident">expr</span>) <span class="op">=&gt;</span> (<span class="prelude-val">Ok</span>(<span class="macro">try</span><span class="macro">!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>)));
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>:<span class="ident">expr</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="kw-2">*</span>) <span class="op">=&gt;</span> ({
+        <span class="macro">try</span><span class="macro">!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>);
+        <span class="macro">try_chain</span><span class="macro">!</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>)<span class="kw-2">*</span>)
     })
 );
 
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>wrapped_with</span>(
-    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>_self</span>:<span class='ident'>ident</span>; <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>before_name</span>:<span class='ident'>ident</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>arg</span>:<span class='ident'>expr</span>) <span class='ident'>and</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>after_name</span>:<span class='ident'>ident</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>body</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> ({
-        <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>_self</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>before_name</span>(<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>arg</span>));
-        <span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>body</span>;
-        <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>_self</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>after_name</span>();
-        <span class='ident'>result</span>
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">wrapped_with</span>(
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">_self</span>:<span class="ident">ident</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">before_name</span>:<span class="ident">ident</span> (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>:<span class="ident">expr</span>) <span class="ident">and</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">after_name</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">body</span>:<span class="ident">expr</span>) <span class="op">=&gt;</span> ({
+        <span class="macro">try</span><span class="macro">!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">_self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">before_name</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>));
+        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">body</span>;
+        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">_self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">after_name</span>();
+        <span class="ident">result</span>
     })
 );
 
-<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>if_present</span>(
-    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>opt</span>:<span class='ident'>ident</span>, <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>body</span>:<span class='ident'>expr</span>) <span class='op'>=&gt;</span> (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>opt</span>.<span class='ident'>map</span>(<span class='op'>|</span><span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>opt</span><span class='op'>|</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>body</span>).<span class='ident'>unwrap_or</span>(<span class='prelude-val'>Ok</span>(())))
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">if_present</span>(
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">opt</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">body</span>:<span class="ident">expr</span>) <span class="op">=&gt;</span> (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">opt</span>.<span class="ident">map</span>(<span class="op">|</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">opt</span><span class="op">|</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">body</span>).<span class="ident">unwrap_or</span>(<span class="prelude-val">Ok</span>(())))
 );
 
-<span class='macro'>bitflags</span><span class='macro'>!</span>(
-    <span class='ident'>flags</span> <span class='ident'>IndentFlags</span>: <span class='ident'>u8</span> {
-        <span class='kw'>const</span> <span class='ident'>WROTE_NOTHING</span> <span class='op'>=</span> <span class='number'>0</span>,
-        <span class='kw'>const</span> <span class='ident'>WROTE_MARKUP</span>  <span class='op'>=</span> <span class='number'>1</span>,
-        <span class='kw'>const</span> <span class='ident'>WROTE_TEXT</span>    <span class='op'>=</span> <span class='number'>2</span>
+<span class="macro">bitflags</span><span class="macro">!</span>(
+    <span class="ident">flags</span> <span class="ident">IndentFlags</span>: <span class="ident">u8</span> {
+        <span class="kw">const</span> <span class="ident">WROTE_NOTHING</span> <span class="op">=</span> <span class="number">0</span>,
+        <span class="kw">const</span> <span class="ident">WROTE_MARKUP</span>  <span class="op">=</span> <span class="number">1</span>,
+        <span class="kw">const</span> <span class="ident">WROTE_TEXT</span>    <span class="op">=</span> <span class="number">2</span>
     }
 );
 
-<span class='kw'>impl</span> <span class='ident'>Emitter</span> {
-    <span class='doccomment'>/// Returns the current state of namespaces.</span>
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>namespace_stack_mut</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>NamespaceStack</span> {
-        <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>.<span class='ident'>nst</span>
+<span class="kw">impl</span> <span class="ident">Emitter</span> {
+    <span class="doccomment">/// Returns the current state of namespaces.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">namespace_stack_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">NamespaceStack</span> {
+        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">nst</span>
     }
 
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>wrote_text</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
-        <span class='self'>self</span>.<span class='ident'>indent_stack</span>.<span class='ident'>last</span>().<span class='ident'>unwrap</span>().<span class='ident'>contains</span>(<span class='ident'>WROTE_TEXT</span>)
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">wrote_text</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">indent_stack</span>.<span class="ident">last</span>().<span class="ident">unwrap</span>().<span class="ident">contains</span>(<span class="ident">WROTE_TEXT</span>)
     }
 
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>wrote_markup</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
-        <span class='self'>self</span>.<span class='ident'>indent_stack</span>.<span class='ident'>last</span>().<span class='ident'>unwrap</span>().<span class='ident'>contains</span>(<span class='ident'>WROTE_MARKUP</span>)
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">wrote_markup</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">indent_stack</span>.<span class="ident">last</span>().<span class="ident">unwrap</span>().<span class="ident">contains</span>(<span class="ident">WROTE_MARKUP</span>)
     }
 
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>set_wrote_text</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
-        <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>indent_stack</span>.<span class='ident'>last_mut</span>().<span class='ident'>unwrap</span>() <span class='op'>=</span> <span class='ident'>WROTE_TEXT</span>;
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">set_wrote_text</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">indent_stack</span>.<span class="ident">last_mut</span>().<span class="ident">unwrap</span>() <span class="op">=</span> <span class="ident">WROTE_TEXT</span>;
     }
 
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>set_wrote_markup</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
-        <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>indent_stack</span>.<span class='ident'>last_mut</span>().<span class='ident'>unwrap</span>() <span class='op'>=</span> <span class='ident'>WROTE_MARKUP</span>;
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">set_wrote_markup</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">indent_stack</span>.<span class="ident">last_mut</span>().<span class="ident">unwrap</span>() <span class="op">=</span> <span class="ident">WROTE_MARKUP</span>;
     }
 
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>reset_state</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
-        <span class='op'>*</span><span class='self'>self</span>.<span class='ident'>indent_stack</span>.<span class='ident'>last_mut</span>().<span class='ident'>unwrap</span>() <span class='op'>=</span> <span class='ident'>WROTE_NOTHING</span>;
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">reset_state</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">indent_stack</span>.<span class="ident">last_mut</span>().<span class="ident">unwrap</span>() <span class="op">=</span> <span class="ident">WROTE_NOTHING</span>;
     }
 
-    <span class='kw'>fn</span> <span class='ident'>write_newline</span><span class='op'>&lt;</span><span class='ident'>W</span>: <span class='ident'>Write</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>, <span class='ident'>level</span>: <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>target</span>.<span class='ident'>write</span>(<span class='self'>self</span>.<span class='ident'>config</span>.<span class='ident'>line_separator</span>.<span class='ident'>as_bytes</span>()));
-        <span class='kw'>for</span> _ <span class='kw'>in</span> <span class='number'>0</span>..<span class='ident'>level</span> {
-            <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>target</span>.<span class='ident'>write</span>(<span class='self'>self</span>.<span class='ident'>config</span>.<span class='ident'>indent_string</span>.<span class='ident'>as_bytes</span>()));
+    <span class="kw">fn</span> <span class="ident">write_newline</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">Write</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>, <span class="ident">level</span>: <span class="ident">usize</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="macro">try</span><span class="macro">!</span>(<span class="ident">target</span>.<span class="ident">write</span>(<span class="self">self</span>.<span class="ident">config</span>.<span class="ident">line_separator</span>.<span class="ident">as_bytes</span>()));
+        <span class="kw">for</span> _ <span class="kw">in</span> <span class="number">0</span>..<span class="ident">level</span> {
+            <span class="macro">try</span><span class="macro">!</span>(<span class="ident">target</span>.<span class="ident">write</span>(<span class="self">self</span>.<span class="ident">config</span>.<span class="ident">indent_string</span>.<span class="ident">as_bytes</span>()));
         }
-        <span class='prelude-val'>Ok</span>(())
+        <span class="prelude-val">Ok</span>(())
     }
 
-    <span class='kw'>fn</span> <span class='ident'>before_markup</span><span class='op'>&lt;</span><span class='ident'>W</span>: <span class='ident'>Write</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>config</span>.<span class='ident'>perform_indent</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>wrote_text</span>() <span class='op'>&amp;&amp;</span>
-           (<span class='self'>self</span>.<span class='ident'>indent_level</span> <span class='op'>&gt;</span> <span class='number'>0</span> <span class='op'>||</span> <span class='self'>self</span>.<span class='ident'>wrote_markup</span>()) {
-            <span class='kw'>let</span> <span class='ident'>indent_level</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>indent_level</span>;
-            <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>write_newline</span>(<span class='ident'>target</span>, <span class='ident'>indent_level</span>));
-            <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>indent_level</span> <span class='op'>&gt;</span> <span class='number'>0</span> <span class='op'>&amp;&amp;</span> <span class='self'>self</span>.<span class='ident'>config</span>.<span class='ident'>indent_string</span>.<span class='ident'>len</span>() <span class='op'>&gt;</span> <span class='number'>0</span> {
-                <span class='self'>self</span>.<span class='ident'>after_markup</span>();
+    <span class="kw">fn</span> <span class="ident">before_markup</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">Write</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">perform_indent</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">wrote_text</span>() <span class="op">&amp;&amp;</span>
+           (<span class="self">self</span>.<span class="ident">indent_level</span> <span class="op">&gt;</span> <span class="number">0</span> <span class="op">||</span> <span class="self">self</span>.<span class="ident">wrote_markup</span>()) {
+            <span class="kw">let</span> <span class="ident">indent_level</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">indent_level</span>;
+            <span class="macro">try</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">write_newline</span>(<span class="ident">target</span>, <span class="ident">indent_level</span>));
+            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">indent_level</span> <span class="op">&gt;</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">indent_string</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="number">0</span> {
+                <span class="self">self</span>.<span class="ident">after_markup</span>();
             }
         }
-        <span class='prelude-val'>Ok</span>(())
+        <span class="prelude-val">Ok</span>(())
     }
 
-    <span class='kw'>fn</span> <span class='ident'>after_markup</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
-        <span class='self'>self</span>.<span class='ident'>set_wrote_markup</span>();
+    <span class="kw">fn</span> <span class="ident">after_markup</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="self">self</span>.<span class="ident">set_wrote_markup</span>();
     }
 
-    <span class='kw'>fn</span> <span class='ident'>before_start_element</span><span class='op'>&lt;</span><span class='ident'>W</span>: <span class='ident'>Write</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>before_markup</span>(<span class='ident'>target</span>));
-        <span class='self'>self</span>.<span class='ident'>indent_stack</span>.<span class='ident'>push</span>(<span class='ident'>WROTE_NOTHING</span>);
-        <span class='prelude-val'>Ok</span>(())
+    <span class="kw">fn</span> <span class="ident">before_start_element</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">Write</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="macro">try</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">before_markup</span>(<span class="ident">target</span>));
+        <span class="self">self</span>.<span class="ident">indent_stack</span>.<span class="ident">push</span>(<span class="ident">WROTE_NOTHING</span>);
+        <span class="prelude-val">Ok</span>(())
     }
 
-    <span class='kw'>fn</span> <span class='ident'>after_start_element</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
-        <span class='self'>self</span>.<span class='ident'>after_markup</span>();
-        <span class='self'>self</span>.<span class='ident'>indent_level</span> <span class='op'>+=</span> <span class='number'>1</span>;
+    <span class="kw">fn</span> <span class="ident">after_start_element</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="self">self</span>.<span class="ident">after_markup</span>();
+        <span class="self">self</span>.<span class="ident">indent_level</span> <span class="op">+=</span> <span class="number">1</span>;
     }
 
-    <span class='kw'>fn</span> <span class='ident'>before_end_element</span><span class='op'>&lt;</span><span class='ident'>W</span>: <span class='ident'>Write</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>config</span>.<span class='ident'>perform_indent</span> <span class='op'>&amp;&amp;</span> <span class='self'>self</span>.<span class='ident'>indent_level</span> <span class='op'>&gt;</span> <span class='number'>0</span> <span class='op'>&amp;&amp;</span> <span class='self'>self</span>.<span class='ident'>wrote_markup</span>() <span class='op'>&amp;&amp;</span>
-           <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>wrote_text</span>() {
-            <span class='kw'>let</span> <span class='ident'>indent_level</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>indent_level</span>;
-            <span class='self'>self</span>.<span class='ident'>write_newline</span>(<span class='ident'>target</span>, <span class='ident'>indent_level</span> <span class='op'>-</span> <span class='number'>1</span>)
-        } <span class='kw'>else</span> {
-            <span class='prelude-val'>Ok</span>(())
+    <span class="kw">fn</span> <span class="ident">before_end_element</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">Write</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">perform_indent</span> <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">indent_level</span> <span class="op">&gt;</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">wrote_markup</span>() <span class="op">&amp;&amp;</span>
+           <span class="op">!</span><span class="self">self</span>.<span class="ident">wrote_text</span>() {
+            <span class="kw">let</span> <span class="ident">indent_level</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">indent_level</span>;
+            <span class="self">self</span>.<span class="ident">write_newline</span>(<span class="ident">target</span>, <span class="ident">indent_level</span> <span class="op">-</span> <span class="number">1</span>)
+        } <span class="kw">else</span> {
+            <span class="prelude-val">Ok</span>(())
         }
     }
 
-    <span class='kw'>fn</span> <span class='ident'>after_end_element</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>indent_level</span> <span class='op'>&gt;</span> <span class='number'>0</span> {
-            <span class='self'>self</span>.<span class='ident'>indent_level</span> <span class='op'>-=</span> <span class='number'>1</span>;
-            <span class='self'>self</span>.<span class='ident'>indent_stack</span>.<span class='ident'>pop</span>();
+    <span class="kw">fn</span> <span class="ident">after_end_element</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">indent_level</span> <span class="op">&gt;</span> <span class="number">0</span> {
+            <span class="self">self</span>.<span class="ident">indent_level</span> <span class="op">-=</span> <span class="number">1</span>;
+            <span class="self">self</span>.<span class="ident">indent_stack</span>.<span class="ident">pop</span>();
         }
-        <span class='self'>self</span>.<span class='ident'>set_wrote_markup</span>();
+        <span class="self">self</span>.<span class="ident">set_wrote_markup</span>();
     }
 
-    <span class='kw'>fn</span> <span class='ident'>after_text</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) {
-        <span class='self'>self</span>.<span class='ident'>set_wrote_text</span>();
+    <span class="kw">fn</span> <span class="ident">after_text</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="self">self</span>.<span class="ident">set_wrote_text</span>();
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>emit_start_document</span><span class='op'>&lt;</span><span class='ident'>W</span>: <span class='ident'>Write</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>,
-                                         <span class='ident'>version</span>: <span class='ident'>XmlVersion</span>,
-                                         <span class='ident'>encoding</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>,
-                                         <span class='ident'>standalone</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>bool</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>start_document_emitted</span> {
-            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EmitterError</span>::<span class='ident'>DocumentStartAlreadyEmitted</span>);
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">emit_start_document</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">Write</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>,
+                                         <span class="ident">version</span>: <span class="ident">XmlVersion</span>,
+                                         <span class="ident">encoding</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+                                         <span class="ident">standalone</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">start_document_emitted</span> {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">EmitterError</span>::<span class="ident">DocumentStartAlreadyEmitted</span>);
         }
-        <span class='self'>self</span>.<span class='ident'>start_document_emitted</span> <span class='op'>=</span> <span class='boolval'>true</span>;
+        <span class="self">self</span>.<span class="ident">start_document_emitted</span> <span class="op">=</span> <span class="bool-val">true</span>;
 
-        <span class='macro'>wrapped_with</span><span class='macro'>!</span>(<span class='self'>self</span>; <span class='ident'>before_markup</span>(<span class='ident'>target</span>) <span class='ident'>and</span> <span class='ident'>after_markup</span>,
-            <span class='macro'>try_chain</span><span class='macro'>!</span> {
-                <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>target</span>, <span class='string'>&quot;&lt;?xml version=\&quot;{}\&quot; encoding=\&quot;{}\&quot;&quot;</span>, <span class='ident'>version</span>, <span class='ident'>encoding</span>),
+        <span class="macro">wrapped_with</span><span class="macro">!</span>(<span class="self">self</span>; <span class="ident">before_markup</span>(<span class="ident">target</span>) <span class="ident">and</span> <span class="ident">after_markup</span>,
+            <span class="macro">try_chain</span><span class="macro">!</span> {
+                <span class="macro">write</span><span class="macro">!</span>(<span class="ident">target</span>, <span class="string">&quot;&lt;?xml version=\&quot;{}\&quot; encoding=\&quot;{}\&quot;&quot;</span>, <span class="ident">version</span>, <span class="ident">encoding</span>),
 
-                <span class='macro'>if_present</span><span class='macro'>!</span>(<span class='ident'>standalone</span>,
-                            <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>target</span>, <span class='string'>&quot; standalone=\&quot;{}\&quot;&quot;</span>,
-                                   <span class='kw'>if</span> <span class='ident'>standalone</span> { <span class='string'>&quot;yes&quot;</span> } <span class='kw'>else</span> { <span class='string'>&quot;no&quot;</span> })),
+                <span class="macro">if_present</span><span class="macro">!</span>(<span class="ident">standalone</span>,
+                            <span class="macro">write</span><span class="macro">!</span>(<span class="ident">target</span>, <span class="string">&quot; standalone=\&quot;{}\&quot;&quot;</span>,
+                                   <span class="kw">if</span> <span class="ident">standalone</span> { <span class="string">&quot;yes&quot;</span> } <span class="kw">else</span> { <span class="string">&quot;no&quot;</span> })),
 
-                <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>target</span>, <span class='string'>&quot;?&gt;&quot;</span>)
+                <span class="macro">write</span><span class="macro">!</span>(<span class="ident">target</span>, <span class="string">&quot;?&gt;&quot;</span>)
             }
         )
     }
 
-    <span class='kw'>fn</span> <span class='ident'>check_document_started</span><span class='op'>&lt;</span><span class='ident'>W</span>: <span class='ident'>Write</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='kw'>if</span> <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>start_document_emitted</span> <span class='op'>&amp;&amp;</span> <span class='self'>self</span>.<span class='ident'>config</span>.<span class='ident'>write_document_declaration</span> {
-            <span class='self'>self</span>.<span class='ident'>emit_start_document</span>(<span class='ident'>target</span>, <span class='ident'>common</span>::<span class='ident'>XmlVersion</span>::<span class='ident'>Version10</span>, <span class='string'>&quot;utf-8&quot;</span>, <span class='prelude-val'>None</span>)
-        } <span class='kw'>else</span> {
-            <span class='prelude-val'>Ok</span>(())
+    <span class="kw">fn</span> <span class="ident">check_document_started</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">Write</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">start_document_emitted</span> <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">write_document_declaration</span> {
+            <span class="self">self</span>.<span class="ident">emit_start_document</span>(<span class="ident">target</span>, <span class="ident">common</span>::<span class="ident">XmlVersion</span>::<span class="ident">Version10</span>, <span class="string">&quot;utf-8&quot;</span>, <span class="prelude-val">None</span>)
+        } <span class="kw">else</span> {
+            <span class="prelude-val">Ok</span>(())
         }
     }
 
-    <span class='kw'>fn</span> <span class='ident'>fix_non_empty_element</span><span class='op'>&lt;</span><span class='ident'>W</span>: <span class='ident'>Write</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>config</span>.<span class='ident'>normalize_empty_elements</span> <span class='op'>&amp;&amp;</span> <span class='self'>self</span>.<span class='ident'>just_wrote_start_element</span> {
-            <span class='self'>self</span>.<span class='ident'>just_wrote_start_element</span> <span class='op'>=</span> <span class='boolval'>false</span>;
-            <span class='ident'>target</span>.<span class='ident'>write</span>(<span class='string'>b&quot;&gt;&quot;</span>).<span class='ident'>map</span>(<span class='op'>|</span>_<span class='op'>|</span> ()).<span class='ident'>map_err</span>(<span class='ident'>From</span>::<span class='ident'>from</span>)
-        } <span class='kw'>else</span> {
-            <span class='prelude-val'>Ok</span>(())
+    <span class="kw">fn</span> <span class="ident">fix_non_empty_element</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">Write</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">normalize_empty_elements</span> <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">just_wrote_start_element</span> {
+            <span class="self">self</span>.<span class="ident">just_wrote_start_element</span> <span class="op">=</span> <span class="bool-val">false</span>;
+            <span class="ident">target</span>.<span class="ident">write</span>(<span class="string">b&quot;&gt;&quot;</span>).<span class="ident">map</span>(<span class="op">|</span>_<span class="op">|</span> ()).<span class="ident">map_err</span>(<span class="ident">From</span>::<span class="ident">from</span>)
+        } <span class="kw">else</span> {
+            <span class="prelude-val">Ok</span>(())
         }
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>emit_processing_instruction</span><span class='op'>&lt;</span><span class='ident'>W</span>: <span class='ident'>Write</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>,
-                                                 <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>,
-                                                 <span class='ident'>name</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>,
-                                                 <span class='ident'>data</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='ident'>str</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>check_document_started</span>(<span class='ident'>target</span>));
-        <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>fix_non_empty_element</span>(<span class='ident'>target</span>));
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">emit_processing_instruction</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">Write</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+                                                 <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>,
+                                                 <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+                                                 <span class="ident">data</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="macro">try</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">check_document_started</span>(<span class="ident">target</span>));
+        <span class="macro">try</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">fix_non_empty_element</span>(<span class="ident">target</span>));
 
-        <span class='macro'>wrapped_with</span><span class='macro'>!</span>(<span class='self'>self</span>; <span class='ident'>before_markup</span>(<span class='ident'>target</span>) <span class='ident'>and</span> <span class='ident'>after_markup</span>,
-            <span class='macro'>try_chain</span><span class='macro'>!</span> {
-                <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>target</span>, <span class='string'>&quot;&lt;?{}&quot;</span>, <span class='ident'>name</span>),
-                <span class='macro'>if_present</span><span class='macro'>!</span>(<span class='ident'>data</span>, <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>target</span>, <span class='string'>&quot; {}&quot;</span>, <span class='ident'>data</span>)),
-                <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>target</span>, <span class='string'>&quot;?&gt;&quot;</span>)
+        <span class="macro">wrapped_with</span><span class="macro">!</span>(<span class="self">self</span>; <span class="ident">before_markup</span>(<span class="ident">target</span>) <span class="ident">and</span> <span class="ident">after_markup</span>,
+            <span class="macro">try_chain</span><span class="macro">!</span> {
+                <span class="macro">write</span><span class="macro">!</span>(<span class="ident">target</span>, <span class="string">&quot;&lt;?{}&quot;</span>, <span class="ident">name</span>),
+                <span class="macro">if_present</span><span class="macro">!</span>(<span class="ident">data</span>, <span class="macro">write</span><span class="macro">!</span>(<span class="ident">target</span>, <span class="string">&quot; {}&quot;</span>, <span class="ident">data</span>)),
+                <span class="macro">write</span><span class="macro">!</span>(<span class="ident">target</span>, <span class="string">&quot;?&gt;&quot;</span>)
             }
         )
     }
 
-    <span class='kw'>fn</span> <span class='ident'>emit_start_element_initial</span><span class='op'>&lt;</span><span class='ident'>W</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>,
-                                     <span class='ident'>name</span>: <span class='ident'>Name</span>,
-                                     <span class='ident'>attributes</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>Attribute</span>]) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span>
-        <span class='kw'>where</span> <span class='ident'>W</span>: <span class='ident'>Write</span>
+    <span class="kw">fn</span> <span class="ident">emit_start_element_initial</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>,
+                                     <span class="ident">name</span>: <span class="ident">Name</span>,
+                                     <span class="ident">attributes</span>: <span class="kw-2">&amp;</span>[<span class="ident">Attribute</span>]) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
+        <span class="kw">where</span> <span class="ident">W</span>: <span class="ident">Write</span>
     {
-        <span class='macro'>try_chain</span><span class='macro'>!</span> {
-            <span class='self'>self</span>.<span class='ident'>check_document_started</span>(<span class='ident'>target</span>),
-            <span class='self'>self</span>.<span class='ident'>fix_non_empty_element</span>(<span class='ident'>target</span>),
-            <span class='self'>self</span>.<span class='ident'>before_start_element</span>(<span class='ident'>target</span>),
-            <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>target</span>, <span class='string'>&quot;&lt;{}&quot;</span>, <span class='ident'>name</span>.<span class='ident'>repr_display</span>()),
-            <span class='self'>self</span>.<span class='ident'>emit_current_namespace_attributes</span>(<span class='ident'>target</span>),
-            <span class='ident'>ignore</span> <span class='self'>self</span>.<span class='ident'>emit_attributes</span>(<span class='ident'>target</span>, <span class='ident'>attributes</span>)
+        <span class="macro">try_chain</span><span class="macro">!</span> {
+            <span class="self">self</span>.<span class="ident">check_document_started</span>(<span class="ident">target</span>),
+            <span class="self">self</span>.<span class="ident">fix_non_empty_element</span>(<span class="ident">target</span>),
+            <span class="self">self</span>.<span class="ident">before_start_element</span>(<span class="ident">target</span>),
+            <span class="macro">write</span><span class="macro">!</span>(<span class="ident">target</span>, <span class="string">&quot;&lt;{}&quot;</span>, <span class="ident">name</span>.<span class="ident">repr_display</span>()),
+            <span class="self">self</span>.<span class="ident">emit_current_namespace_attributes</span>(<span class="ident">target</span>),
+            <span class="ident">ignore</span> <span class="self">self</span>.<span class="ident">emit_attributes</span>(<span class="ident">target</span>, <span class="ident">attributes</span>)
         }
-        <span class='self'>self</span>.<span class='ident'>after_start_element</span>();
-        <span class='prelude-val'>Ok</span>(())
+        <span class="self">self</span>.<span class="ident">after_start_element</span>();
+        <span class="prelude-val">Ok</span>(())
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>emit_start_element</span><span class='op'>&lt;</span><span class='ident'>W</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>,
-                                 <span class='ident'>name</span>: <span class='ident'>Name</span>,
-                                 <span class='ident'>attributes</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>Attribute</span>]) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span>
-        <span class='kw'>where</span> <span class='ident'>W</span>: <span class='ident'>Write</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">emit_start_element</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>,
+                                 <span class="ident">name</span>: <span class="ident">Name</span>,
+                                 <span class="ident">attributes</span>: <span class="kw-2">&amp;</span>[<span class="ident">Attribute</span>]) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
+        <span class="kw">where</span> <span class="ident">W</span>: <span class="ident">Write</span>
     {
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>config</span>.<span class='ident'>keep_element_names_stack</span> {
-            <span class='self'>self</span>.<span class='ident'>element_names</span>.<span class='ident'>push</span>(<span class='ident'>name</span>.<span class='ident'>to_owned</span>());
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">keep_element_names_stack</span> {
+            <span class="self">self</span>.<span class="ident">element_names</span>.<span class="ident">push</span>(<span class="ident">name</span>.<span class="ident">to_owned</span>());
         }
-        <span class='macro'>try_chain</span><span class='macro'>!</span> {
-            <span class='self'>self</span>.<span class='ident'>emit_start_element_initial</span>(<span class='ident'>target</span>, <span class='ident'>name</span>, <span class='ident'>attributes</span>),
+        <span class="macro">try_chain</span><span class="macro">!</span> {
+            <span class="self">self</span>.<span class="ident">emit_start_element_initial</span>(<span class="ident">target</span>, <span class="ident">name</span>, <span class="ident">attributes</span>),
             {
-                <span class='self'>self</span>.<span class='ident'>just_wrote_start_element</span> <span class='op'>=</span> <span class='boolval'>true</span>;
-                <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>config</span>.<span class='ident'>normalize_empty_elements</span> { <span class='prelude-val'>Ok</span>(()) }
-                <span class='kw'>else</span> { <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>target</span>, <span class='string'>&quot;&gt;&quot;</span>) }
+                <span class="self">self</span>.<span class="ident">just_wrote_start_element</span> <span class="op">=</span> <span class="bool-val">true</span>;
+                <span class="kw">if</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">normalize_empty_elements</span> { <span class="prelude-val">Ok</span>(()) }
+                <span class="kw">else</span> { <span class="macro">write</span><span class="macro">!</span>(<span class="ident">target</span>, <span class="string">&quot;&gt;&quot;</span>) }
             }
         }
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>emit_current_namespace_attributes</span><span class='op'>&lt;</span><span class='ident'>W</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span>
-        <span class='kw'>where</span> <span class='ident'>W</span>: <span class='ident'>Write</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">emit_current_namespace_attributes</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
+        <span class="kw">where</span> <span class="ident">W</span>: <span class="ident">Write</span>
     {
-        <span class='kw'>for</span> (<span class='ident'>prefix</span>, <span class='ident'>uri</span>) <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>nst</span>.<span class='ident'>peek</span>() {
-            <span class='macro'>try</span><span class='macro'>!</span>(<span class='kw'>match</span> <span class='ident'>prefix</span> {
-                <span class='comment'>// internal namespaces are not emitted</span>
-                <span class='ident'>NS_XMLNS_PREFIX</span> <span class='op'>|</span> <span class='ident'>NS_XML_PREFIX</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(()),
-                <span class='comment'>//// there is already a namespace binding with this prefix in scope</span>
-                <span class='comment'>//prefix if self.nst.get(prefix) == Some(uri) =&gt; Ok(()),</span>
-                <span class='comment'>// emit xmlns only if it is overridden</span>
-                <span class='ident'>NS_NO_PREFIX</span> <span class='op'>=&gt;</span> <span class='kw'>if</span> <span class='ident'>uri</span> <span class='op'>!=</span> <span class='ident'>NS_EMPTY_URI</span> {
-                    <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>target</span>, <span class='string'>&quot; xmlns=\&quot;{}\&quot;&quot;</span>, <span class='ident'>uri</span>)
-                } <span class='kw'>else</span> { <span class='prelude-val'>Ok</span>(()) },
-                <span class='comment'>// everything else</span>
-                <span class='ident'>prefix</span> <span class='op'>=&gt;</span> <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>target</span>, <span class='string'>&quot; xmlns:{}=\&quot;{}\&quot;&quot;</span>, <span class='ident'>prefix</span>, <span class='ident'>uri</span>)
+        <span class="kw">for</span> (<span class="ident">prefix</span>, <span class="ident">uri</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">nst</span>.<span class="ident">peek</span>() {
+            <span class="macro">try</span><span class="macro">!</span>(<span class="kw">match</span> <span class="ident">prefix</span> {
+                <span class="comment">// internal namespaces are not emitted</span>
+                <span class="ident">NS_XMLNS_PREFIX</span> <span class="op">|</span> <span class="ident">NS_XML_PREFIX</span> <span class="op">=&gt;</span> <span class="prelude-val">Ok</span>(()),
+                <span class="comment">//// there is already a namespace binding with this prefix in scope</span>
+                <span class="comment">//prefix if self.nst.get(prefix) == Some(uri) =&gt; Ok(()),</span>
+                <span class="comment">// emit xmlns only if it is overridden</span>
+                <span class="ident">NS_NO_PREFIX</span> <span class="op">=&gt;</span> <span class="kw">if</span> <span class="ident">uri</span> <span class="op">!=</span> <span class="ident">NS_EMPTY_URI</span> {
+                    <span class="macro">write</span><span class="macro">!</span>(<span class="ident">target</span>, <span class="string">&quot; xmlns=\&quot;{}\&quot;&quot;</span>, <span class="ident">uri</span>)
+                } <span class="kw">else</span> { <span class="prelude-val">Ok</span>(()) },
+                <span class="comment">// everything else</span>
+                <span class="ident">prefix</span> <span class="op">=&gt;</span> <span class="macro">write</span><span class="macro">!</span>(<span class="ident">target</span>, <span class="string">&quot; xmlns:{}=\&quot;{}\&quot;&quot;</span>, <span class="ident">prefix</span>, <span class="ident">uri</span>)
             });
         }
-        <span class='prelude-val'>Ok</span>(())
+        <span class="prelude-val">Ok</span>(())
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>emit_attributes</span><span class='op'>&lt;</span><span class='ident'>W</span>: <span class='ident'>Write</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>,
-                                      <span class='ident'>attributes</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>Attribute</span>]) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='kw'>for</span> <span class='ident'>attr</span> <span class='kw'>in</span> <span class='ident'>attributes</span>.<span class='ident'>iter</span>() {
-            <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(
-                <span class='ident'>target</span>, <span class='string'>&quot; {}=\&quot;{}\&quot;&quot;</span>,
-                <span class='ident'>attr</span>.<span class='ident'>name</span>.<span class='ident'>repr_display</span>(),
-                <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>config</span>.<span class='ident'>perform_escaping</span> { <span class='ident'>escape_str_attribute</span>(<span class='ident'>attr</span>.<span class='ident'>value</span>) }
-                <span class='kw'>else</span> { <span class='ident'>Cow</span>::<span class='ident'>Borrowed</span>(<span class='ident'>attr</span>.<span class='ident'>value</span>) }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">emit_attributes</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">Write</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>,
+                                      <span class="ident">attributes</span>: <span class="kw-2">&amp;</span>[<span class="ident">Attribute</span>]) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">for</span> <span class="ident">attr</span> <span class="kw">in</span> <span class="ident">attributes</span>.<span class="ident">iter</span>() {
+            <span class="macro">try</span><span class="macro">!</span>(<span class="macro">write</span><span class="macro">!</span>(
+                <span class="ident">target</span>, <span class="string">&quot; {}=\&quot;{}\&quot;&quot;</span>,
+                <span class="ident">attr</span>.<span class="ident">name</span>.<span class="ident">repr_display</span>(),
+                <span class="kw">if</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">perform_escaping</span> { <span class="ident">escape_str_attribute</span>(<span class="ident">attr</span>.<span class="ident">value</span>) }
+                <span class="kw">else</span> { <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="ident">attr</span>.<span class="ident">value</span>) }
             ))
         }
-        <span class='prelude-val'>Ok</span>(())
+        <span class="prelude-val">Ok</span>(())
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>emit_end_element</span><span class='op'>&lt;</span><span class='ident'>W</span>: <span class='ident'>Write</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>,
-                                      <span class='ident'>name</span>: <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Name</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='kw'>let</span> <span class='ident'>owned_name</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>config</span>.<span class='ident'>keep_element_names_stack</span> {
-            <span class='prelude-val'>Some</span>(<span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>element_names</span>.<span class='ident'>pop</span>().<span class='ident'>ok_or</span>(<span class='ident'>EmitterError</span>::<span class='ident'>LastElementNameNotAvailable</span>)))
-        } <span class='kw'>else</span> {
-            <span class='prelude-val'>None</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">emit_end_element</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">Write</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>,
+                                      <span class="ident">name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Name</span><span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">owned_name</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">keep_element_names_stack</span> {
+            <span class="prelude-val">Some</span>(<span class="macro">try</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">element_names</span>.<span class="ident">pop</span>().<span class="ident">ok_or</span>(<span class="ident">EmitterError</span>::<span class="ident">LastElementNameNotAvailable</span>)))
+        } <span class="kw">else</span> {
+            <span class="prelude-val">None</span>
         };
 
-        <span class='comment'>// Check that last started element name equals to the provided name, if there are both</span>
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>last_name</span>) <span class='op'>=</span> <span class='ident'>owned_name</span> {
-            <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>ref</span> <span class='ident'>name</span>) <span class='op'>=</span> <span class='ident'>name</span> {
-                <span class='kw'>if</span> <span class='ident'>last_name</span>.<span class='ident'>borrow</span>() <span class='op'>!=</span> <span class='op'>*</span><span class='ident'>name</span> {
-                    <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>EmitterError</span>::<span class='ident'>EndElementNameIsNotEqualToLastStartElementName</span>);
+        <span class="comment">// Check that last started element name equals to the provided name, if there are both</span>
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">last_name</span>) <span class="op">=</span> <span class="ident">owned_name</span> {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">name</span>) <span class="op">=</span> <span class="ident">name</span> {
+                <span class="kw">if</span> <span class="ident">last_name</span>.<span class="ident">borrow</span>() <span class="op">!=</span> <span class="kw-2">*</span><span class="ident">name</span> {
+                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">EmitterError</span>::<span class="ident">EndElementNameIsNotEqualToLastStartElementName</span>);
                 }
             }
         }
 
-        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>name</span>) <span class='op'>=</span> <span class='ident'>owned_name</span>.<span class='ident'>as_ref</span>().<span class='ident'>map</span>(<span class='op'>|</span><span class='ident'>n</span><span class='op'>|</span> <span class='ident'>n</span>.<span class='ident'>borrow</span>()).<span class='ident'>or</span>(<span class='ident'>name</span>) {
-            <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>config</span>.<span class='ident'>normalize_empty_elements</span> <span class='op'>&amp;&amp;</span> <span class='self'>self</span>.<span class='ident'>just_wrote_start_element</span> {
-                <span class='self'>self</span>.<span class='ident'>just_wrote_start_element</span> <span class='op'>=</span> <span class='boolval'>false</span>;
-                <span class='comment'>// TODO: make this space configurable</span>
-                <span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>target</span>.<span class='ident'>write</span>(<span class='string'>b&quot; /&gt;&quot;</span>).<span class='ident'>map_err</span>(<span class='ident'>From</span>::<span class='ident'>from</span>);
-                <span class='self'>self</span>.<span class='ident'>after_end_element</span>();
-                <span class='ident'>result</span>.<span class='ident'>map</span>(<span class='op'>|</span>_<span class='op'>|</span> ())
-            } <span class='kw'>else</span> {
-                <span class='self'>self</span>.<span class='ident'>just_wrote_start_element</span> <span class='op'>=</span> <span class='boolval'>false</span>;
-                <span class='macro'>wrapped_with</span><span class='macro'>!</span>(<span class='self'>self</span>; <span class='ident'>before_end_element</span>(<span class='ident'>target</span>) <span class='ident'>and</span> <span class='ident'>after_end_element</span>,
-                    <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>target</span>, <span class='string'>&quot;&lt;/{}&gt;&quot;</span>, <span class='ident'>name</span>.<span class='ident'>repr_display</span>()).<span class='ident'>map_err</span>(<span class='ident'>From</span>::<span class='ident'>from</span>)
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="op">=</span> <span class="ident">owned_name</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">n</span><span class="op">|</span> <span class="ident">n</span>.<span class="ident">borrow</span>()).<span class="ident">or</span>(<span class="ident">name</span>) {
+            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">normalize_empty_elements</span> <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">just_wrote_start_element</span> {
+                <span class="self">self</span>.<span class="ident">just_wrote_start_element</span> <span class="op">=</span> <span class="bool-val">false</span>;
+                <span class="comment">// TODO: make this space configurable</span>
+                <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">target</span>.<span class="ident">write</span>(<span class="string">b&quot; /&gt;&quot;</span>).<span class="ident">map_err</span>(<span class="ident">From</span>::<span class="ident">from</span>);
+                <span class="self">self</span>.<span class="ident">after_end_element</span>();
+                <span class="ident">result</span>.<span class="ident">map</span>(<span class="op">|</span>_<span class="op">|</span> ())
+            } <span class="kw">else</span> {
+                <span class="self">self</span>.<span class="ident">just_wrote_start_element</span> <span class="op">=</span> <span class="bool-val">false</span>;
+                <span class="macro">wrapped_with</span><span class="macro">!</span>(<span class="self">self</span>; <span class="ident">before_end_element</span>(<span class="ident">target</span>) <span class="ident">and</span> <span class="ident">after_end_element</span>,
+                    <span class="macro">write</span><span class="macro">!</span>(<span class="ident">target</span>, <span class="string">&quot;&lt;/{}&gt;&quot;</span>, <span class="ident">name</span>.<span class="ident">repr_display</span>()).<span class="ident">map_err</span>(<span class="ident">From</span>::<span class="ident">from</span>)
                 )
             }
-        } <span class='kw'>else</span> {
-            <span class='prelude-val'>Err</span>(<span class='ident'>EmitterError</span>::<span class='ident'>EndElementNameIsNotSpecified</span>)
+        } <span class="kw">else</span> {
+            <span class="prelude-val">Err</span>(<span class="ident">EmitterError</span>::<span class="ident">EndElementNameIsNotSpecified</span>)
         }
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>emit_cdata</span><span class='op'>&lt;</span><span class='ident'>W</span>: <span class='ident'>Write</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>, <span class='ident'>content</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>fix_non_empty_element</span>(<span class='ident'>target</span>));
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>config</span>.<span class='ident'>cdata_to_characters</span> {
-            <span class='self'>self</span>.<span class='ident'>emit_characters</span>(<span class='ident'>target</span>, <span class='ident'>content</span>)
-        } <span class='kw'>else</span> {
-            <span class='comment'>// TODO: escape &#39;]]&gt;&#39; characters in CDATA as two adjacent CDATA blocks</span>
-            <span class='macro'>try_chain</span><span class='macro'>!</span> {
-                <span class='ident'>target</span>.<span class='ident'>write</span>(<span class='string'>b&quot;&lt;![CDATA[&quot;</span>),
-                <span class='ident'>target</span>.<span class='ident'>write</span>(<span class='ident'>content</span>.<span class='ident'>as_bytes</span>()),
-                <span class='ident'>ignore</span> <span class='ident'>target</span>.<span class='ident'>write</span>(<span class='string'>b&quot;]]&gt;&quot;</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">emit_cdata</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">Write</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>, <span class="ident">content</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="macro">try</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">fix_non_empty_element</span>(<span class="ident">target</span>));
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">cdata_to_characters</span> {
+            <span class="self">self</span>.<span class="ident">emit_characters</span>(<span class="ident">target</span>, <span class="ident">content</span>)
+        } <span class="kw">else</span> {
+            <span class="comment">// TODO: escape &#39;]]&gt;&#39; characters in CDATA as two adjacent CDATA blocks</span>
+            <span class="macro">try_chain</span><span class="macro">!</span> {
+                <span class="ident">target</span>.<span class="ident">write</span>(<span class="string">b&quot;&lt;![CDATA[&quot;</span>),
+                <span class="ident">target</span>.<span class="ident">write</span>(<span class="ident">content</span>.<span class="ident">as_bytes</span>()),
+                <span class="ident">ignore</span> <span class="ident">target</span>.<span class="ident">write</span>(<span class="string">b&quot;]]&gt;&quot;</span>)
             };
-            <span class='self'>self</span>.<span class='ident'>after_text</span>();
-            <span class='prelude-val'>Ok</span>(())
+            <span class="self">self</span>.<span class="ident">after_text</span>();
+            <span class="prelude-val">Ok</span>(())
         }
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>emit_characters</span><span class='op'>&lt;</span><span class='ident'>W</span>: <span class='ident'>Write</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>,
-                                      <span class='ident'>content</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>fix_non_empty_element</span>(<span class='ident'>target</span>));
-        <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>target</span>.<span class='ident'>write</span>(
-            (<span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>config</span>.<span class='ident'>perform_escaping</span> { <span class='ident'>escape_str_pcdata</span>(<span class='ident'>content</span>) }
-            <span class='kw'>else</span> { <span class='ident'>Cow</span>::<span class='ident'>Borrowed</span>(<span class='ident'>content</span>) }).<span class='ident'>as_bytes</span>()
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">emit_characters</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">Write</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>,
+                                      <span class="ident">content</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="macro">try</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">fix_non_empty_element</span>(<span class="ident">target</span>));
+        <span class="macro">try</span><span class="macro">!</span>(<span class="ident">target</span>.<span class="ident">write</span>(
+            (<span class="kw">if</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">perform_escaping</span> { <span class="ident">escape_str_pcdata</span>(<span class="ident">content</span>) }
+            <span class="kw">else</span> { <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="ident">content</span>) }).<span class="ident">as_bytes</span>()
         ));
-        <span class='self'>self</span>.<span class='ident'>after_text</span>();
-        <span class='prelude-val'>Ok</span>(())
+        <span class="self">self</span>.<span class="ident">after_text</span>();
+        <span class="prelude-val">Ok</span>(())
     }
 
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>emit_comment</span><span class='op'>&lt;</span><span class='ident'>W</span>: <span class='ident'>Write</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span>, <span class='ident'>content</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-        <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>fix_non_empty_element</span>(<span class='ident'>target</span>));
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">emit_comment</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">Write</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>, <span class="ident">content</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="macro">try</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">fix_non_empty_element</span>(<span class="ident">target</span>));
 
-        <span class='comment'>// TODO: add escaping dashes at the end of the comment</span>
+        <span class="comment">// TODO: add escaping dashes at the end of the comment</span>
 
-        <span class='kw'>let</span> <span class='ident'>autopad_comments</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>config</span>.<span class='ident'>autopad_comments</span>;
-        <span class='kw'>let</span> <span class='ident'>write</span> <span class='op'>=</span> <span class='op'>|</span><span class='ident'>target</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>W</span><span class='op'>|</span> <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
-            <span class='macro'>try_chain</span><span class='macro'>!</span> {
-                <span class='ident'>target</span>.<span class='ident'>write</span>(<span class='string'>b&quot;&lt;!--&quot;</span>),
-                <span class='kw'>if</span> <span class='ident'>autopad_comments</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='ident'>content</span>.<span class='ident'>starts_with</span>(<span class='ident'>char</span>::<span class='ident'>is_whitespace</span>) {
-                    <span class='ident'>target</span>.<span class='ident'>write</span>(<span class='string'>b&quot; &quot;</span>)
-                } <span class='kw'>else</span> { <span class='prelude-val'>Ok</span>(<span class='number'>0</span>) },
-                <span class='ident'>target</span>.<span class='ident'>write</span>(<span class='ident'>content</span>.<span class='ident'>as_bytes</span>()),
-                <span class='kw'>if</span> <span class='ident'>autopad_comments</span> <span class='op'>&amp;&amp;</span> <span class='op'>!</span><span class='ident'>content</span>.<span class='ident'>ends_with</span>(<span class='ident'>char</span>::<span class='ident'>is_whitespace</span>) {
-                    <span class='ident'>target</span>.<span class='ident'>write</span>(<span class='string'>b&quot; &quot;</span>)
-                } <span class='kw'>else</span> { <span class='prelude-val'>Ok</span>(<span class='number'>0</span>) },
-                <span class='ident'>ok_unit</span> <span class='ident'>target</span>.<span class='ident'>write</span>(<span class='string'>b&quot;--&gt;&quot;</span>)
+        <span class="kw">let</span> <span class="ident">autopad_comments</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">autopad_comments</span>;
+        <span class="kw">let</span> <span class="ident">write</span> <span class="op">=</span> <span class="op">|</span><span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span><span class="op">|</span> <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+            <span class="macro">try_chain</span><span class="macro">!</span> {
+                <span class="ident">target</span>.<span class="ident">write</span>(<span class="string">b&quot;&lt;!--&quot;</span>),
+                <span class="kw">if</span> <span class="ident">autopad_comments</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">content</span>.<span class="ident">starts_with</span>(<span class="ident">char</span>::<span class="ident">is_whitespace</span>) {
+                    <span class="ident">target</span>.<span class="ident">write</span>(<span class="string">b&quot; &quot;</span>)
+                } <span class="kw">else</span> { <span class="prelude-val">Ok</span>(<span class="number">0</span>) },
+                <span class="ident">target</span>.<span class="ident">write</span>(<span class="ident">content</span>.<span class="ident">as_bytes</span>()),
+                <span class="kw">if</span> <span class="ident">autopad_comments</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">content</span>.<span class="ident">ends_with</span>(<span class="ident">char</span>::<span class="ident">is_whitespace</span>) {
+                    <span class="ident">target</span>.<span class="ident">write</span>(<span class="string">b&quot; &quot;</span>)
+                } <span class="kw">else</span> { <span class="prelude-val">Ok</span>(<span class="number">0</span>) },
+                <span class="ident">ok_unit</span> <span class="ident">target</span>.<span class="ident">write</span>(<span class="string">b&quot;--&gt;&quot;</span>)
             }
         };
 
-        <span class='macro'>wrapped_with</span><span class='macro'>!</span>(<span class='self'>self</span>; <span class='ident'>before_markup</span>(<span class='ident'>target</span>) <span class='ident'>and</span> <span class='ident'>after_markup</span>,
-            <span class='ident'>write</span>(<span class='ident'>target</span>)
+        <span class="macro">wrapped_with</span><span class="macro">!</span>(<span class="self">self</span>; <span class="ident">before_markup</span>(<span class="ident">target</span>) <span class="ident">and</span> <span class="ident">after_markup</span>,
+            <span class="ident">write</span>(<span class="ident">target</span>)
         )
     }
 }
@@ -920,6 +950,8 @@
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 
@@ -940,7 +972,7 @@
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>
@@ -951,11 +983,9 @@
     <script>
         window.rootPath = "../../../";
         window.currentCrate = "xml";
-        window.playgroundUrl = "";
     </script>
     <script src="../../../jquery.js"></script>
     <script src="../../../main.js"></script>
-    
     <script defer src="../../../search-index.js"></script>
 </body>
 </html>

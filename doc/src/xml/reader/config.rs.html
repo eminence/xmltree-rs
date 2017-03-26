@@ -4,13 +4,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/storage/home/achin/.multirust/toolchains/nightly/cargo/registry/src/github.com-88ac128001ac3a9a/xml-rs-0.2.2/src/reader/config.rs`.">
+    <meta name="description" content="Source to the Rust file `/storage/home/achin/.cargo/registry/src/github.com-1ecc6299db9ec823/xml-rs-0.4.1/src/reader/config.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>config.rs.html -- source</title>
 
+    <link rel="stylesheet" type="text/css" href="../../../normalize.css">
     <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
 
     
     
@@ -160,125 +162,187 @@
 <span id="117">117</span>
 <span id="118">118</span>
 <span id="119">119</span>
-</pre><pre class='rust '>
-<span class='doccomment'>//! Contains parser configuration structure.</span>
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>io</span>::<span class='ident'>Read</span>;
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+</pre><pre class="rust ">
+<span class="doccomment">//! Contains parser configuration structure.</span>
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Read</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">collections</span>::<span class="ident">HashMap</span>;
 
-<span class='kw'>use</span> <span class='ident'>reader</span>::<span class='ident'>EventReader</span>;
+<span class="kw">use</span> <span class="ident">reader</span>::<span class="ident">EventReader</span>;
 
-<span class='doccomment'>/// Parser configuration structure.</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// This structure contains various configuration options which affect</span>
-<span class='doccomment'>/// behavior of the parser.</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Eq</span>, <span class='ident'>Debug</span>)]</span>
-<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>ParserConfig</span> {
-    <span class='doccomment'>/// Whether or not should whitespace in textual events be removed. Default is false.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// When true, all standalone whitespace will be removed (this means no</span>
-    <span class='doccomment'>/// `Whitespace` events will ve emitted), and leading and trailing whitespace</span>
-    <span class='doccomment'>/// from `Character` events will be deleted. If after trimming `Characters`</span>
-    <span class='doccomment'>/// event will be empty, it will also be omitted from output stream. This is</span>
-    <span class='doccomment'>/// possible, however, only if `whitespace_to_characters` or</span>
-    <span class='doccomment'>/// `cdata_to_characters` options are set.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// This option does not affect CDATA events, unless `cdata_to_characters`</span>
-    <span class='doccomment'>/// option is also set. In that case CDATA content will also be trimmed.</span>
-    <span class='kw'>pub</span> <span class='ident'>trim_whitespace</span>: <span class='ident'>bool</span>,
+<span class="doccomment">/// Parser configuration structure.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This structure contains various configuration options which affect</span>
+<span class="doccomment">/// behavior of the parser.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ParserConfig</span> {
+    <span class="doccomment">/// Whether or not should whitespace in textual events be removed. Default is false.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// When true, all standalone whitespace will be removed (this means no</span>
+    <span class="doccomment">/// `Whitespace` events will ve emitted), and leading and trailing whitespace</span>
+    <span class="doccomment">/// from `Character` events will be deleted. If after trimming `Characters`</span>
+    <span class="doccomment">/// event will be empty, it will also be omitted from output stream. This is</span>
+    <span class="doccomment">/// possible, however, only if `whitespace_to_characters` or</span>
+    <span class="doccomment">/// `cdata_to_characters` options are set.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This option does not affect CDATA events, unless `cdata_to_characters`</span>
+    <span class="doccomment">/// option is also set. In that case CDATA content will also be trimmed.</span>
+    <span class="kw">pub</span> <span class="ident">trim_whitespace</span>: <span class="ident">bool</span>,
 
-    <span class='doccomment'>/// Whether or not should whitespace be converted to characters.</span>
-    <span class='doccomment'>/// Default is false.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// If true, instead of `Whitespace` events `Characters` events with the</span>
-    <span class='doccomment'>/// same content will be emitted. If `trim_whitespace` is also true, these</span>
-    <span class='doccomment'>/// events will be trimmed to nothing and, consequently, not emitted.</span>
-    <span class='kw'>pub</span> <span class='ident'>whitespace_to_characters</span>: <span class='ident'>bool</span>,
+    <span class="doccomment">/// Whether or not should whitespace be converted to characters.</span>
+    <span class="doccomment">/// Default is false.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// If true, instead of `Whitespace` events `Characters` events with the</span>
+    <span class="doccomment">/// same content will be emitted. If `trim_whitespace` is also true, these</span>
+    <span class="doccomment">/// events will be trimmed to nothing and, consequently, not emitted.</span>
+    <span class="kw">pub</span> <span class="ident">whitespace_to_characters</span>: <span class="ident">bool</span>,
 
-    <span class='doccomment'>/// Whether or not should CDATA be converted to characters.</span>
-    <span class='doccomment'>/// Default is false.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// If true, instead of `CData` events `Characters` events with the same</span>
-    <span class='doccomment'>/// content will be emitted. If `trim_whitespace` is also true, these events</span>
-    <span class='doccomment'>/// will be trimmed. If corresponding CDATA contained nothing but whitespace,</span>
-    <span class='doccomment'>/// this event will be omitted from the stream.</span>
-    <span class='kw'>pub</span> <span class='ident'>cdata_to_characters</span>: <span class='ident'>bool</span>,
+    <span class="doccomment">/// Whether or not should CDATA be converted to characters.</span>
+    <span class="doccomment">/// Default is false.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// If true, instead of `CData` events `Characters` events with the same</span>
+    <span class="doccomment">/// content will be emitted. If `trim_whitespace` is also true, these events</span>
+    <span class="doccomment">/// will be trimmed. If corresponding CDATA contained nothing but whitespace,</span>
+    <span class="doccomment">/// this event will be omitted from the stream.</span>
+    <span class="kw">pub</span> <span class="ident">cdata_to_characters</span>: <span class="ident">bool</span>,
 
-    <span class='doccomment'>/// Whether or not should comments be omitted. Default is true.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// If true, `Comment` events will not be emitted at all.</span>
-    <span class='kw'>pub</span> <span class='ident'>ignore_comments</span>: <span class='ident'>bool</span>,
+    <span class="doccomment">/// Whether or not should comments be omitted. Default is true.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// If true, `Comment` events will not be emitted at all.</span>
+    <span class="kw">pub</span> <span class="ident">ignore_comments</span>: <span class="ident">bool</span>,
 
-    <span class='doccomment'>/// Whether or not should sequential `Characters` events be merged.</span>
-    <span class='doccomment'>/// Default is true.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// If true, multiple sequential `Characters` events will be merged into</span>
-    <span class='doccomment'>/// a single event, that is, their data will be concatenated.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// Multiple sequential `Characters` events are only possible if either</span>
-    <span class='doccomment'>/// `cdata_to_characters` or `ignore_comments` are set. Otherwise character</span>
-    <span class='doccomment'>/// events will always be separated by other events.</span>
-    <span class='kw'>pub</span> <span class='ident'>coalesce_characters</span>: <span class='ident'>bool</span>
+    <span class="doccomment">/// Whether or not should sequential `Characters` events be merged.</span>
+    <span class="doccomment">/// Default is true.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// If true, multiple sequential `Characters` events will be merged into</span>
+    <span class="doccomment">/// a single event, that is, their data will be concatenated.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Multiple sequential `Characters` events are only possible if either</span>
+    <span class="doccomment">/// `cdata_to_characters` or `ignore_comments` are set. Otherwise character</span>
+    <span class="doccomment">/// events will always be separated by other events.</span>
+    <span class="kw">pub</span> <span class="ident">coalesce_characters</span>: <span class="ident">bool</span>,
+
+    <span class="doccomment">/// A map of extra entities recognized by the parser. Default is an empty map.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// By default the XML parser recognizes the entities defined in the XML spec. Sometimes,</span>
+    <span class="doccomment">/// however, it is convenient to make the parser recognize additional entities which</span>
+    <span class="doccomment">/// are also not available through the DTD definitions (especially given that at the moment</span>
+    <span class="doccomment">/// DTD parsing is not supported).</span>
+    <span class="kw">pub</span> <span class="ident">extra_entities</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">char</span><span class="op">&gt;</span>
 }
 
-<span class='kw'>impl</span> <span class='ident'>ParserConfig</span> {
-    <span class='doccomment'>/// Returns a new config with default values.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// You can tweak default values using builder-like pattern:</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// ```rust</span>
-    <span class='doccomment'>/// use xml::reader::ParserConfig;</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// let config = ParserConfig::new()</span>
-    <span class='doccomment'>///     .trim_whitespace(true)</span>
-    <span class='doccomment'>///     .ignore_comments(true)</span>
-    <span class='doccomment'>///     .coalesce_characters(false);</span>
-    <span class='doccomment'>/// ```</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>new</span>() <span class='op'>-&gt;</span> <span class='ident'>ParserConfig</span> {
-        <span class='ident'>ParserConfig</span> {
-            <span class='ident'>trim_whitespace</span>: <span class='boolval'>false</span>,
-            <span class='ident'>whitespace_to_characters</span>: <span class='boolval'>false</span>,
-            <span class='ident'>cdata_to_characters</span>: <span class='boolval'>false</span>,
-            <span class='ident'>ignore_comments</span>: <span class='boolval'>true</span>,
-            <span class='ident'>coalesce_characters</span>: <span class='boolval'>true</span>
+<span class="kw">impl</span> <span class="ident">ParserConfig</span> {
+    <span class="doccomment">/// Returns a new config with default values.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// You can tweak default values using builder-like pattern:</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```rust</span>
+    <span class="doccomment">/// use xml::reader::ParserConfig;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let config = ParserConfig::new()</span>
+    <span class="doccomment">///     .trim_whitespace(true)</span>
+    <span class="doccomment">///     .ignore_comments(true)</span>
+    <span class="doccomment">///     .coalesce_characters(false);</span>
+    <span class="doccomment">/// ```</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-&gt;</span> <span class="ident">ParserConfig</span> {
+        <span class="ident">ParserConfig</span> {
+            <span class="ident">trim_whitespace</span>: <span class="bool-val">false</span>,
+            <span class="ident">whitespace_to_characters</span>: <span class="bool-val">false</span>,
+            <span class="ident">cdata_to_characters</span>: <span class="bool-val">false</span>,
+            <span class="ident">ignore_comments</span>: <span class="bool-val">true</span>,
+            <span class="ident">coalesce_characters</span>: <span class="bool-val">true</span>,
+            <span class="ident">extra_entities</span>: <span class="ident">HashMap</span>::<span class="ident">new</span>()
         }
     }
 
-    <span class='doccomment'>/// Creates an XML reader with this configuration.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// This is a convenience method for configuring and creating a reader at the same time:</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// ```rust</span>
-    <span class='doccomment'>/// use xml::reader::ParserConfig;</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// let mut source: &amp;[u8] = b&quot;...&quot;;</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// let reader = ParserConfig::new()</span>
-    <span class='doccomment'>///     .trim_whitespace(true)</span>
-    <span class='doccomment'>///     .ignore_comments(true)</span>
-    <span class='doccomment'>///     .coalesce_characters(false)</span>
-    <span class='doccomment'>///     .create_reader(&amp;mut source);</span>
-    <span class='doccomment'>/// ```</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// This method is exactly equivalent to calling `EventReader::new_with_config()` with</span>
-    <span class='doccomment'>/// this configuration object.</span>
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>create_reader</span><span class='op'>&lt;</span><span class='ident'>R</span>: <span class='ident'>Read</span><span class='op'>&gt;</span>(<span class='self'>self</span>, <span class='ident'>source</span>: <span class='ident'>R</span>) <span class='op'>-&gt;</span> <span class='ident'>EventReader</span><span class='op'>&lt;</span><span class='ident'>R</span><span class='op'>&gt;</span> {
-        <span class='ident'>EventReader</span>::<span class='ident'>new_with_config</span>(<span class='ident'>source</span>, <span class='self'>self</span>)
+    <span class="doccomment">/// Creates an XML reader with this configuration.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This is a convenience method for configuring and creating a reader at the same time:</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```rust</span>
+    <span class="doccomment">/// use xml::reader::ParserConfig;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let mut source: &amp;[u8] = b&quot;...&quot;;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let reader = ParserConfig::new()</span>
+    <span class="doccomment">///     .trim_whitespace(true)</span>
+    <span class="doccomment">///     .ignore_comments(true)</span>
+    <span class="doccomment">///     .coalesce_characters(false)</span>
+    <span class="doccomment">///     .create_reader(&amp;mut source);</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This method is exactly equivalent to calling `EventReader::new_with_config()` with</span>
+    <span class="doccomment">/// this configuration object.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_reader</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Read</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">source</span>: <span class="ident">R</span>) <span class="op">-&gt;</span> <span class="ident">EventReader</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> {
+        <span class="ident">EventReader</span>::<span class="ident">new_with_config</span>(<span class="ident">source</span>, <span class="self">self</span>)
+    }
+
+    <span class="doccomment">/// Adds a new entity mapping and returns an updated config object.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This is a convenience method for adding external entities mappings to the XML parser.</span>
+    <span class="doccomment">/// An example:</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```rust</span>
+    <span class="doccomment">/// use xml::reader::ParserConfig;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let mut source: &amp;[u8] = b&quot;...&quot;;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let reader = ParserConfig::new()</span>
+    <span class="doccomment">///     .add_entity(&quot;nbsp&quot;, &#39; &#39;)</span>
+    <span class="doccomment">///     .add_entity(&quot;copy&quot;, &#39;©&#39;)</span>
+    <span class="doccomment">///     .add_entity(&quot;reg&quot;, &#39;®&#39;)</span>
+    <span class="doccomment">///     .create_reader(&amp;mut source);</span>
+    <span class="doccomment">/// ```</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_entity</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">entity</span>: <span class="ident">S</span>, <span class="ident">value</span>: <span class="ident">char</span>) <span class="op">-&gt;</span> <span class="ident">ParserConfig</span> {
+        <span class="self">self</span>.<span class="ident">extra_entities</span>.<span class="ident">insert</span>(<span class="ident">entity</span>.<span class="ident">into</span>(), <span class="ident">value</span>);
+        <span class="self">self</span>
     }
 }
 
-<span class='kw'>impl</span> <span class='ident'>Default</span> <span class='kw'>for</span> <span class='ident'>ParserConfig</span> {
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>default</span>() <span class='op'>-&gt;</span> <span class='ident'>ParserConfig</span> {
-        <span class='ident'>ParserConfig</span>::<span class='ident'>new</span>()
+<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">ParserConfig</span> {
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-&gt;</span> <span class="ident">ParserConfig</span> {
+        <span class="ident">ParserConfig</span>::<span class="ident">new</span>()
     }
 }
 
-<span class='macro'>gen_setters</span><span class='macro'>!</span> { <span class='ident'>ParserConfig</span>,
-    <span class='ident'>trim_whitespace</span>: <span class='ident'>val</span> <span class='ident'>bool</span>,
-    <span class='ident'>whitespace_to_characters</span>: <span class='ident'>val</span> <span class='ident'>bool</span>,
-    <span class='ident'>cdata_to_characters</span>: <span class='ident'>val</span> <span class='ident'>bool</span>,
-    <span class='ident'>ignore_comments</span>: <span class='ident'>val</span> <span class='ident'>bool</span>,
-    <span class='ident'>coalesce_characters</span>: <span class='ident'>val</span> <span class='ident'>bool</span>
+<span class="macro">gen_setters</span><span class="macro">!</span> { <span class="ident">ParserConfig</span>,
+    <span class="ident">trim_whitespace</span>: <span class="ident">val</span> <span class="ident">bool</span>,
+    <span class="ident">whitespace_to_characters</span>: <span class="ident">val</span> <span class="ident">bool</span>,
+    <span class="ident">cdata_to_characters</span>: <span class="ident">val</span> <span class="ident">bool</span>,
+    <span class="ident">ignore_comments</span>: <span class="ident">val</span> <span class="ident">bool</span>,
+    <span class="ident">coalesce_characters</span>: <span class="ident">val</span> <span class="ident">bool</span>
 }
 </pre>
 </section>
@@ -304,6 +368,8 @@
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 
@@ -324,7 +390,7 @@
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>
@@ -335,11 +401,9 @@
     <script>
         window.rootPath = "../../../";
         window.currentCrate = "xml";
-        window.playgroundUrl = "";
     </script>
     <script src="../../../jquery.js"></script>
     <script src="../../../main.js"></script>
-    
     <script defer src="../../../search-index.js"></script>
 </body>
 </html>

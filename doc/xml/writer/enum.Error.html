@@ -9,8 +9,10 @@
 
     <title>xml::writer::Error - Rust</title>
 
+    <link rel="stylesheet" type="text/css" href="../../normalize.css">
     <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
+    
 
     
     
@@ -42,30 +44,41 @@
     </nav>
 
     <section id='main' class="content enum">
-<h1 class='fqn'><span class='in-band'>Enum <a href='../index.html'>xml</a>::<wbr><a href='index.html'>writer</a>::<wbr><a class='enum' href=''>Error</a></span><span class='out-of-band'><span id='render-detail'>
-            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
-                [<span class='inner'>&#x2212;</span>]
-            </a>
-        </span><a id='src-2048' class='srclink' href='../../src/xml/writer/emitter.rs.html#18-35' title='goto source code'>[src]</a></span></h1>
+<h1 class='fqn'><span class='in-band'>Enum <a href='../index.html'>xml</a>::<wbr><a href='index.html'>writer</a>::<wbr><a class="enum" href=''>Error</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a class='srclink' href='../../src/xml/writer/emitter.rs.html#19-36' title='goto source code'>[src]</a></span></h1>
 <pre class='rust enum'>pub enum Error {
-    Io(<a class='struct' href='https://doc.rust-lang.org/nightly/std/io/error/struct.Error.html' title='std::io::error::Error'>Error</a>),
+    Io(<a class="struct" href="https://doc.rust-lang.org/nightly/std/io/error/struct.Error.html" title="struct std::io::error::Error">Error</a>),
     DocumentStartAlreadyEmitted,
     LastElementNameNotAvailable,
     EndElementNameIsNotEqualToLastStartElementName,
     EndElementNameIsNotSpecified,
 }</pre><div class='docblock'><p>An error which may be returned by <code>XmlWriter</code> when writing XML events.</p>
 </div><h2 class='variants'>Variants</h2>
-<table><tr><td id='variant.Io'><code>Io</code></td><td><div class='docblock'><p>An I/O error occured in the underlying <code>Write</code> instance.</p>
-</div></td></tr><tr><td id='variant.DocumentStartAlreadyEmitted'><code>DocumentStartAlreadyEmitted</code></td><td><div class='docblock'><p>Document declaration has already been written to the output stream.</p>
-</div></td></tr><tr><td id='variant.LastElementNameNotAvailable'><code>LastElementNameNotAvailable</code></td><td><div class='docblock'><p>The name of the last opening element is not available.</p>
-</div></td></tr><tr><td id='variant.EndElementNameIsNotEqualToLastStartElementName'><code>EndElementNameIsNotEqualToLastStartElementName</code></td><td><div class='docblock'><p>The name of the last opening element is not equal to the name of the provided
+<span id='variant.Io' class='variant'><span id='Io.v' class='invisible'><code>Io(<a class="struct" href="https://doc.rust-lang.org/nightly/std/io/error/struct.Error.html" title="struct std::io::error::Error">Error</a>)</code></span></span><div class='docblock'><p>An I/O error occured in the underlying <code>Write</code> instance.</p>
+</div><span id='variant.DocumentStartAlreadyEmitted' class='variant'><span id='DocumentStartAlreadyEmitted.v' class='invisible'><code>DocumentStartAlreadyEmitted</code></span></span><div class='docblock'><p>Document declaration has already been written to the output stream.</p>
+</div><span id='variant.LastElementNameNotAvailable' class='variant'><span id='LastElementNameNotAvailable.v' class='invisible'><code>LastElementNameNotAvailable</code></span></span><div class='docblock'><p>The name of the last opening element is not available.</p>
+</div><span id='variant.EndElementNameIsNotEqualToLastStartElementName' class='variant'><span id='EndElementNameIsNotEqualToLastStartElementName.v' class='invisible'><code>EndElementNameIsNotEqualToLastStartElementName</code></span></span><div class='docblock'><p>The name of the last opening element is not equal to the name of the provided
 closing element.</p>
-</div></td></tr><tr><td id='variant.EndElementNameIsNotSpecified'><code>EndElementNameIsNotSpecified</code></td><td><div class='docblock'><p>End element name is not specified when it is needed, for example, when automatic
+</div><span id='variant.EndElementNameIsNotSpecified' class='variant'><span id='EndElementNameIsNotSpecified.v' class='invisible'><code>EndElementNameIsNotSpecified</code></span></span><div class='docblock'><p>End element name is not specified when it is needed, for example, when automatic
 closing is not enabled in configuration.</p>
-</div></td></tr></table><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.From.html' title='core::convert::From'>From</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/std/io/error/struct.Error.html' title='std::io::error::Error'>Error</a>&gt; for <a class='enum' href='../../xml/writer/enum.Error.html' title='xml::writer::Error'>EmitterError</a></code></h3><div class='impl-items'><h4 id='method.from' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/convert/trait.From.html#method.from' class='fnname'>from</a>(err: <a class='struct' href='https://doc.rust-lang.org/nightly/std/io/error/struct.Error.html' title='std::io::error::Error'>Error</a>) -&gt; <a class='enum' href='../../xml/writer/enum.Error.html' title='xml::writer::Error'>EmitterError</a></code></h4>
-</div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html' title='core::fmt::Display'>Display</a> for <a class='enum' href='../../xml/writer/enum.Error.html' title='xml::writer::Error'>EmitterError</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html#method.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
-</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='enum' href='../../xml/writer/enum.Error.html' title='xml::writer::Error'>EmitterError</a></code></h3><div class='impl-items'><h4 id='method.fmt-1' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
-</div></section>
+</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html" title="trait core::fmt::Debug">Debug</a> for <a class="enum" href="../../xml/writer/enum.Error.html" title="enum xml::writer::Error">EmitterError</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/xml/writer/emitter.rs.html#18' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.fmt' class="method"><span id='fmt.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class="struct" href="https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>) -&gt; <a class="type" href="https://doc.rust-lang.org/nightly/core/fmt/type.Result.html" title="type core::fmt::Result">Result</a></code></span></h4>
+<div class='docblock'><p>Formats the value using the given formatter.</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/std/io/error/struct.Error.html" title="struct std::io::error::Error">Error</a>&gt; for <a class="enum" href="../../xml/writer/enum.Error.html" title="enum xml::writer::Error">EmitterError</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/xml/writer/emitter.rs.html#38-42' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.from' class="method"><span id='from.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/convert/trait.From.html#tymethod.from' class='fnname'>from</a>(err: <a class="struct" href="https://doc.rust-lang.org/nightly/std/io/error/struct.Error.html" title="struct std::io::error::Error">Error</a>) -&gt; <a class="enum" href="../../xml/writer/enum.Error.html" title="enum xml::writer::Error">EmitterError</a></code></span></h4>
+<div class='docblock'><p>Performs the conversion.</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html" title="trait core::fmt::Display">Display</a> for <a class="enum" href="../../xml/writer/enum.Error.html" title="enum xml::writer::Error">EmitterError</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/xml/writer/emitter.rs.html#44-56' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.fmt-1' class="method"><span id='fmt.v-1' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class="struct" href="https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>) -&gt; <a class="type" href="https://doc.rust-lang.org/nightly/core/fmt/type.Result.html" title="type core::fmt::Result">Result</a></code></span></h4>
+<div class='docblock'><p>Formats the value using the given formatter. <a href="https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html#tymethod.fmt">Read more</a></p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class="trait" href="https://doc.rust-lang.org/nightly/std/error/trait.Error.html" title="trait std::error::Error">Error</a> for <a class="enum" href="../../xml/writer/enum.Error.html" title="enum xml::writer::Error">EmitterError</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/xml/writer/emitter.rs.html#58-73' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.description' class="method"><span id='description.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/std/error/trait.Error.html#tymethod.description' class='fnname'>description</a>(&amp;self) -&gt; &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a></code></span></h4>
+<div class='docblock'><p>A short description of the error. <a href="https://doc.rust-lang.org/nightly/std/error/trait.Error.html#tymethod.description">Read more</a></p>
+</div><h4 id='method.cause' class="method"><span id='cause.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/std/error/trait.Error.html#method.cause' class='fnname'>cause</a>(&amp;self) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;&amp;<a class="trait" href="https://doc.rust-lang.org/nightly/std/error/trait.Error.html" title="trait std::error::Error">Error</a>&gt;</code><div class='since' title='Stable since Rust version 1.0.0'>1.0.0</div></span></h4>
+<div class='docblock'><p>The lower-level cause of this error, if any. <a href="https://doc.rust-lang.org/nightly/std/error/trait.Error.html#method.cause">Read more</a></p>
+</div></div></section>
     <section id='search' class="content hidden"></section>
 
     <section class="footer"></section>
@@ -88,6 +101,8 @@ closing is not enabled in configuration.</p>
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 
@@ -108,7 +123,7 @@ closing is not enabled in configuration.</p>
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>
@@ -119,11 +134,9 @@ closing is not enabled in configuration.</p>
     <script>
         window.rootPath = "../../";
         window.currentCrate = "xml";
-        window.playgroundUrl = "";
     </script>
     <script src="../../jquery.js"></script>
     <script src="../../main.js"></script>
-    
     <script defer src="../../search-index.js"></script>
 </body>
 </html>
