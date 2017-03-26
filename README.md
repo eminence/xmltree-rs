@@ -15,7 +15,7 @@ Add the following to your `Cargo.toml` file:
 
 ```toml
 [dependencies]
-xmltree = "0.3"
+xmltree = "0.4"
 ```
 
 and this to yoru crate root:
