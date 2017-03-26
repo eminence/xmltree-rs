@@ -5,7 +5,7 @@ xmltree-rs
 
 A small library for parsing an XML file into an in-memory tree structure.
 
-Needs more testing, not recommended for large XML files.
+Not recommended for large XML files, as it will load the entire file into memory.
 
 https://crates.io/crates/xmltree
 
@@ -26,6 +26,6 @@ extern crate xmltree;
 
 ## Example
 
-See the documentation:
+See the documentation for the latest version:
 
 https://eminence.github.io/xmltree-rs/doc/xmltree/index.html

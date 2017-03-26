@@ -41,10 +41,15 @@ pub use xml::namespace::Namespace;
 /// Represents an XML element.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Element {
+    /// This elements prefix, if any
     pub prefix: Option<String>,
 
+    /// This elements namespace, if any
     pub namespace: Option<String>,
 
+    /// The full list of namespaces, if any
+    ///
+    /// The `Namespace` type is exported from the `xml-rs` crate.
     pub namespaces: Option<Namespace>,
 
     /// The name of the Element.  Does not include any namespace info
@@ -136,6 +141,8 @@ fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Result<Elem
 
 impl Element {
     /// Create a new empty element with given name
+    ///
+    /// All other fields are empty
     pub fn new(name: &str) -> Element {
         Element {
             name: String::from(name),
