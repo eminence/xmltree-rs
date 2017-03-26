@@ -132,6 +132,14 @@ fn test_mal_03() {
 
 }
 
+#[test]
+fn test_new() {
+    let e = Element::new("foo");
+    assert_eq!(e.name.as_str(), "foo");
+    assert_eq!(e.attributes.len(), 0);
+    assert_eq!(e.children.len(), 0);
+    assert_eq!(e.text, None);
+}
 
 #[test]
 fn test_take() {
