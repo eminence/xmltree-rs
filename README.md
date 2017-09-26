@@ -15,7 +15,7 @@ Add the following to your `Cargo.toml` file:
 
 ```toml
 [dependencies]
-xmltree = "0.5"
+xmltree = "0.6"
 ```
 
 and this to yoru crate root:
@@ -28,4 +28,4 @@ extern crate xmltree;
 
 See the documentation for the latest version:
 
-https://eminence.github.io/xmltree-rs/doc/xmltree/index.html
+https://docs.rs/xmltree/0.6.0/xmltree/
