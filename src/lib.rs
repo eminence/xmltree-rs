@@ -77,25 +77,25 @@ pub enum ParseError {
 
 impl fmt::Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            &ParseError::MalformedXml(ref e) => write!(f, "Malformed XML. {}", e),
-            &ParseError::CannotParse => write!(f, "Cannot parse"),
+        match *self {
+            ParseError::MalformedXml(ref e) => write!(f, "Malformed XML. {}", e),
+            ParseError::CannotParse => write!(f, "Cannot parse"),
         }
     }
 }
 
 impl std::error::Error for ParseError {
     fn description(&self) -> &str {
-        match self {
-            &ParseError::MalformedXml(..) => "Malformed XML",
-            &ParseError::CannotParse => "Cannot parse",
+        match *self {
+            ParseError::MalformedXml(..) => "Malformed XML",
+            ParseError::CannotParse => "Cannot parse",
         }
     }
 
     fn cause(&self) -> Option<&std::error::Error> {
-        match self {
-            &ParseError::MalformedXml(ref e) => Some(e),
-            &ParseError::CannotParse => None,
+        match *self {
+            ParseError::MalformedXml(ref e) => Some(e),
+            ParseError::CannotParse => None,
         }
     }
 }
@@ -134,9 +134,8 @@ fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Result<Elem
             Ok(XmlEvent::Characters(s)) => {
                 elem.text = Some(s);
             }
-            Ok(XmlEvent::Whitespace(..)) => (),
+            Ok(XmlEvent::Whitespace(..)) | Ok(XmlEvent::Comment(..))=> (),
             Ok(XmlEvent::CData(s)) => elem.text = Some(s),
-            Ok(XmlEvent::Comment(..)) => (),
             Ok(XmlEvent::StartDocument { .. }) |
             Ok(XmlEvent::EndDocument) |
             Ok(XmlEvent::ProcessingInstruction { .. }) => return Err(ParseError::CannotParse),
@@ -216,7 +215,7 @@ impl Element {
         }
 
         let mut attributes = Vec::with_capacity(self.attributes.len());
-        for (k, v) in self.attributes.iter() {
+        for (k, v) in &self.attributes {
             attributes.push(Attribute {
                                 name: Name::local(k),
                                 value: v,
@@ -270,14 +269,14 @@ impl Element {
     }
 
     /// Find a child element with the given name and return a mutable reference to it.
-    pub fn get_mut_child<'a, K>(&'a mut self, k: K) -> Option<&'a mut Element>
+    pub fn get_mut_child<K>(&mut self, k: K) -> Option<&mut Element>
         where String: PartialEq<K>
     {
         self.children.iter_mut().find(|e| e.name == k)
     }
 
     /// Find a child element with the given name, remove and return it.
-    pub fn take_child<'a, K>(&'a mut self, k: K) -> Option<Element>
+    pub fn take_child<K>(&mut self, k: K) -> Option<Element>
         where String: PartialEq<K>
     {
         self.children
