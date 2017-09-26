@@ -7,6 +7,9 @@ documentation = "http://eminence.github.io/xmltree-rs/doc/xmltree/index.html"
 repository = "https://github.com/eminence/xmltree-rs"
 keywords = ["xml", "parse", "xmltree"]
 license = "MIT"
+readme = "README.md"
+categories = ["parsing", "data-structures"]
+
 
 [dependencies]
 xml-rs = "0.6"
