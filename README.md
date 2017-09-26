@@ -28,4 +28,4 @@ extern crate xmltree;
 
 See the documentation for the latest version:
 
-https://docs.rs/xmltree/0.6.0/xmltree/
+https://docs.rs/xmltree/
