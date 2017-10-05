@@ -262,26 +262,73 @@ impl Element {
     }
 
     /// Find a child element with the given name and return a reference to it.
-    pub fn get_child<K>(&self, k: K) -> Option<&Element>
-        where String: PartialEq<K>
+    pub fn get_child<P: ElementPredicate>(&self, k: P) -> Option<&Element>
     {
-        self.children.iter().find(|e| e.name == k)
+        self.children.iter().find(|e| k.match_element(e))
     }
 
     /// Find a child element with the given name and return a mutable reference to it.
-    pub fn get_mut_child<K>(&mut self, k: K) -> Option<&mut Element>
-        where String: PartialEq<K>
+    pub fn get_mut_child<P: ElementPredicate>(&mut self, k: P) -> Option<&mut Element>
     {
-        self.children.iter_mut().find(|e| e.name == k)
+        self.children.iter_mut().find(|e| k.match_element(e))
     }
 
     /// Find a child element with the given name, remove and return it.
-    pub fn take_child<K>(&mut self, k: K) -> Option<Element>
-        where String: PartialEq<K>
+    pub fn take_child<P: ElementPredicate>(&mut self, k: P) -> Option<Element>
     {
         self.children
             .iter()
-            .position(|e| e.name == k)
+            .position(|e| k.match_element(e))
             .map(|i| self.children.remove(i))
+    }
+}
+
+/// A predicate for matching elements.
+///
+/// The default implementations allow you to match by tag name or a tuple of
+/// tag name and namespace.
+pub trait ElementPredicate {
+    fn match_element(&self, e: &Element) -> bool;
+}
+
+// Unfortunately,
+// `impl<TN> ElementPredicate for TN where String: PartialEq<TN>` and
+// `impl<TN, NS> ElementPredicate for (TN, NS) where String: PartialEq<TN>, String: PartialEq<NS>`
+// are conflicting implementations, even though we know that there is no
+// implementation for tuples. We just manually implement `ElementPredicate` for
+// all `PartialEq` impls of `String` and forward them to the 1-tuple version.
+//
+// This can probably be fixed once specialization is stable.
+impl<TN> ElementPredicate for (TN,)
+    where String: PartialEq<TN>
+{
+    fn match_element(&self, e: &Element) -> bool {
+        &e.name == &self.0
+    }
+}
+
+impl<'a> ElementPredicate for &'a str {
+    fn match_element(&self, e: &Element) -> bool {
+        (*self,).match_element(e)
+    }
+}
+
+impl<'a> ElementPredicate for Cow<'a, str> {
+    fn match_element(&self, e: &Element) -> bool {
+        (&**self,).match_element(e)
+    }
+}
+
+impl ElementPredicate for String {
+    fn match_element(&self, e: &Element) -> bool {
+        (&**self,).match_element(e)
+    }
+}
+
+impl<TN, NS> ElementPredicate for (TN, NS)
+    where String: PartialEq<TN>, String: PartialEq<NS>
+{
+    fn match_element(&self, e: &Element) -> bool {
+        &e.name == &self.0 && e.namespace.as_ref().map(|ns| ns == &self.1).unwrap_or(false)
     }
 }
