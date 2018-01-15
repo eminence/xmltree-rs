@@ -1,7 +1,7 @@
 xmltree-rs
 ==========
 
-[Documention](https://eminence.github.io/xmltree-rs/doc/xmltree/index.html)
+[Documention](https://docs.rs/xmltree/)
 
 A small library for parsing an XML file into an in-memory tree structure.
 
