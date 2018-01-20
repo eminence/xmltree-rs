@@ -36,6 +36,7 @@ use std::borrow::Cow;
 use std::fmt;
 
 use xml::reader::{EventReader, XmlEvent};
+pub use xml::writer::EmitterConfig;
 pub use xml::namespace::Namespace;
 
 /// Represents an XML element.
@@ -247,11 +248,16 @@ impl Element {
 
     /// Writes out this element as the root element in an new XML document
     pub fn write<W: Write>(&self, w: W) {
+        self.write_with_config(w, EmitterConfig::new())
+    }
+
+    /// Writes out this element as the root element in a new XML document using the provided configuration
+    pub fn write_with_config<W: Write>(&self, w: W, config: EmitterConfig) {
         use xml::writer::EventWriter;
         use xml::writer::events::XmlEvent;
         use xml::common::XmlVersion;
 
-        let mut emitter = EventWriter::new(w);
+        let mut emitter = EventWriter::new_with_config(w, config);
         emitter.write(XmlEvent::StartDocument {
                           version: XmlVersion::Version10,
                           encoding: None,
