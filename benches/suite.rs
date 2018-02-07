@@ -1,7 +1,7 @@
 #![feature(test)]
 
-extern crate xmltree;
 extern crate test;
+extern crate xmltree;
 
 use test::Bencher;
 
@@ -19,7 +19,6 @@ fn _parse_file(filename: &str) -> std::result::Result<xmltree::Element, xmltree:
     Element::parse(data.as_bytes())
 }
 
-
 #[bench]
 fn bench_01(b: &mut Bencher) {
     b.iter(|| {
@@ -27,9 +26,8 @@ fn bench_01(b: &mut Bencher) {
         let e: Element = _parse_file(filename).unwrap();
 
         assert_eq!(e.name, "project");
-        let e2: &Element = e.get_child("libraries").expect(
-            "Missing libraries child element",
-        );
+        let e2: &Element = e.get_child("libraries")
+            .expect("Missing libraries child element");
         assert_eq!(e2.name, "libraries");
 
         assert!(e.get_child("doesnotexist").is_none());
@@ -45,19 +43,25 @@ fn bench_01(b: &mut Bencher) {
 #[bench]
 fn bench_02(b: &mut Bencher) {
     let filename = "tests/data/02.xml";
-    b.iter(|| { let _ = _parse_file(filename).unwrap(); });
+    b.iter(|| {
+        let _ = _parse_file(filename).unwrap();
+    });
 }
 
 #[bench]
 fn bench_03(b: &mut Bencher) {
     let filename = "tests/data/03.xml";
-    b.iter(|| { let _ = _parse_file(filename).unwrap(); });
+    b.iter(|| {
+        let _ = _parse_file(filename).unwrap();
+    });
 }
 
 #[bench]
 fn bench_04(b: &mut Bencher) {
     let filename = "tests/data/04.xml";
-    b.iter(|| { let _ = _parse_file(filename).unwrap(); });
+    b.iter(|| {
+        let _ = _parse_file(filename).unwrap();
+    });
 }
 
 #[bench]

@@ -111,7 +111,11 @@ fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Result<Elem
                     return Err(ParseError::CannotParse);
                 }
             }
-            Ok(XmlEvent::StartElement { name, attributes, namespace }) => {
+            Ok(XmlEvent::StartElement {
+                name,
+                attributes,
+                namespace,
+            }) => {
                 let mut attr_map = HashMap::new();
                 for attr in attributes {
                     attr_map.insert(attr.name.local_name, attr.value);
@@ -135,15 +139,14 @@ fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Result<Elem
             Ok(XmlEvent::Characters(s)) => {
                 elem.text = Some(s);
             }
-            Ok(XmlEvent::Whitespace(..)) | Ok(XmlEvent::Comment(..))=> (),
+            Ok(XmlEvent::Whitespace(..)) | Ok(XmlEvent::Comment(..)) => (),
             Ok(XmlEvent::CData(s)) => elem.text = Some(s),
-            Ok(XmlEvent::StartDocument { .. }) |
-            Ok(XmlEvent::EndDocument) |
-            Ok(XmlEvent::ProcessingInstruction { .. }) => return Err(ParseError::CannotParse),
+            Ok(XmlEvent::StartDocument { .. })
+            | Ok(XmlEvent::EndDocument)
+            | Ok(XmlEvent::ProcessingInstruction { .. }) => return Err(ParseError::CannotParse),
             Err(e) => return Err(ParseError::MalformedXml(e)),
         }
     }
-
 }
 
 impl Element {
@@ -167,7 +170,11 @@ impl Element {
         let mut reader = EventReader::new(r);
         loop {
             match reader.next() {
-                Ok(XmlEvent::StartElement { name, attributes, namespace }) => {
+                Ok(XmlEvent::StartElement {
+                    name,
+                    attributes,
+                    namespace,
+                }) => {
                     let mut attr_map = HashMap::new();
                     for attr in attributes {
                         attr_map.insert(attr.name.local_name, attr.value);
@@ -188,14 +195,14 @@ impl Element {
                     };
                     return build(&mut reader, root);
                 }
-                Ok(XmlEvent::Comment(..)) |
-                Ok(XmlEvent::Whitespace(..)) |
-                Ok(XmlEvent::StartDocument { .. }) => continue,
-                Ok(XmlEvent::EndDocument) |
-                Ok(XmlEvent::EndElement { .. }) |
-                Ok(XmlEvent::Characters(..)) |
-                Ok(XmlEvent::CData(..)) |
-                Ok(XmlEvent::ProcessingInstruction { .. }) => return Err(ParseError::CannotParse),
+                Ok(XmlEvent::Comment(..))
+                | Ok(XmlEvent::Whitespace(..))
+                | Ok(XmlEvent::StartDocument { .. }) => continue,
+                Ok(XmlEvent::EndDocument)
+                | Ok(XmlEvent::EndElement { .. })
+                | Ok(XmlEvent::Characters(..))
+                | Ok(XmlEvent::CData(..))
+                | Ok(XmlEvent::ProcessingInstruction { .. }) => return Err(ParseError::CannotParse),
                 Err(e) => return Err(ParseError::MalformedXml(e)),
             }
         }
@@ -218,9 +225,9 @@ impl Element {
         let mut attributes = Vec::with_capacity(self.attributes.len());
         for (k, v) in &self.attributes {
             attributes.push(Attribute {
-                                name: Name::local(k),
-                                value: v,
-                            });
+                name: Name::local(k),
+                value: v,
+            });
         }
 
         let empty_ns = Namespace::empty();
@@ -230,12 +237,11 @@ impl Element {
             Cow::Borrowed(&empty_ns)
         };
 
-
         emitter.write(XmlEvent::StartElement {
-                          name: name,
-                          attributes: Cow::Owned(attributes),
-                          namespace: namespace,
-                      })?;
+            name: name,
+            attributes: Cow::Owned(attributes),
+            namespace: namespace,
+        })?;
         if let Some(ref t) = self.text {
             emitter.write(XmlEvent::Characters(t))?;
         }
@@ -260,30 +266,33 @@ impl Element {
 
         let mut emitter = EventWriter::new_with_config(w, config);
         emitter.write(XmlEvent::StartDocument {
-                          version: XmlVersion::Version10,
-                          encoding: None,
-                          standalone: None,
-                      })?;
+            version: XmlVersion::Version10,
+            encoding: None,
+            standalone: None,
+        })?;
         self._write(&mut emitter)
     }
 
     /// Find a child element with the given name and return a reference to it.
     pub fn get_child<K>(&self, k: K) -> Option<&Element>
-        where String: PartialEq<K>
+    where
+        String: PartialEq<K>,
     {
         self.children.iter().find(|e| e.name == k)
     }
 
     /// Find a child element with the given name and return a mutable reference to it.
     pub fn get_mut_child<K>(&mut self, k: K) -> Option<&mut Element>
-        where String: PartialEq<K>
+    where
+        String: PartialEq<K>,
     {
         self.children.iter_mut().find(|e| e.name == k)
     }
 
     /// Find a child element with the given name, remove and return it.
     pub fn take_child<K>(&mut self, k: K) -> Option<Element>
-        where String: PartialEq<K>
+    where
+        String: PartialEq<K>,
     {
         self.children
             .iter()

@@ -4,13 +4,13 @@ use xmltree::*;
 use std::fs::File;
 use std::io::Cursor;
 
-
 #[test]
 fn test_01() {
     let e: Element = Element::parse(File::open("tests/data/01.xml").unwrap()).unwrap();
     println!("E:=======\n{:#?}", e);
     assert_eq!(e.name, "project");
-    let e2: &Element = e.get_child("libraries").expect("Missing libraries child element");
+    let e2: &Element = e.get_child("libraries")
+        .expect("Missing libraries child element");
     assert_eq!(e2.name, "libraries");
 
     assert!(e.get_child("doesnotexist").is_none());
@@ -44,7 +44,6 @@ fn test_04() {
 
 #[test]
 fn test_rw() {
-
     let e: Element = Element::parse(File::open("tests/data/rw.xml").unwrap()).unwrap();
 
     let mut buf = Vec::new();
@@ -57,14 +56,12 @@ fn test_rw() {
 
 #[test]
 fn test_mut() {
-
     let mut e: Element = Element::parse(File::open("tests/data/rw.xml").unwrap()).unwrap();
     {
         let name = e.get_mut_child("name").unwrap();
         name.attributes.insert("suffix".to_owned(), "mr".to_owned());
     }
 }
-
 
 #[test]
 fn test_mal_01() {
@@ -85,9 +82,7 @@ fn test_mal_01() {
         panic!("unexpected parse result");
     }
     println!("{:?}", names_element);
-
 }
-
 
 #[test]
 fn test_mal_02() {
@@ -105,9 +100,7 @@ fn test_mal_02() {
         panic!("unexpected parse result");
     }
     println!("{:?}", names_element);
-
 }
-
 
 #[test]
 fn test_mal_03() {
@@ -128,7 +121,6 @@ fn test_mal_03() {
         panic!("unexpected parse result");
     }
     println!("{:?}", names_element);
-
 }
 
 #[test]
@@ -166,11 +158,9 @@ fn test_take() {
 
     if let Some(removed) = data_1.take_child("remove_me") {
         assert_eq!(removed.children.len(), 1);
-
     } else {
         panic!("take_child failed");
     }
-
 
     assert_eq!(data_1, data_2);
 }
@@ -199,14 +189,13 @@ fn test_ns_rw() {
     }
 }
 
-
 #[test]
 fn test_write_with_config() {
     let e: Element = Element::parse(File::open("tests/data/01.xml").unwrap()).unwrap();
 
-    let cfg = EmitterConfig { 
+    let cfg = EmitterConfig {
         perform_indent: true,
-        .. EmitterConfig::default()
+        ..EmitterConfig::default()
     };
 
     let mut buf = Vec::new();
@@ -214,5 +203,4 @@ fn test_write_with_config() {
 
     let s = String::from_utf8(buf).unwrap();
     println!("{}", s);
-
 }
