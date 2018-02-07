@@ -16,7 +16,7 @@ fn test_01() {
     assert!(e.get_child("doesnotexist").is_none());
 
     let mut buf = Vec::new();
-    e.write(&mut buf);
+    e.write(&mut buf).unwrap();
 
     let e2 = Element::parse(Cursor::new(buf)).unwrap();
     println!("E2:======\n{:#?}", e2);
@@ -48,7 +48,7 @@ fn test_rw() {
     let e: Element = Element::parse(File::open("tests/data/rw.xml").unwrap()).unwrap();
 
     let mut buf = Vec::new();
-    e.write(&mut buf);
+    e.write(&mut buf).unwrap();
 
     let e2 = Element::parse(Cursor::new(buf)).unwrap();
 
@@ -181,7 +181,7 @@ fn test_ns_rw() {
         let e: Element = Element::parse(File::open("tests/data/ns1.xml").unwrap()).unwrap();
 
         let mut buf = Vec::new();
-        e.write(&mut buf);
+        e.write(&mut buf).unwrap();
 
         let e2 = Element::parse(Cursor::new(buf)).unwrap();
 
@@ -191,7 +191,7 @@ fn test_ns_rw() {
         let e: Element = Element::parse(File::open("tests/data/ns2.xml").unwrap()).unwrap();
 
         let mut buf = Vec::new();
-        e.write(&mut buf);
+        e.write(&mut buf).unwrap();
 
         let e2 = Element::parse(Cursor::new(buf)).unwrap();
 
@@ -210,7 +210,7 @@ fn test_write_with_config() {
     };
 
     let mut buf = Vec::new();
-    e.write_with_config(&mut buf, cfg);
+    e.write_with_config(&mut buf, cfg).unwrap();
 
     let s = String::from_utf8(buf).unwrap();
     println!("{}", s);

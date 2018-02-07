@@ -36,7 +36,7 @@ use std::borrow::Cow;
 use std::fmt;
 
 use xml::reader::{EventReader, XmlEvent};
-pub use xml::writer::EmitterConfig;
+pub use xml::writer::{EmitterConfig, Error};
 pub use xml::namespace::Namespace;
 
 /// Represents an XML element.
@@ -201,7 +201,7 @@ impl Element {
         }
     }
 
-    fn _write<B: Write>(&self, emitter: &mut xml::writer::EventWriter<B>) {
+    fn _write<B: Write>(&self, emitter: &mut xml::writer::EventWriter<B>) -> Result<(), Error> {
         use xml::writer::events::XmlEvent;
         use xml::name::Name;
         use xml::namespace::Namespace;
@@ -235,24 +235,25 @@ impl Element {
                           name: name,
                           attributes: Cow::Owned(attributes),
                           namespace: namespace,
-                      })
-            .unwrap();
+                      })?;
         if let Some(ref t) = self.text {
-            emitter.write(XmlEvent::Characters(t)).unwrap();
+            emitter.write(XmlEvent::Characters(t))?;
         }
         for elem in &self.children {
-            elem._write(emitter);
+            elem._write(emitter)?;
         }
-        emitter.write(XmlEvent::EndElement { name: Some(name) }).unwrap();
+        emitter.write(XmlEvent::EndElement { name: Some(name) })?;
+
+        Ok(())
     }
 
     /// Writes out this element as the root element in an new XML document
-    pub fn write<W: Write>(&self, w: W) {
+    pub fn write<W: Write>(&self, w: W) -> Result<(), Error> {
         self.write_with_config(w, EmitterConfig::new())
     }
 
     /// Writes out this element as the root element in a new XML document using the provided configuration
-    pub fn write_with_config<W: Write>(&self, w: W, config: EmitterConfig) {
+    pub fn write_with_config<W: Write>(&self, w: W, config: EmitterConfig) -> Result<(), Error> {
         use xml::writer::EventWriter;
         use xml::writer::events::XmlEvent;
         use xml::common::XmlVersion;
@@ -262,9 +263,8 @@ impl Element {
                           version: XmlVersion::Version10,
                           encoding: None,
                           standalone: None,
-                      })
-            .unwrap();
-        self._write(&mut emitter);
+                      })?;
+        self._write(&mut emitter)
     }
 
     /// Find a child element with the given name and return a reference to it.
