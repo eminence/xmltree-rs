@@ -33,7 +33,7 @@ fn bench_01(b: &mut Bencher) {
         assert!(e.get_child("doesnotexist").is_none());
 
         let mut buf = Vec::new();
-        e.write(&mut buf);
+        e.write(&mut buf).unwrap();
 
         let e2 = Element::parse(Cursor::new(buf)).unwrap();
         assert_eq!(e, e2);
@@ -71,7 +71,7 @@ fn bench_rw(b: &mut Bencher) {
         let e = _parse_file(filename).unwrap();
 
         let mut buf = Vec::new();
-        e.write(&mut buf);
+        e.write(&mut buf).unwrap();
 
         let e2 = Element::parse(Cursor::new(buf)).unwrap();
         assert_eq!(e, e2);
@@ -187,7 +187,7 @@ fn bench_ns1_rw(b: &mut Bencher) {
     b.iter(|| {
         let e = _parse_file(filename).unwrap();
         let mut buf = Vec::new();
-        e.write(&mut buf);
+        e.write(&mut buf).unwrap();
     });
 }
 
@@ -197,6 +197,6 @@ fn bench_ns2_rw(b: &mut Bencher) {
     b.iter(|| {
         let e = _parse_file(filename).unwrap();
         let mut buf = Vec::new();
-        e.write(&mut buf);
+        e.write(&mut buf).unwrap();
     });
 }
