@@ -1,7 +1,6 @@
 extern crate xmltree;
 
-use xmltree::Element;
-use xmltree::ParseError;
+use xmltree::*;
 use std::fs::File;
 use std::io::Cursor;
 
@@ -198,4 +197,22 @@ fn test_ns_rw() {
 
         assert_eq!(e, e2);
     }
+}
+
+
+#[test]
+fn test_write_with_config() {
+    let e: Element = Element::parse(File::open("tests/data/01.xml").unwrap()).unwrap();
+
+    let cfg = EmitterConfig { 
+        perform_indent: true,
+        .. EmitterConfig::default()
+    };
+
+    let mut buf = Vec::new();
+    e.write_with_config(&mut buf, cfg);
+
+    let s = String::from_utf8(buf).unwrap();
+    println!("{}", s);
+
 }
