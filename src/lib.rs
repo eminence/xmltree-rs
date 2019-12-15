@@ -93,7 +93,7 @@ impl std::error::Error for ParseError {
         }
     }
 
-    fn cause(&self) -> Option<&std::error::Error> {
+    fn cause(&self) -> Option<&dyn std::error::Error> {
         match *self {
             ParseError::MalformedXml(ref e) => Some(e),
             ParseError::CannotParse => None,
