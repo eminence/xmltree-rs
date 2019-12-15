@@ -211,7 +211,6 @@ impl Element {
     fn _write<B: Write>(&self, emitter: &mut xml::writer::EventWriter<B>) -> Result<(), Error> {
         use xml::writer::events::XmlEvent;
         use xml::name::Name;
-        use xml::namespace::Namespace;
         use xml::attribute::Attribute;
 
         let mut name = Name::local(&self.name);
