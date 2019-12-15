@@ -134,7 +134,7 @@ fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Result<Elem
                     children: Vec::new(),
                     text: None,
                 };
-                elem.children.push(try!(build(reader, new_elem)));
+                elem.children.push(build(reader, new_elem)?);
             }
             Ok(XmlEvent::Characters(s)) => {
                 elem.text = Some(s);
