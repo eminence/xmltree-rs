@@ -93,7 +93,7 @@ impl std::error::Error for ParseError {
         }
     }
 
-    fn cause(&self) -> Option<&std::error::Error> {
+    fn cause(&self) -> Option<&dyn std::error::Error> {
         match *self {
             ParseError::MalformedXml(ref e) => Some(e),
             ParseError::CannotParse => None,
@@ -134,7 +134,7 @@ fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Result<Elem
                     children: Vec::new(),
                     text: None,
                 };
-                elem.children.push(try!(build(reader, new_elem)));
+                elem.children.push(build(reader, new_elem)?);
             }
             Ok(XmlEvent::Characters(s)) => {
                 elem.text = Some(s);
@@ -211,7 +211,6 @@ impl Element {
     fn _write<B: Write>(&self, emitter: &mut xml::writer::EventWriter<B>) -> Result<(), Error> {
         use xml::writer::events::XmlEvent;
         use xml::name::Name;
-        use xml::namespace::Namespace;
         use xml::attribute::Attribute;
 
         let mut name = Name::local(&self.name);
