@@ -5,11 +5,11 @@ extern crate xmltree;
 
 use test::Bencher;
 
-use xmltree::Element;
-use xmltree::ParseError;
 use std::fs::File;
 use std::io::Cursor;
 use std::io::Read;
+use xmltree::Element;
+use xmltree::ParseError;
 
 fn _parse_file(filename: &str) -> std::result::Result<xmltree::Element, xmltree::ParseError> {
     let mut file = File::open(filename).unwrap();
@@ -26,7 +26,8 @@ fn bench_01(b: &mut Bencher) {
         let e: Element = _parse_file(filename).unwrap();
 
         assert_eq!(e.name, "project");
-        let e2: &Element = e.get_child("libraries")
+        let e2: &Element = e
+            .get_child("libraries")
             .expect("Missing libraries child element");
         assert_eq!(e2.name, "libraries");
 

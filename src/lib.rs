@@ -30,14 +30,14 @@
 //! ```
 extern crate xml;
 
-use std::collections::HashMap;
-use std::io::{Read, Write};
 use std::borrow::Cow;
+use std::collections::HashMap;
 use std::fmt;
+use std::io::{Read, Write};
 
+pub use xml::namespace::Namespace;
 use xml::reader::{EventReader, XmlEvent};
 pub use xml::writer::{EmitterConfig, Error};
-pub use xml::namespace::Namespace;
 
 /// Represents an XML element.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -202,16 +202,18 @@ impl Element {
                 | Ok(XmlEvent::EndElement { .. })
                 | Ok(XmlEvent::Characters(..))
                 | Ok(XmlEvent::CData(..))
-                | Ok(XmlEvent::ProcessingInstruction { .. }) => return Err(ParseError::CannotParse),
+                | Ok(XmlEvent::ProcessingInstruction { .. }) => {
+                    return Err(ParseError::CannotParse)
+                }
                 Err(e) => return Err(ParseError::MalformedXml(e)),
             }
         }
     }
 
     fn _write<B: Write>(&self, emitter: &mut xml::writer::EventWriter<B>) -> Result<(), Error> {
-        use xml::writer::events::XmlEvent;
-        use xml::name::Name;
         use xml::attribute::Attribute;
+        use xml::name::Name;
+        use xml::writer::events::XmlEvent;
 
         let mut name = Name::local(&self.name);
         if let Some(ref ns) = self.namespace {
@@ -237,9 +239,9 @@ impl Element {
         };
 
         emitter.write(XmlEvent::StartElement {
-            name: name,
+            name,
             attributes: Cow::Owned(attributes),
-            namespace: namespace,
+            namespace,
         })?;
         if let Some(ref t) = self.text {
             emitter.write(XmlEvent::Characters(t))?;
@@ -259,9 +261,9 @@ impl Element {
 
     /// Writes out this element as the root element in a new XML document using the provided configuration
     pub fn write_with_config<W: Write>(&self, w: W, config: EmitterConfig) -> Result<(), Error> {
-        use xml::writer::EventWriter;
-        use xml::writer::events::XmlEvent;
         use xml::common::XmlVersion;
+        use xml::writer::events::XmlEvent;
+        use xml::writer::EventWriter;
 
         let mut emitter = EventWriter::new_with_config(w, config);
         emitter.write(XmlEvent::StartDocument {
@@ -273,20 +275,17 @@ impl Element {
     }
 
     /// Find a child element with the given name and return a reference to it.
-    pub fn get_child<P: ElementPredicate>(&self, k: P) -> Option<&Element>
-    {
+    pub fn get_child<P: ElementPredicate>(&self, k: P) -> Option<&Element> {
         self.children.iter().find(|e| k.match_element(e))
     }
 
     /// Find a child element with the given name and return a mutable reference to it.
-    pub fn get_mut_child<P: ElementPredicate>(&mut self, k: P) -> Option<&mut Element>
-    {
+    pub fn get_mut_child<P: ElementPredicate>(&mut self, k: P) -> Option<&mut Element> {
         self.children.iter_mut().find(|e| k.match_element(e))
     }
 
     /// Find a child element with the given name, remove and return it.
-    pub fn take_child<P: ElementPredicate>(&mut self, k: P) -> Option<Element>
-    {
+    pub fn take_child<P: ElementPredicate>(&mut self, k: P) -> Option<Element> {
         self.children
             .iter()
             .position(|e| k.match_element(e))
@@ -311,10 +310,11 @@ pub trait ElementPredicate {
 //
 // This can probably be fixed once specialization is stable.
 impl<TN> ElementPredicate for (TN,)
-    where String: PartialEq<TN>
+where
+    String: PartialEq<TN>,
 {
     fn match_element(&self, e: &Element) -> bool {
-        &e.name == &self.0
+        e.name == self.0
     }
 }
 
@@ -337,9 +337,15 @@ impl ElementPredicate for String {
 }
 
 impl<TN, NS> ElementPredicate for (TN, NS)
-    where String: PartialEq<TN>, String: PartialEq<NS>
+where
+    String: PartialEq<TN>,
+    String: PartialEq<NS>,
 {
     fn match_element(&self, e: &Element) -> bool {
-        &e.name == &self.0 && e.namespace.as_ref().map(|ns| ns == &self.1).unwrap_or(false)
+        e.name == self.0
+            && e.namespace
+                .as_ref()
+                .map(|ns| ns == &self.1)
+                .unwrap_or(false)
     }
 }

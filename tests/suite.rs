@@ -1,15 +1,16 @@
 extern crate xmltree;
 
-use xmltree::*;
 use std::fs::File;
 use std::io::Cursor;
+use xmltree::*;
 
 #[test]
 fn test_01() {
     let e: Element = Element::parse(File::open("tests/data/01.xml").unwrap()).unwrap();
     println!("E:=======\n{:#?}", e);
     assert_eq!(e.name, "project");
-    let e2: &Element = e.get_child("libraries")
+    let e2: &Element = e
+        .get_child("libraries")
         .expect("Missing libraries child element");
     assert_eq!(e2.name, "libraries");
 
@@ -209,8 +210,12 @@ fn test_write_with_config() {
 fn test_ns() {
     let e: Element = Element::parse(File::open("tests/data/ns1.xml").unwrap()).unwrap();
 
-    let htbl = e.get_child(("table", "http://www.w3.org/TR/html4/")).unwrap();
-    let ftbl = e.get_child(("table", "https://www.w3schools.com/furniture")).unwrap();
+    let htbl = e
+        .get_child(("table", "http://www.w3.org/TR/html4/"))
+        .unwrap();
+    let ftbl = e
+        .get_child(("table", "https://www.w3schools.com/furniture"))
+        .unwrap();
 
     assert_ne!(htbl, ftbl);
 }
