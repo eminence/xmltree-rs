@@ -319,18 +319,21 @@ where
 }
 
 impl<'a> ElementPredicate for &'a str {
+    /// Search by tag name
     fn match_element(&self, e: &Element) -> bool {
         (*self,).match_element(e)
     }
 }
 
 impl<'a> ElementPredicate for Cow<'a, str> {
+    /// Search by tag name
     fn match_element(&self, e: &Element) -> bool {
         (&**self,).match_element(e)
     }
 }
 
 impl ElementPredicate for String {
+    /// Search by tag name
     fn match_element(&self, e: &Element) -> bool {
         (&**self,).match_element(e)
     }
@@ -341,6 +344,7 @@ where
     String: PartialEq<TN>,
     String: PartialEq<NS>,
 {
+    /// Search by a tuple of (tagname, namespace)
     fn match_element(&self, e: &Element) -> bool {
         e.name == self.0
             && e.namespace
