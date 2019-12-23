@@ -39,6 +39,15 @@ pub use xml::namespace::Namespace;
 use xml::reader::{EventReader, XmlEvent};
 pub use xml::writer::{EmitterConfig, Error};
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum XMLNode {
+    Element(Element),
+    Comment(String),
+    CData(String),
+    Text(String),
+    ProcessingInstruction(String, Option<String>),
+}
+
 /// Represents an XML element.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Element {
@@ -60,10 +69,7 @@ pub struct Element {
     pub attributes: HashMap<String, String>,
 
     /// Children
-    pub children: Vec<Element>,
-
-    /// The text data for this element
-    pub text: Option<String>,
+    pub children: Vec<XMLNode>,
 }
 
 /// Errors that can occur parsing XML
@@ -132,18 +138,20 @@ fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Result<Elem
                     name: name.local_name,
                     attributes: attr_map,
                     children: Vec::new(),
-                    text: None,
                 };
-                elem.children.push(build(reader, new_elem)?);
+                elem.children
+                    .push(XMLNode::Element(build(reader, new_elem)?));
             }
-            Ok(XmlEvent::Characters(s)) => {
-                elem.text = Some(s);
+            Ok(XmlEvent::Characters(s)) => elem.children.push(XMLNode::Text(s)),
+            Ok(XmlEvent::Whitespace(..)) => (),
+            Ok(XmlEvent::Comment(s)) => elem.children.push(XMLNode::Comment(s)),
+            Ok(XmlEvent::CData(s)) => elem.children.push(XMLNode::Text(s)),
+            Ok(XmlEvent::ProcessingInstruction { name, data }) => elem
+                .children
+                .push(XMLNode::ProcessingInstruction(name, data)),
+            Ok(XmlEvent::StartDocument { .. }) | Ok(XmlEvent::EndDocument) => {
+                return Err(ParseError::CannotParse)
             }
-            Ok(XmlEvent::Whitespace(..)) | Ok(XmlEvent::Comment(..)) => (),
-            Ok(XmlEvent::CData(s)) => elem.text = Some(s),
-            Ok(XmlEvent::StartDocument { .. })
-            | Ok(XmlEvent::EndDocument)
-            | Ok(XmlEvent::ProcessingInstruction { .. }) => return Err(ParseError::CannotParse),
             Err(e) => return Err(ParseError::MalformedXml(e)),
         }
     }
@@ -161,13 +169,13 @@ impl Element {
             namespaces: None,
             attributes: HashMap::new(),
             children: Vec::new(),
-            text: None,
         }
     }
 
     /// Parses some data into an Element
-    pub fn parse<R: Read>(r: R) -> Result<Element, ParseError> {
+    pub fn parse<R: Read>(r: R) -> Result<Vec<XMLNode>, ParseError> {
         let mut reader = EventReader::new(r);
+        let mut root_nodes = Vec::new();
         loop {
             match reader.next() {
                 Ok(XmlEvent::StartElement {
@@ -175,7 +183,7 @@ impl Element {
                     attributes,
                     namespace,
                 }) => {
-                    let mut attr_map = HashMap::new();
+                    let mut attr_map = HashMap::with_capacity(attributes.len());
                     for attr in attributes {
                         attr_map.insert(attr.name.local_name, attr.value);
                     }
@@ -191,18 +199,21 @@ impl Element {
                         name: name.local_name,
                         attributes: attr_map,
                         children: Vec::new(),
-                        text: None,
                     };
-                    return build(&mut reader, root);
+                    root_nodes.push(XMLNode::Element(build(&mut reader, root)?));
                 }
-                Ok(XmlEvent::Comment(..))
-                | Ok(XmlEvent::Whitespace(..))
-                | Ok(XmlEvent::StartDocument { .. }) => continue,
-                Ok(XmlEvent::EndDocument)
-                | Ok(XmlEvent::EndElement { .. })
-                | Ok(XmlEvent::Characters(..))
-                | Ok(XmlEvent::CData(..))
-                | Ok(XmlEvent::ProcessingInstruction { .. }) => {
+                Ok(XmlEvent::Comment(comment_string)) => {
+                    root_nodes.push(XMLNode::Comment(comment_string))
+                }
+                Ok(XmlEvent::Characters(text_string)) => {
+                    root_nodes.push(XMLNode::Text(text_string))
+                }
+                Ok(XmlEvent::CData(cdata_string)) => root_nodes.push(XMLNode::CData(cdata_string)),
+                Ok(XmlEvent::Whitespace(..)) | Ok(XmlEvent::StartDocument { .. }) => continue,
+                Ok(XmlEvent::ProcessingInstruction { name, data }) => {
+                    root_nodes.push(XMLNode::ProcessingInstruction(name, data))
+                }
+                Ok(XmlEvent::EndDocument) | Ok(XmlEvent::EndElement { .. }) => {
                     return Err(ParseError::CannotParse)
                 }
                 Err(e) => return Err(ParseError::MalformedXml(e)),
@@ -243,11 +254,21 @@ impl Element {
             attributes: Cow::Owned(attributes),
             namespace,
         })?;
-        if let Some(ref t) = self.text {
-            emitter.write(XmlEvent::Characters(t))?;
-        }
-        for elem in &self.children {
-            elem._write(emitter)?;
+        for node in &self.children {
+            match node {
+                XMLNode::Element(elem) => elem._write(emitter)?,
+                XMLNode::Text(text) => emitter.write(XmlEvent::Characters(text))?,
+                XMLNode::Comment(comment) => emitter.write(XmlEvent::Comment(comment))?,
+                XMLNode::CData(comment) => emitter.write(XmlEvent::CData(comment))?,
+                XMLNode::ProcessingInstruction(name, data) => match data.to_owned() {
+                    Some(string) => emitter.write(XmlEvent::ProcessingInstruction {
+                        name,
+                        data: Some(&string),
+                    })?,
+                    None => emitter.write(XmlEvent::ProcessingInstruction { name, data: None })?,
+                },
+            }
+            // elem._write(emitter)?;
         }
         emitter.write(XmlEvent::EndElement { name: Some(name) })?;
 
@@ -276,20 +297,39 @@ impl Element {
 
     /// Find a child element with the given name and return a reference to it.
     pub fn get_child<P: ElementPredicate>(&self, k: P) -> Option<&Element> {
-        self.children.iter().find(|e| k.match_element(e))
+        self.children
+            .iter()
+            .filter_map(|e| match e {
+                XMLNode::Element(elem) => Some(elem),
+                _ => None,
+            })
+            .find(|e| k.match_element(e))
     }
 
     /// Find a child element with the given name and return a mutable reference to it.
     pub fn get_mut_child<P: ElementPredicate>(&mut self, k: P) -> Option<&mut Element> {
-        self.children.iter_mut().find(|e| k.match_element(e))
+        self.children
+            .iter_mut()
+            .filter_map(|e| match e {
+                XMLNode::Element(elem) => Some(elem),
+                _ => None,
+            })
+            .find(|e| k.match_element(e))
     }
 
     /// Find a child element with the given name, remove and return it.
     pub fn take_child<P: ElementPredicate>(&mut self, k: P) -> Option<Element> {
-        self.children
-            .iter()
-            .position(|e| k.match_element(e))
-            .map(|i| self.children.remove(i))
+        let index = self.children.iter().position(|e| match e {
+            XMLNode::Element(elem) => k.match_element(elem),
+            _ => false,
+        });
+        match index {
+            Some(index) => match self.children.remove(index) {
+                XMLNode::Element(elem) => Some(elem),
+                _ => None,
+            },
+            None => None,
+        }
     }
 }
 
