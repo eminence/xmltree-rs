@@ -36,7 +36,7 @@ use std::fmt;
 use std::io::{Read, Write};
 
 pub use xml::namespace::Namespace;
-use xml::reader::{EventReader, XmlEvent};
+use xml::reader::{EventReader, XmlEvent, ParserConfig};
 pub use xml::writer::{EmitterConfig, Error};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -149,9 +149,7 @@ fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Result<Elem
             Ok(XmlEvent::ProcessingInstruction { name, data }) => elem
                 .children
                 .push(XMLNode::ProcessingInstruction(name, data)),
-            Ok(XmlEvent::StartDocument { .. }) | Ok(XmlEvent::EndDocument) => {
-                return Err(ParseError::CannotParse)
-            }
+            Ok(XmlEvent::StartDocument { .. }) | Ok(XmlEvent::EndDocument) => return Err(ParseError::CannotParse),
             Err(e) => return Err(ParseError::MalformedXml(e)),
         }
     }
@@ -173,8 +171,9 @@ impl Element {
     }
 
     /// Parses some data into an Element
-    pub fn parse<R: Read>(r: R) -> Result<Vec<XMLNode>, ParseError> {
-        let mut reader = EventReader::new(r);
+    pub fn parse_all<R: Read>(r: R) -> Result<Vec<XMLNode>, ParseError> {
+        let parser_config = ParserConfig::new().ignore_comments(false);
+        let mut reader = EventReader::new_with_config(r, parser_config);
         let mut root_nodes = Vec::new();
         loop {
             match reader.next() {
@@ -203,6 +202,7 @@ impl Element {
                     root_nodes.push(XMLNode::Element(build(&mut reader, root)?));
                 }
                 Ok(XmlEvent::Comment(comment_string)) => {
+                    println!("comment");
                     root_nodes.push(XMLNode::Comment(comment_string))
                 }
                 Ok(XmlEvent::Characters(text_string)) => {
@@ -213,12 +213,24 @@ impl Element {
                 Ok(XmlEvent::ProcessingInstruction { name, data }) => {
                     root_nodes.push(XMLNode::ProcessingInstruction(name, data))
                 }
-                Ok(XmlEvent::EndDocument) | Ok(XmlEvent::EndElement { .. }) => {
-                    return Err(ParseError::CannotParse)
-                }
+                Ok(XmlEvent::EndElement { .. }) => (),
+                Ok(XmlEvent::EndDocument) => return Ok(root_nodes),
                 Err(e) => return Err(ParseError::MalformedXml(e)),
             }
         }
+    }
+
+    /// Parses some data into an Element
+    pub fn parse<R: Read>(r: R) -> Result<Element, ParseError> {
+        let nodes = Element::parse_all(r)?;
+        for node in nodes {
+            match node {
+                XMLNode::Element(elem) => return Ok(elem),
+                _ => (),
+            }
+        }
+        // This assume the underlying xml library throws an error on no root element
+        unreachable!();
     }
 
     fn _write<B: Write>(&self, emitter: &mut xml::writer::EventWriter<B>) -> Result<(), Error> {
