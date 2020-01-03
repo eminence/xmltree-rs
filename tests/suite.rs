@@ -53,6 +53,12 @@ fn test_parse_all() {
 }
 
 #[test]
+fn test_no_root_node() {
+    let result = Element::parse_all(File::open("tests/data/05.xml").unwrap());
+    assert!(result.is_err())
+}
+
+#[test]
 fn test_rw() {
     let e: Element = Element::parse(File::open("tests/data/rw.xml").unwrap()).unwrap();
 

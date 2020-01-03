@@ -36,7 +36,7 @@ use std::fmt;
 use std::io::{Read, Write};
 
 pub use xml::namespace::Namespace;
-use xml::reader::{EventReader, XmlEvent, ParserConfig};
+use xml::reader::{EventReader, ParserConfig, XmlEvent};
 pub use xml::writer::{EmitterConfig, Error};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -149,7 +149,9 @@ fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Result<Elem
             Ok(XmlEvent::ProcessingInstruction { name, data }) => elem
                 .children
                 .push(XMLNode::ProcessingInstruction(name, data)),
-            Ok(XmlEvent::StartDocument { .. }) | Ok(XmlEvent::EndDocument) => return Err(ParseError::CannotParse),
+            Ok(XmlEvent::StartDocument { .. }) | Ok(XmlEvent::EndDocument) => {
+                return Err(ParseError::CannotParse)
+            }
             Err(e) => return Err(ParseError::MalformedXml(e)),
         }
     }
@@ -202,7 +204,6 @@ impl Element {
                     root_nodes.push(XMLNode::Element(build(&mut reader, root)?));
                 }
                 Ok(XmlEvent::Comment(comment_string)) => {
-                    println!("comment");
                     root_nodes.push(XMLNode::Comment(comment_string))
                 }
                 Ok(XmlEvent::Characters(text_string)) => {
