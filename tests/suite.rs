@@ -266,7 +266,7 @@ fn test_text() {
     let elem = Element::parse(data.as_bytes()).unwrap();
     assert_eq!(
         elem.get_text().unwrap(),
-        Cow::<str>::Owned("hello world".to_owned())
+        Cow::from("hello world".to_owned())
     );
 
     let data = r##"
@@ -277,6 +277,6 @@ fn test_text() {
     let elem = Element::parse(data.as_bytes()).unwrap();
     assert_eq!(
         elem.get_text().unwrap(),
-        Cow::<str>::Owned("hello <world>".to_owned())
+        Cow::from("hello <world>".to_owned())
     );
 }

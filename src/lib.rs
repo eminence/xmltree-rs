@@ -79,7 +79,7 @@ impl XMLNode {
     }
     pub fn as_processing_instruction(&self) -> Option<(&str, Option<&str>)> {
         if let XMLNode::ProcessingInstruction(s, o) = self {
-            Some((s, o.as_deref()))
+            Some((s, o.as_ref().map(|s| s.as_str())))
         } else {
             None
         }
