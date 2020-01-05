@@ -1,5 +1,6 @@
 extern crate xmltree;
 
+use std::borrow::Cow;
 use std::fs::File;
 use std::io::Cursor;
 use xmltree::*;
@@ -39,17 +40,21 @@ fn test_03() {
 
 #[test]
 fn test_04() {
-
     let e: Element = Element::parse(File::open("tests/data/04.xml").unwrap()).unwrap();
     println!("{:#?}", e);
+    let pi = e.children[0].as_processing_instruction();
+    assert!(pi.is_some());
+    let pi = pi.unwrap();
+    assert_eq!(pi.0, "pi");
+    assert_eq!(pi.1.unwrap(), "foo=\"blah\"");
 }
 
 #[test]
 fn test_parse_all() {
     let nodes = Element::parse_all(File::open("tests/data/04.xml").unwrap()).unwrap();
     println!("{:#?}", nodes);
-    assert_eq!(nodes.len(), 3);
-    println!("{:#?}", nodes);
+    assert_eq!(nodes.len(), 4);
+    assert!(nodes[0].as_comment().is_some());
 }
 
 #[test]
@@ -233,4 +238,45 @@ fn test_ns() {
         .unwrap();
 
     assert_ne!(htbl, ftbl);
+}
+
+#[test]
+fn test_text() {
+    let data = r##"
+        <?xml version="1.0" encoding="utf-8" standalone="yes"?>
+        <elem><inner/></elem>
+    "##;
+
+    let elem = Element::parse(data.as_bytes()).unwrap();
+    assert!(elem.get_text().is_none());
+
+    let data = r##"
+        <?xml version="1.0" encoding="utf-8" standalone="yes"?>
+        <elem>hello world<inner/></elem>
+    "##;
+
+    let elem = Element::parse(data.as_bytes()).unwrap();
+    assert_eq!(elem.get_text().unwrap(), Cow::Borrowed("hello world"));
+
+    let data = r##"
+        <?xml version="1.0" encoding="utf-8" standalone="yes"?>
+        <elem>hello <inner/>world</elem>
+    "##;
+
+    let elem = Element::parse(data.as_bytes()).unwrap();
+    assert_eq!(
+        elem.get_text().unwrap(),
+        Cow::<str>::Owned("hello world".to_owned())
+    );
+
+    let data = r##"
+        <?xml version="1.0" encoding="utf-8" standalone="yes"?>
+        <elem>hello <inner/><![CDATA[<world>]]></elem>
+    "##;
+
+    let elem = Element::parse(data.as_bytes()).unwrap();
+    assert_eq!(
+        elem.get_text().unwrap(),
+        Cow::<str>::Owned("hello <world>".to_owned())
+    );
 }

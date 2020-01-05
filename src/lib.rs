@@ -48,6 +48,44 @@ pub enum XMLNode {
     ProcessingInstruction(String, Option<String>),
 }
 
+impl XMLNode {
+    pub fn as_element(&self) -> Option<&Element> {
+        if let XMLNode::Element(e) = self {
+            Some(e)
+        } else {
+            None
+        }
+    }
+    pub fn as_comment(&self) -> Option<&str> {
+        if let XMLNode::Comment(c) = self {
+            Some(c)
+        } else {
+            None
+        }
+    }
+    pub fn as_cdata(&self) -> Option<&str> {
+        if let XMLNode::CData(c) = self {
+            Some(c)
+        } else {
+            None
+        }
+    }
+    pub fn as_text(&self) -> Option<&str> {
+        if let XMLNode::Text(c) = self {
+            Some(c)
+        } else {
+            None
+        }
+    }
+    pub fn as_processing_instruction(&self) -> Option<(&str, Option<&str>)> {
+        if let XMLNode::ProcessingInstruction(s, o) = self {
+            Some((s, o.as_deref()))
+        } else {
+            None
+        }
+    }
+}
+
 /// Represents an XML element.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Element {
@@ -172,7 +210,10 @@ impl Element {
         }
     }
 
-    /// Parses some data into an Element
+    /// Parses some data into a list of `XMLNode`s
+    ///
+    /// This is useful when you want to capture comments or processing instructions that appear
+    /// before or after the root node
     pub fn parse_all<R: Read>(r: R) -> Result<Vec<XMLNode>, ParseError> {
         let parser_config = ParserConfig::new().ignore_comments(false);
         let mut reader = EventReader::new_with_config(r, parser_config);
@@ -309,6 +350,14 @@ impl Element {
     }
 
     /// Find a child element with the given name and return a reference to it.
+    ///
+    /// Both `&str` and `String` implement `ElementPredicate` and can be used to search for child
+    /// elements that match the given element name with `.get_child("element_name")`.  You can also
+    /// search by `("element_name", "tag_name")` tuple.
+    ///
+    ///
+    /// Note: this will only return Elements.  To get other nodes (like comments), iterate through
+    /// the `children` field.
     pub fn get_child<P: ElementPredicate>(&self, k: P) -> Option<&Element> {
         self.children
             .iter()
@@ -342,6 +391,28 @@ impl Element {
                 _ => None,
             },
             None => None,
+        }
+    }
+
+    /// Returns the inner text/cdata of this element, if any.
+    ///
+    /// If there are multiple text/cdata nodes, they will be all concatenated into one string.
+    pub fn get_text<'a>(&'a self) -> Option<Cow<'a, str>> {
+        let text_nodes: Vec<&'a str> = self
+            .children
+            .iter()
+            .filter_map(|node| node.as_text().or_else(|| node.as_cdata()))
+            .collect();
+        if text_nodes.is_empty() {
+            None
+        } else if text_nodes.len() == 1 {
+            Some(Cow::Borrowed(text_nodes[0]))
+        } else {
+            let mut full_text = String::new();
+            for text in text_nodes {
+                full_text.push_str(text);
+            }
+            Some(Cow::Owned(full_text))
         }
     }
 }
