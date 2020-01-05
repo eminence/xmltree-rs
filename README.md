@@ -15,7 +15,7 @@ Add the following to your `Cargo.toml` file:
 
 ```toml
 [dependencies]
-xmltree = "0.9"
+xmltree = "0.10"
 ```
 
 ## Compatability with xml-rs
@@ -26,7 +26,7 @@ use a version of xmltree that matches the version of xml-rs you are using:
 
 | xml-rs version | xmltree version |
 |----------------|-----------------|
-| 0.8            | 0.9             |
+| 0.8            | 0.10            |
 | 0.7            | 0.8             |
 | 0.6            | 0.6             |
 
