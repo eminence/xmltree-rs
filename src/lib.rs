@@ -84,6 +84,98 @@ impl XMLNode {
             None
         }
     }
+
+    /// Depth first traversal using post order (parent before children)
+    pub fn dft_pre_order<'a>(
+        &'a self,
+        stop_predicate: Option<fn(&'a XMLNode) -> bool>,
+    ) -> PreOrderDFTIterator<'a, Self> {
+        PreOrderDFTIterator::new(self, stop_predicate)
+    }
+
+    /// Depth first traversal using post order (parent after children)
+    pub fn dft_post_order<'a>(
+        &'a self,
+        stop_predicate: Option<fn(&'a XMLNode) -> bool>,
+    ) -> PostOrderDFTIterator<'a, Self> {
+        PostOrderDFTIterator::new(self, stop_predicate)
+    }
+}
+
+impl Traversable for XMLNode {
+    fn get_children(&self) -> Vec<&XMLNode> {
+        if let Some(element) = self.as_element() {
+            let mut child_vec = Vec::new();
+            for child in element.children.iter() {
+                child_vec.push(child);
+            }
+            return child_vec;
+        }
+        return Vec::new();
+    }
+}
+
+/// Parses some data into a list of `XMLNode`s
+///
+/// This is useful when you want to capture comments or processing instructions that appear
+/// before or after the root node
+pub fn parse_all<R: Read>(r: R) -> Result<Vec<XMLNode>, ParseError> {
+    let parser_config = ParserConfig::new().ignore_comments(false);
+    let mut reader = EventReader::new_with_config(r, parser_config);
+    let mut root_nodes = Vec::new();
+    loop {
+        match reader.next() {
+            Ok(XmlEvent::StartElement {
+                name,
+                attributes,
+                namespace,
+            }) => {
+                let mut attr_map = HashMap::with_capacity(attributes.len());
+                for attr in attributes {
+                    attr_map.insert(attr.name.local_name, attr.value);
+                }
+
+                let root = Element {
+                    prefix: name.prefix,
+                    namespace: name.namespace,
+                    namespaces: if namespace.is_essentially_empty() {
+                        None
+                    } else {
+                        Some(namespace)
+                    },
+                    name: name.local_name,
+                    attributes: attr_map,
+                    children: Vec::new(),
+                };
+                root_nodes.push(XMLNode::Element(build(&mut reader, root)?));
+            }
+            Ok(XmlEvent::Comment(comment_string)) => {
+                root_nodes.push(XMLNode::Comment(comment_string))
+            }
+            Ok(XmlEvent::Characters(text_string)) => root_nodes.push(XMLNode::Text(text_string)),
+            Ok(XmlEvent::CData(cdata_string)) => root_nodes.push(XMLNode::CData(cdata_string)),
+            Ok(XmlEvent::Whitespace(..)) | Ok(XmlEvent::StartDocument { .. }) => continue,
+            Ok(XmlEvent::ProcessingInstruction { name, data }) => {
+                root_nodes.push(XMLNode::ProcessingInstruction(name, data))
+            }
+            Ok(XmlEvent::EndElement { .. }) => (),
+            Ok(XmlEvent::EndDocument) => return Ok(root_nodes),
+            Err(e) => return Err(ParseError::MalformedXml(e)),
+        }
+    }
+}
+
+/// Parses some data into an Element
+pub fn parse<R: Read>(r: R) -> Result<Element, ParseError> {
+    let nodes = Element::parse_all(r)?;
+    for node in nodes {
+        match node {
+            XMLNode::Element(elem) => return Ok(elem),
+            _ => (),
+        }
+    }
+    // This assume the underlying xml library throws an error on no root element
+    unreachable!();
 }
 
 /// Represents an XML element.
@@ -195,6 +287,19 @@ fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Result<Elem
     }
 }
 
+
+impl Traversable for Element {
+    fn get_children(&self) -> Vec<&Element> {
+        let mut child_vec = Vec::new();
+        for child in self.children.iter() {
+            if let XMLNode::Element(element) = child {
+                child_vec.push(element);
+            }
+        }
+        return child_vec;
+    }
+}
+
 impl Element {
     /// Create a new empty element with given name
     ///
@@ -210,69 +315,33 @@ impl Element {
         }
     }
 
+    /// Depth first traversal using post order (parent before children)
+    pub fn dft_pre_order<'a>(
+        &'a self,
+        stop_predicate: Option<fn(&'a Element) -> bool>,
+    ) -> PreOrderDFTIterator<'a, Self> {
+        PreOrderDFTIterator::new(self, stop_predicate)
+    }
+
+    /// Depth first traversal using post order (parent after children)
+    pub fn dft_post_order<'a>(
+        &'a self,
+        stop_predicate: Option<fn(&'a Element) -> bool>,
+    ) -> PostOrderDFTIterator<'a, Self> {
+        PostOrderDFTIterator::new(self, stop_predicate)
+    }
+
     /// Parses some data into a list of `XMLNode`s
     ///
     /// This is useful when you want to capture comments or processing instructions that appear
     /// before or after the root node
     pub fn parse_all<R: Read>(r: R) -> Result<Vec<XMLNode>, ParseError> {
-        let parser_config = ParserConfig::new().ignore_comments(false);
-        let mut reader = EventReader::new_with_config(r, parser_config);
-        let mut root_nodes = Vec::new();
-        loop {
-            match reader.next() {
-                Ok(XmlEvent::StartElement {
-                    name,
-                    attributes,
-                    namespace,
-                }) => {
-                    let mut attr_map = HashMap::with_capacity(attributes.len());
-                    for attr in attributes {
-                        attr_map.insert(attr.name.local_name, attr.value);
-                    }
-
-                    let root = Element {
-                        prefix: name.prefix,
-                        namespace: name.namespace,
-                        namespaces: if namespace.is_essentially_empty() {
-                            None
-                        } else {
-                            Some(namespace)
-                        },
-                        name: name.local_name,
-                        attributes: attr_map,
-                        children: Vec::new(),
-                    };
-                    root_nodes.push(XMLNode::Element(build(&mut reader, root)?));
-                }
-                Ok(XmlEvent::Comment(comment_string)) => {
-                    root_nodes.push(XMLNode::Comment(comment_string))
-                }
-                Ok(XmlEvent::Characters(text_string)) => {
-                    root_nodes.push(XMLNode::Text(text_string))
-                }
-                Ok(XmlEvent::CData(cdata_string)) => root_nodes.push(XMLNode::CData(cdata_string)),
-                Ok(XmlEvent::Whitespace(..)) | Ok(XmlEvent::StartDocument { .. }) => continue,
-                Ok(XmlEvent::ProcessingInstruction { name, data }) => {
-                    root_nodes.push(XMLNode::ProcessingInstruction(name, data))
-                }
-                Ok(XmlEvent::EndElement { .. }) => (),
-                Ok(XmlEvent::EndDocument) => return Ok(root_nodes),
-                Err(e) => return Err(ParseError::MalformedXml(e)),
-            }
-        }
+        parse_all(r)
     }
 
     /// Parses some data into an Element
     pub fn parse<R: Read>(r: R) -> Result<Element, ParseError> {
-        let nodes = Element::parse_all(r)?;
-        for node in nodes {
-            match node {
-                XMLNode::Element(elem) => return Ok(elem),
-                _ => (),
-            }
-        }
-        // This assume the underlying xml library throws an error on no root element
-        unreachable!();
+        parse(r)
     }
 
     fn _write<B: Write>(&self, emitter: &mut xml::writer::EventWriter<B>) -> Result<(), Error> {
@@ -475,5 +544,166 @@ where
                 .as_ref()
                 .map(|ns| ns == &self.1)
                 .unwrap_or(false)
+    }
+}
+
+/// Trait enabling traversal over a tree structure
+pub trait Traversable<T = Self> {
+    fn get_children(&self) -> Vec<&T>;
+}
+
+/// Iterator for post-order depth first traversal
+pub struct PostOrderDFTIterator<'a, T>
+where
+    T: Traversable,
+{
+    node: &'a T,
+    has_next: bool,
+    index: usize,
+    child_iterator: Option<Box<PostOrderDFTIterator<'a, T>>>,
+    stop_predicate: Option<fn(&'a T) -> bool>,
+}
+
+impl<'a, T> PostOrderDFTIterator<'a, T>
+where
+    T: Traversable,
+{
+    fn new(node: &'a T, stop_predicate: Option<fn(&'a T) -> bool>) -> Self {
+        PostOrderDFTIterator {
+            node,
+            has_next: true,
+            index: 0,
+            child_iterator: None,
+            stop_predicate,
+        }
+    }
+}
+
+impl<'a, T> Iterator for PostOrderDFTIterator<'a, T>
+where
+    T: Traversable,
+{
+    type Item = &'a T;
+    fn next(&mut self) -> std::option::Option<<Self as std::iter::Iterator>::Item> {
+        // If no next, return None
+        if !self.has_next {
+            return None;
+        }
+
+        // If we have a matching stop predicate, return self
+        if let Some(stop_predicate) = self.stop_predicate {
+            if stop_predicate(self.node) {
+                self.has_next = false;
+                return Some(self.node);
+            }
+        }
+
+        // If we're in the middle of a child iterator, continue delegation
+        if let Some(ref mut child_iterator) = self.child_iterator {
+            if let Some(child_iterator_result) = (*child_iterator).next() {
+                return Some(child_iterator_result);
+            }
+            // The iterator is finished, so increment our child index and clear the child iterator
+            self.index = self.index + 1;
+            self.child_iterator = None;
+        }
+        // We're not in the middle of a child iterator, check to see if we have another child iterator
+        if let Some(child) = self.node.get_children().get(self.index) {
+            self.child_iterator = Some(Box::new(PostOrderDFTIterator::new(
+                child,
+                self.stop_predicate,
+            )));
+            // Hit the first iteration of the child
+            return self.next();
+        }
+
+        // No children to iterate, so return self
+        self.has_next = false;
+        return Some(self.node);
+    }
+}
+
+/// Iterator for pre-order depth first traversal
+pub struct PreOrderDFTIterator<'a, T>
+where
+    T: Traversable,
+{
+    node: &'a T,
+    has_next: bool,
+    has_returned_owned_node: bool,
+    index: usize,
+    child_iterator: Option<Box<PreOrderDFTIterator<'a, T>>>,
+    stop_predicate: Option<fn(&'a T) -> bool>,
+}
+
+impl<'a, T> PreOrderDFTIterator<'a, T>
+where
+    T: Traversable,
+{
+    fn new(node: &'a T, stop_predicate: Option<fn(&'a T) -> bool>) -> Self
+    where
+        T: Traversable,
+    {
+        PreOrderDFTIterator {
+            node,
+            has_next: true,
+            has_returned_owned_node: false,
+            index: 0,
+            child_iterator: None,
+            stop_predicate,
+        }
+    }
+}
+
+impl<'a, T> Iterator for PreOrderDFTIterator<'a, T>
+where
+    T: Traversable,
+{
+    type Item = &'a T;
+    fn next(&mut self) -> std::option::Option<<Self as std::iter::Iterator>::Item> {
+        // If no next, return None
+        if !self.has_next {
+            return None;
+        }
+
+        // If we have a matching stop predicate, return self
+        if let Some(stop_predicate) = self.stop_predicate {
+            let predicate_evaluation = stop_predicate(self.node);
+            if predicate_evaluation {
+                self.has_next = false;
+                self.has_returned_owned_node = true;
+                return Some(self.node);
+            }
+        }
+
+        // If we haven't returned owned node, return it
+        if !self.has_returned_owned_node {
+            self.has_returned_owned_node = true;
+            return Some(self.node);
+        }
+
+        // If we're in the middle of a child iterator, continue delegation
+        if let Some(ref mut child_iterator) = self.child_iterator {
+            if let Some(child_iterator_result) = (*child_iterator).next() {
+                return Some(child_iterator_result);
+            }
+            // The iterator is finished, so increment our child index and clear the child iterator
+            self.index = self.index + 1;
+            self.child_iterator = None;
+        }
+
+        // We're not in the middle of a child iterator, check to see if we have another child iterator
+        if let Some(child) = self.node.get_children().get(self.index) {
+            self.child_iterator = Some(Box::new(PreOrderDFTIterator::new(
+                child,
+                self.stop_predicate,
+            )));
+            // Hit the first iteration of the child
+            return self.next();
+        }
+
+        // No children to iterate, so return None
+        self.has_next = false;
+        return None;
     }
 }
