@@ -31,13 +31,16 @@
 extern crate xml;
 
 use std::borrow::Cow;
-use std::collections::HashMap;
+#[cfg(not(feature = "attribute-order"))]
+use std::collections::HashMap as AttributeMap;
 use std::fmt;
 use std::io::{Read, Write};
 
 pub use xml::namespace::Namespace;
 use xml::reader::{EventReader, ParserConfig, XmlEvent};
 pub use xml::writer::{EmitterConfig, Error};
+#[cfg(feature = "attribute-order")]
+use indexmap::map::IndexMap as AttributeMap;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum XMLNode {
@@ -104,7 +107,7 @@ pub struct Element {
     pub name: String,
 
     /// The Element attributes
-    pub attributes: HashMap<String, String>,
+    pub attributes: AttributeMap<String, String>,
 
     /// Children
     pub children: Vec<XMLNode>,
@@ -160,7 +163,7 @@ fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Result<Elem
                 attributes,
                 namespace,
             }) => {
-                let mut attr_map = HashMap::new();
+                let mut attr_map = AttributeMap::new();
                 for attr in attributes {
                     attr_map.insert(attr.name.local_name, attr.value);
                 }
@@ -205,7 +208,7 @@ impl Element {
             prefix: None,
             namespace: None,
             namespaces: None,
-            attributes: HashMap::new(),
+            attributes: AttributeMap::new(),
             children: Vec::new(),
         }
     }
@@ -225,7 +228,7 @@ impl Element {
                     attributes,
                     namespace,
                 }) => {
-                    let mut attr_map = HashMap::with_capacity(attributes.len());
+                    let mut attr_map = AttributeMap::with_capacity(attributes.len());
                     for attr in attributes {
                         attr_map.insert(attr.name.local_name, attr.value);
                     }
