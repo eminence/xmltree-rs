@@ -107,6 +107,10 @@ pub struct Element {
     pub name: String,
 
     /// The Element attributes
+    /// 
+    /// By default, this is a `HashMap`, but if the optional "attribute-order" feature is enabled,
+    /// this is an [IndexMap](https://docs.rs/indexmap/1.4.0/indexmap/), which will retain
+    /// item insertion order.
     pub attributes: AttributeMap<String, String>,
 
     /// Children
