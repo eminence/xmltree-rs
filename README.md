@@ -18,6 +18,11 @@ Add the following to your `Cargo.toml` file:
 xmltree = "0.10"
 ```
 
+### Feature-flags
+
+* `attribute-order` - change the data structure that stores attributes into one that keeps a
+consistent order. This changes the type definition and adds another dependency.
+
 ## Compatability with xml-rs
 This crate will export some types from the xml-rs crate.  If your own crate also uses the xml-rs
 crate, but with a different version, the types may be incompatible.  One way to solve this is to
