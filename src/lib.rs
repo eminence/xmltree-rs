@@ -59,6 +59,13 @@ impl XMLNode {
             None
         }
     }
+    pub fn as_mut_element(&mut self) -> Option<&mut Element> {
+        if let XMLNode::Element(e) = self {
+            Some(e)
+        } else {
+            None
+        }
+    }
     pub fn as_comment(&self) -> Option<&str> {
         if let XMLNode::Comment(c) = self {
             Some(c)
