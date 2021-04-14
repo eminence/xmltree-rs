@@ -354,12 +354,15 @@ impl Element {
         use xml::writer::events::XmlEvent;
         use xml::writer::EventWriter;
 
+        let write_document_declaration = config.write_document_declaration;
         let mut emitter = EventWriter::new_with_config(w, config);
-        emitter.write(XmlEvent::StartDocument {
-            version: XmlVersion::Version10,
-            encoding: None,
-            standalone: None,
-        })?;
+        if write_document_declaration {
+            emitter.write(XmlEvent::StartDocument {
+                version: XmlVersion::Version10,
+                encoding: None,
+                standalone: None,
+            })?;
+        }
         self._write(&mut emitter)
     }
 
