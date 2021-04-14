@@ -280,3 +280,23 @@ fn test_text() {
         Cow::from("hello <world>".to_owned())
     );
 }
+
+#[test]
+fn test_nodecl() {
+    let mut c = EmitterConfig::new();
+    c.write_document_declaration = false;
+    let e = Element::new("n");
+    let mut output = Vec::new();
+    e.write_with_config(&mut output, c).unwrap();
+    assert_eq!(String::from_utf8(output).unwrap(), "<n />");
+}
+
+#[test]
+fn test_decl() {
+    let mut c = EmitterConfig::new();
+    c.write_document_declaration = true;
+    let e = Element::new("n");
+    let mut output = Vec::new();
+    e.write_with_config(&mut output, c).unwrap();
+    assert_eq!(String::from_utf8(output).unwrap(), "<?xml version=\"1.0\" encoding=\"UTF-8\"?><n />");
+}
