@@ -31,16 +31,18 @@
 extern crate xml;
 
 use std::borrow::Cow;
-#[cfg(not(feature = "attribute-order"))]
+#[cfg(feature = "attribute-sorted")]
+use std::collections::BTreeMap as AttributeMap;
+#[cfg(not(any(feature = "attribute-sorted", feature = "attribute-order")))]
 use std::collections::HashMap as AttributeMap;
 use std::fmt;
 use std::io::{Read, Write};
 
+#[cfg(feature = "attribute-order")]
+use indexmap::map::IndexMap as AttributeMap;
 pub use xml::namespace::Namespace;
 use xml::reader::{EventReader, ParserConfig, XmlEvent};
 pub use xml::writer::{EmitterConfig, Error};
-#[cfg(feature = "attribute-order")]
-use indexmap::map::IndexMap as AttributeMap;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum XMLNode {
@@ -49,6 +51,24 @@ pub enum XMLNode {
     CData(String),
     Text(String),
     ProcessingInstruction(String, Option<String>),
+}
+
+trait AttributeMapExt {
+    fn allocate(capacity: usize) -> Self;
+}
+
+#[cfg(feature = "attribute-sorted")]
+impl<K: Ord, V> AttributeMapExt for AttributeMap<K, V> {
+    fn allocate(_capacity: usize) -> Self {
+        Self::new()
+    }
+}
+
+#[cfg(not(feature = "attribute-sorted"))]
+impl<K, V> AttributeMapExt for AttributeMap<K, V> {
+    fn allocate(capacity: usize) -> Self {
+        Self::with_capacity(capacity)
+    }
 }
 
 impl XMLNode {
@@ -114,7 +134,7 @@ pub struct Element {
     pub name: String,
 
     /// The Element attributes
-    /// 
+    ///
     /// By default, this is a `HashMap`, but if the optional "attribute-order" feature is enabled,
     /// this is an [IndexMap](https://docs.rs/indexmap/1.4.0/indexmap/), which will retain
     /// item insertion order.
@@ -239,7 +259,7 @@ impl Element {
                     attributes,
                     namespace,
                 }) => {
-                    let mut attr_map = AttributeMap::with_capacity(attributes.len());
+                    let mut attr_map = AttributeMap::allocate(attributes.len());
                     for attr in attributes {
                         attr_map.insert(attr.name.local_name, attr.value);
                     }
