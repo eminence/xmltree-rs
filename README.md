@@ -20,8 +20,9 @@ xmltree = "0.10"
 
 ### Feature-flags
 
-* `attribute-order` - change the data structure that stores attributes into one that keeps a
-consistent order. This changes the type definition and adds another dependency.
+* `attribute-order` - change the data structure that stores attributes to one that uses insertion order. This changes the type definition and adds another dependency.
+
+* `attribute-sorted` - change the data structure that stores attributes to one that uses sorted order. This changes the type definition.
 
 ## Compatability with xml-rs
 This crate will export some types from the xml-rs crate.  If your own crate also uses the xml-rs
