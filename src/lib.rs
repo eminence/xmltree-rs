@@ -41,7 +41,8 @@ use std::io::{Read, Write};
 #[cfg(feature = "attribute-order")]
 use indexmap::map::IndexMap as AttributeMap;
 pub use xml::namespace::Namespace;
-use xml::reader::{EventReader, ParserConfig, XmlEvent};
+pub use xml::reader::ParserConfig;
+use xml::reader::{EventReader, XmlEvent};
 pub use xml::writer::{EmitterConfig, Error};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -250,6 +251,10 @@ impl Element {
     /// before or after the root node
     pub fn parse_all<R: Read>(r: R) -> Result<Vec<XMLNode>, ParseError> {
         let parser_config = ParserConfig::new().ignore_comments(false);
+        Element::parse_all_with_config(r, parser_config)
+    }
+
+    pub fn parse_all_with_config<R: Read>(r: R, parser_config: ParserConfig) -> Result<Vec<XMLNode>, ParseError> {
         let mut reader = EventReader::new_with_config(r, parser_config);
         let mut root_nodes = Vec::new();
         loop {
@@ -300,10 +305,16 @@ impl Element {
     pub fn parse<R: Read>(r: R) -> Result<Element, ParseError> {
         let nodes = Element::parse_all(r)?;
         for node in nodes {
-            match node {
-                XMLNode::Element(elem) => return Ok(elem),
-                _ => (),
-            }
+            if let XMLNode::Element(elem) = node { return Ok(elem) }
+        }
+        // This assume the underlying xml library throws an error on no root element
+        unreachable!();
+    }
+
+    pub fn parse_with_config<R: Read>(r: R, config: ParserConfig) -> Result<Element, ParseError> {
+        let nodes = Element::parse_all_with_config(r, config)?;
+        for node in nodes {
+            if let XMLNode::Element(elem) = node { return Ok(elem) }
         }
         // This assume the underlying xml library throws an error on no root element
         unreachable!();
