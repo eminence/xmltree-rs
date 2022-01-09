@@ -28,18 +28,28 @@
 //!
 //!
 //! ```
-extern crate xml;
+use xml;
+
+#[cfg(all(feature = "attribute-order", not(feature = "attribute-sorted")))]
+pub use indexmap::map::IndexMap as AttributeMap;
+#[cfg(all(feature = "attribute-sorted", not(feature = "attribute-order")))]
+pub use std::collections::BTreeMap as AttributeMap;
+// When both features disabled or both enabled, use a fallback so irrelevant compiler errors don't
+// appear…
+#[cfg(any(
+    not(any(feature = "attribute-sorted", feature = "attribute-order")),
+    all(feature = "attribute-order", feature = "attribute-sorted")
+))]
+pub use std::collections::HashMap as AttributeMap;
+// But don't let the invalid case off easy, now that we've made sure this is the only compiler
+// error they'll see.
+#[cfg(all(feature = "attribute-order", feature = "attribute-sorted"))]
+compile_error!("`attribute-order` and `attribute-sorted` are mutually exclusive — pick one");
 
 use std::borrow::Cow;
-#[cfg(feature = "attribute-sorted")]
-use std::collections::BTreeMap as AttributeMap;
-#[cfg(not(any(feature = "attribute-sorted", feature = "attribute-order")))]
-use std::collections::HashMap as AttributeMap;
 use std::fmt;
 use std::io::{Read, Write};
 
-#[cfg(feature = "attribute-order")]
-use indexmap::map::IndexMap as AttributeMap;
 pub use xml::namespace::Namespace;
 use xml::reader::{EventReader, ParserConfig, XmlEvent};
 pub use xml::writer::{EmitterConfig, Error};
