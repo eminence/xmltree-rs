@@ -49,8 +49,11 @@ compile_error!("`attribute-order` and `attribute-sorted` are mutually exclusive 
 use std::borrow::Cow;
 use std::fmt;
 use std::io::{Read, Write};
+use std::iter::FromIterator as _;
 
-pub use xml::namespace::Namespace;
+mod namespace;
+pub use namespace::Namespace;
+use xml::namespace::Namespace as XmlNamespace;
 pub use xml::reader::ParserConfig;
 use xml::reader::{EventReader, XmlEvent};
 pub use xml::writer::{EmitterConfig, Error};
@@ -137,8 +140,6 @@ pub struct Element {
     pub namespace: Option<String>,
 
     /// The full list of namespaces, if any
-    ///
-    /// The `Namespace` type is exported from the `xml-rs` crate.
     pub namespaces: Option<Namespace>,
 
     /// The name of the Element.  Does not include any namespace info
@@ -150,6 +151,12 @@ pub struct Element {
     /// this is an [IndexMap](https://docs.rs/indexmap/1.4.0/indexmap/), which will retain
     /// item insertion order.
     pub attributes: AttributeMap<String, String>,
+
+    /// Attribute namespaces, such as `xml:lang="en"` in the below snippet:
+    /// ```xml
+    /// <mdui:DisplayName xml:lang="en">TestShib Test IdP</mdui:DisplayName>
+    /// ```
+    pub attribute_namespaces: AttributeMap<String, Namespace>,
 
     /// Children
     pub children: Vec<XMLNode>,
@@ -190,6 +197,27 @@ impl std::error::Error for ParseError {
     }
 }
 
+trait ToAttributeMaps {
+    fn to_attribute_maps(self) -> (AttributeMap<String, String>, AttributeMap<String, Namespace>);
+}
+
+impl ToAttributeMaps for Vec<xml::attribute::OwnedAttribute> {
+    fn to_attribute_maps(self) -> (AttributeMap<String, String>, AttributeMap<String, Namespace>) {
+        let mut attr_map = AttributeMap::with_capacity(self.len());
+        let mut attr_map_ns = AttributeMap::new();
+
+        for attr in self {
+            if let Some(ns) = attr.name.prefix {
+                let xns = Namespace::from_iter([(ns, attr.name.namespace.unwrap_or(xml::namespace::NS_EMPTY_URI.to_string()))]);
+                attr_map_ns.insert(attr.name.local_name.clone(), xns);
+            }
+            attr_map.insert(attr.name.local_name, attr.value);
+        }
+
+        (attr_map, attr_map_ns)
+    }
+}
+
 fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Result<Element, ParseError> {
     loop {
         match reader.next() {
@@ -205,10 +233,7 @@ fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Result<Elem
                 attributes,
                 namespace,
             }) => {
-                let mut attr_map = AttributeMap::new();
-                for attr in attributes {
-                    attr_map.insert(attr.name.local_name, attr.value);
-                }
+                let (attributes, attribute_namespaces) = attributes.to_attribute_maps();
 
                 let new_elem = Element {
                     prefix: name.prefix,
@@ -216,10 +241,11 @@ fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Result<Elem
                     namespaces: if namespace.is_essentially_empty() {
                         None
                     } else {
-                        Some(namespace)
+                        Some(namespace.into())
                     },
                     name: name.local_name,
-                    attributes: attr_map,
+                    attributes,
+                    attribute_namespaces,
                     children: Vec::new(),
                 };
                 elem.children
@@ -251,6 +277,7 @@ impl Element {
             namespace: None,
             namespaces: None,
             attributes: AttributeMap::new(),
+            attribute_namespaces: AttributeMap::new(),
             children: Vec::new(),
         }
     }
@@ -274,21 +301,18 @@ impl Element {
                     attributes,
                     namespace,
                 }) => {
-                    let mut attr_map = AttributeMap::allocate(attributes.len());
-                    for attr in attributes {
-                        attr_map.insert(attr.name.local_name, attr.value);
-                    }
-
+                    let (attributes, attribute_namespaces) = attributes.to_attribute_maps();
                     let root = Element {
                         prefix: name.prefix,
                         namespace: name.namespace,
                         namespaces: if namespace.is_essentially_empty() {
                             None
                         } else {
-                            Some(namespace)
+                            Some(namespace.into())
                         },
                         name: name.local_name,
-                        attributes: attr_map,
+                        attributes,
+                        attribute_namespaces,
                         children: Vec::new(),
                     };
                     root_nodes.push(XMLNode::Element(build(&mut reader, root)?));
@@ -346,14 +370,23 @@ impl Element {
         let mut attributes = Vec::with_capacity(self.attributes.len());
         for (k, v) in &self.attributes {
             attributes.push(Attribute {
-                name: Name::local(k),
+                name: if let Some(ns) = self.attribute_namespaces.get(k) {
+                    let nskv = ns.into_iter().next();
+                    if let Some((nsk, nsv)) = nskv {
+                        Name::qualified(k, nsv, Some(nsk))
+                    } else {
+                        Name::local(k)
+                    }
+                } else {
+                    Name::local(k)
+                },
                 value: v,
             });
         }
 
-        let empty_ns = Namespace::empty();
-        let namespace = if let Some(ref ns) = self.namespaces {
-            Cow::Borrowed(ns)
+        let empty_ns = XmlNamespace::empty();
+        let namespace = if let Some(ref ns) = self.namespaces.as_ref().map(|ns|ns.as_ref()) {
+            Cow::Borrowed(*ns)
         } else {
             Cow::Borrowed(&empty_ns)
         };
