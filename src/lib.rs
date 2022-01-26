@@ -383,8 +383,8 @@ impl Element {
         }
 
         let empty_ns = XmlNamespace::empty();
-        let namespace = if let Some(ref ns) = self.namespaces.as_ref().map(|ns|ns.as_ref()) {
-            Cow::Borrowed(*ns)
+        let namespace = if let Some(ns) = self.namespaces.as_ref().map(|ns|ns.as_ref()) {
+            Cow::Borrowed(ns)
         } else {
             Cow::Borrowed(&empty_ns)
         };
