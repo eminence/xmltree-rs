@@ -28,8 +28,6 @@
 //!
 //!
 //! ```
-use xml;
-
 #[cfg(all(feature = "attribute-order", not(feature = "attribute-sorted")))]
 pub use indexmap::map::IndexMap as AttributeMap;
 #[cfg(all(feature = "attribute-sorted", not(feature = "attribute-order")))]
