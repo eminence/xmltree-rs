@@ -206,7 +206,7 @@ impl ToAttributeMaps for Vec<xml::attribute::OwnedAttribute> {
 
         for attr in self {
             if let Some(ns) = attr.name.prefix {
-                let xns = Namespace::from_iter([(ns, attr.name.namespace.unwrap_or(xml::namespace::NS_EMPTY_URI.to_string()))]);
+                let xns = Namespace::from_iter([(ns, attr.name.namespace.unwrap_or_else(||xml::namespace::NS_EMPTY_URI.to_string()))]);
                 attr_map_ns.insert(attr.name.local_name.clone(), xns);
             }
             attr_map.insert(attr.name.local_name, attr.value);
