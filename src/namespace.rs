@@ -48,11 +48,6 @@ impl<'a> IntoIterator for &'a Namespace {
 
 impl FromIterator<(String, String)> for Namespace {
     fn from_iter<I: IntoIterator<Item = (String, String)>>(iter: I) -> Self {
-        let mut iterator = iter.into_iter();
-        let mut map = BTreeMap::new();
-        while let Some((k, v)) = iterator.next() {
-            map.insert(k, v);
-        }
-        Self(XmlNamespace(map))
+        Self(XmlNamespace(BTreeMap::from_iter(iter)))
     }
 }
