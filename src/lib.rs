@@ -31,16 +31,21 @@
 use xml;
 
 #[cfg(all(feature = "attribute-order", not(feature = "attribute-sorted")))]
-pub use indexmap::map::IndexMap as AttributeMap;
+/// The type used to store element attributes.
+pub type AttributeMap<K, V> = indexmap::map::IndexMap<K, V>;
 #[cfg(all(feature = "attribute-sorted", not(feature = "attribute-order")))]
-pub use std::collections::BTreeMap as AttributeMap;
+/// The type used to store element attributes.
+pub type AttributeMap<K, V> = std::collections::BTreeMap<K, V>;
 // When both features disabled or both enabled, use a fallback so irrelevant compiler errors don't
 // appear…
 #[cfg(any(
     not(any(feature = "attribute-sorted", feature = "attribute-order")),
     all(feature = "attribute-order", feature = "attribute-sorted")
 ))]
-pub use std::collections::HashMap as AttributeMap;
+/// The type used to store element attributes.
+///
+/// By default this is a HashMap, but this can be changed with the "attribute-sorted" or "attribute-order" features
+pub type AttributeMap<K, V> = std::collections::HashMap<K, V>;
 // But don't let the invalid case off easy, now that we've made sure this is the only compiler
 // error they'll see.
 #[cfg(all(feature = "attribute-order", feature = "attribute-sorted"))]
@@ -146,9 +151,11 @@ pub struct Element {
 
     /// The Element attributes
     ///
-    /// By default, this is a `HashMap`, but if the optional "attribute-order" feature is enabled,
-    /// this is an [IndexMap](https://docs.rs/indexmap/1.4.0/indexmap/), which will retain
-    /// item insertion order.
+    /// By default, this is a `HashMap`, but there are two optional features that can change this:
+    ///
+    /// * If the "attribute-order" feature is enabled, then this is an [IndexMap](https://docs.rs/indexmap/1.4.0/indexmap/),
+    /// which will retain item insertion order.
+    /// * If the "attribute-sorted" feature is enabled, then this is a [`std::collections::BTreeMap`], which maintains keys in sorted order.
     pub attributes: AttributeMap<String, String>,
 
     /// Children
