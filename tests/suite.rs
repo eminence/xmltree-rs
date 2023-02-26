@@ -80,7 +80,7 @@ fn test_mut() {
     let mut e: Element = Element::parse(File::open("tests/data/rw.xml").unwrap()).unwrap();
     {
         let name = e.get_mut_child("name").unwrap();
-        name.attributes.insert("suffix".to_owned(), "mr".to_owned());
+        name.attributes.insert(AttributeName::local("suffix"), "mr".to_owned());
     }
 }
 
@@ -299,4 +299,73 @@ fn test_decl() {
     let mut output = Vec::new();
     e.write_with_config(&mut output, c).unwrap();
     assert_eq!(String::from_utf8(output).unwrap(), "<?xml version=\"1.0\" encoding=\"UTF-8\"?><n />");
+}
+
+#[test]
+fn test_attribute_ns1() {
+    let e: Element = Element::parse(File::open("tests/data/issue13.xml").unwrap()).unwrap();
+
+    let display_name_elem = e.get_child(("DisplayName", "urn:oasis:names:tc:SAML:metadata:ui")).unwrap();
+    assert_eq!(display_name_elem.attributes.len(), 1);
+
+    // Search map using AttributeName struct
+    let attribute_name = AttributeName{ local_name: "lang".to_string(),
+        namespace: Some("http://www.w3.org/XML/1998/namespace".to_string()),
+        prefix: Some("xml".to_string())};
+    assert_eq!(display_name_elem.attributes.get(&attribute_name).unwrap(), "en");
+
+    // Search by name + namespace
+    let attribute_value
+        = display_name_elem.get_attribute(("lang",
+            Some("http://www.w3.org/XML/1998/namespace"))).unwrap();
+    assert_eq!(attribute_value, "en");
+
+    assert_eq!(None, display_name_elem.get_attribute(("lang",
+            Some("https://www.w3schools.com/furniture"))));
+
+    // Search by name as a &str
+    assert_eq!("en", display_name_elem.get_attribute("lang").unwrap());
+
+    assert_eq!(None, display_name_elem.get_attribute("no_such_attribute"));
+}
+
+#[test]
+fn test_multi_attribute_names() {
+    let ext_ns = "http://dbus.extensions.com/schemas/dbus-extensions-v1.0";
+    let mut e = Element::parse(File::open("tests/data/multi-attribute-ns.xml").unwrap()).unwrap();
+    let mut member_elem = e.take_child(("member", ext_ns)).unwrap();
+
+    // Get the first "type" attribute (in one namespace)
+    assert_ne!(None, member_elem.take_attribute("type"));
+    // Get the second "type" attribute (in the other namespace)
+    assert_ne!(None, member_elem.take_attribute("type"));
+    // Should be no more "type" attributes
+    assert_eq!(None, member_elem.take_attribute("type"));
+
+    e = Element::parse(File::open("tests/data/multi-attribute-ns.xml").unwrap()).unwrap();
+    member_elem = e.take_child(("member", ext_ns)).unwrap();
+
+    assert_eq!("i", member_elem.take_attribute(("type", None)).unwrap());
+    assert_eq!(None, member_elem.take_attribute(("type", None)));
+
+    assert_eq!("[ExtendedType]", member_elem.take_attribute(("type", Some(ext_ns))).unwrap());
+    assert_eq!(None, member_elem.take_attribute(("type", Some(ext_ns))));
+}
+
+#[test]
+fn test_mutable_attributes() {
+    let ext_ns = "http://dbus.extensions.com/schemas/dbus-extensions-v1.0";
+    let mut e = Element::parse(File::open("tests/data/multi-attribute-ns.xml").unwrap()).unwrap();
+    let mut member_elem = e.take_child(("member", ext_ns)).unwrap();
+
+    let new_val = "New value".to_string();
+    let attr_val : &mut String = member_elem.get_mut_attribute(("type", None)).unwrap();
+    *attr_val = new_val.clone();
+    assert_eq!(&new_val, member_elem.get_attribute(("type", None)).unwrap());
+
+
+    let new_ext_val = "New extended attr".to_string();
+    let ext_attr_val : &mut String = member_elem.get_mut_attribute(("type", Some(ext_ns))).unwrap();
+    *ext_attr_val = new_ext_val.clone();
+    assert_eq!(&new_ext_val, member_elem.get_attribute(("type", Some(ext_ns))).unwrap());
 }
