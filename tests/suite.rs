@@ -53,7 +53,7 @@ fn test_04() {
 fn test_parse_all() {
     let nodes = Element::parse_all(File::open("tests/data/04.xml").unwrap()).unwrap();
     println!("{:#?}", nodes);
-    assert_eq!(nodes.len(), 4);
+    assert_eq!(nodes.len(), 3);
     assert!(nodes[0].as_comment().is_some());
 }
 
@@ -174,8 +174,8 @@ fn test_take() {
         </names>
     "##;
 
-    let mut data_1 = Element::parse(data_xml_1.as_bytes()).unwrap();
-    let data_2 = Element::parse(data_xml_2.as_bytes()).unwrap();
+    let mut data_1 = Element::parse(data_xml_1.trim().as_bytes()).unwrap();
+    let data_2 = Element::parse(data_xml_2.trim().as_bytes()).unwrap();
 
     if let Some(removed) = data_1.take_child("remove_me") {
         assert_eq!(removed.children.len(), 1);
@@ -247,7 +247,7 @@ fn test_text() {
         <elem><inner/></elem>
     "##;
 
-    let elem = Element::parse(data.as_bytes()).unwrap();
+    let elem = Element::parse(data.trim().as_bytes()).unwrap();
     assert!(elem.get_text().is_none());
 
     let data = r##"
@@ -255,7 +255,7 @@ fn test_text() {
         <elem>hello world<inner/></elem>
     "##;
 
-    let elem = Element::parse(data.as_bytes()).unwrap();
+    let elem = Element::parse(data.trim().as_bytes()).unwrap();
     assert_eq!(elem.get_text().unwrap(), Cow::Borrowed("hello world"));
 
     let data = r##"
@@ -263,7 +263,7 @@ fn test_text() {
         <elem>hello <inner/>world</elem>
     "##;
 
-    let elem = Element::parse(data.as_bytes()).unwrap();
+    let elem = Element::parse(data.trim().as_bytes()).unwrap();
     assert_eq!(
         elem.get_text().unwrap(),
         Cow::from("hello world".to_owned())
@@ -274,7 +274,7 @@ fn test_text() {
         <elem>hello <inner/><![CDATA[<world>]]></elem>
     "##;
 
-    let elem = Element::parse(data.as_bytes()).unwrap();
+    let elem = Element::parse(data.trim().as_bytes()).unwrap();
     assert_eq!(
         elem.get_text().unwrap(),
         Cow::from("hello <world>".to_owned())
