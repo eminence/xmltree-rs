@@ -235,7 +235,7 @@ fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Result<Elem
             Ok(XmlEvent::Characters(s)) => elem.children.push(XMLNode::Text(s)),
             Ok(XmlEvent::Whitespace(..)) => (),
             Ok(XmlEvent::Comment(s)) => elem.children.push(XMLNode::Comment(s)),
-            Ok(XmlEvent::CData(s)) => elem.children.push(XMLNode::Text(s)),
+            Ok(XmlEvent::CData(s)) => elem.children.push(XMLNode::CData(s)),
             Ok(XmlEvent::ProcessingInstruction { name, data }) => elem
                 .children
                 .push(XMLNode::ProcessingInstruction(name, data)),
