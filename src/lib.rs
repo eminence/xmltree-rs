@@ -480,6 +480,11 @@ impl Element {
             Some(Cow::Owned(full_text))
         }
     }
+
+    /// Checks if this element matches the predicate.
+    pub fn matches<P: ElementPredicate>(&self, k: P) -> bool {
+        k.match_element(self)
+    }
 }
 
 /// A predicate for matching elements.
