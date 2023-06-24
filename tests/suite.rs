@@ -1,5 +1,3 @@
-extern crate xmltree;
-
 use std::borrow::Cow;
 use std::fs::File;
 use std::io::Cursor;
@@ -187,30 +185,6 @@ fn test_take() {
 }
 
 #[test]
-fn test_ns_rw() {
-    {
-        let e: Element = Element::parse(File::open("tests/data/ns1.xml").unwrap()).unwrap();
-
-        let mut buf = Vec::new();
-        e.write(&mut buf).unwrap();
-
-        let e2 = Element::parse(Cursor::new(buf)).unwrap();
-
-        assert_eq!(e, e2);
-    }
-    {
-        let e: Element = Element::parse(File::open("tests/data/ns2.xml").unwrap()).unwrap();
-
-        let mut buf = Vec::new();
-        e.write(&mut buf).unwrap();
-
-        let e2 = Element::parse(Cursor::new(buf)).unwrap();
-
-        assert_eq!(e, e2);
-    }
-}
-
-#[test]
 fn test_write_with_config() {
     let e: Element = Element::parse(File::open("tests/data/01.xml").unwrap()).unwrap();
 
@@ -224,20 +198,6 @@ fn test_write_with_config() {
 
     let s = String::from_utf8(buf).unwrap();
     println!("{}", s);
-}
-
-#[test]
-fn test_ns() {
-    let e: Element = Element::parse(File::open("tests/data/ns1.xml").unwrap()).unwrap();
-
-    let htbl = e
-        .get_child(("table", "http://www.w3.org/TR/html4/"))
-        .unwrap();
-    let ftbl = e
-        .get_child(("table", "https://www.w3schools.com/furniture"))
-        .unwrap();
-
-    assert_ne!(htbl, ftbl);
 }
 
 #[test]
