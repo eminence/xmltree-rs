@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<node xmlns:ext="http://dbus.extensions.com/schemas/dbus-extensions-v1.0">
+     <ext:member type="i" ext:type="[ExtendedType]" name="extendedType" >
+    </ext:member> 
+</node>

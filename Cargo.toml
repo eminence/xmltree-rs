@@ -1,6 +1,6 @@
 [package]
 name = "xmltree"
-version = "0.10.3"
+version = "0.11.0"
 authors = ["Andrew Chin <achin@eminence32.net>"]
 description = "Parse an XML file into a simple tree-like structure"
 documentation = "https://docs.rs/xmltree/"
@@ -9,7 +9,7 @@ keywords = ["xml", "parse", "xmltree"]
 license = "MIT"
 readme = "README.md"
 categories = ["parsing", "data-structures"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 xml-rs = "0.8"

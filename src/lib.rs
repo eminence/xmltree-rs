@@ -5,7 +5,7 @@
 //! # Example
 //!
 //! ```no_run
-//! use xmltree::Element;
+//! use xmltree::{AttributeName, Element};
 //! use std::fs::File;
 //!
 //! let data: &'static str = r##"
@@ -22,7 +22,7 @@
 //! {
 //!     // get first `name` element
 //!     let name = names_element.get_mut_child("name").expect("Can't find name element");
-//!     name.attributes.insert("suffix".to_owned(), "mr".to_owned());
+//!     name.attributes.insert(AttributeName::local("suffix"), "mr".to_owned());
 //! }
 //! names_element.write(File::create("result.xml").unwrap());
 //!
@@ -55,6 +55,7 @@ use std::borrow::Cow;
 use std::fmt;
 use std::io::{Read, Write};
 
+pub use xml::name::OwnedName as AttributeName;
 pub use xml::namespace::Namespace;
 pub use xml::reader::ParserConfig;
 use xml::reader::{EventReader, XmlEvent};
@@ -156,7 +157,7 @@ pub struct Element {
     /// * If the "attribute-order" feature is enabled, then this is an [IndexMap](https://docs.rs/indexmap/1.4.0/indexmap/),
     /// which will retain item insertion order.
     /// * If the "attribute-sorted" feature is enabled, then this is a [`std::collections::BTreeMap`], which maintains keys in sorted order.
-    pub attributes: AttributeMap<String, String>,
+    pub attributes: AttributeMap<AttributeName, String>,
 
     /// Children
     pub children: Vec<XMLNode>,
@@ -214,7 +215,7 @@ fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Result<Elem
             }) => {
                 let mut attr_map = AttributeMap::new();
                 for attr in attributes {
-                    attr_map.insert(attr.name.local_name, attr.value);
+                    attr_map.insert(attr.name, attr.value);
                 }
 
                 let new_elem = Element {
@@ -283,7 +284,7 @@ impl Element {
                 }) => {
                     let mut attr_map = AttributeMap::allocate(attributes.len());
                     for attr in attributes {
-                        attr_map.insert(attr.name.local_name, attr.value);
+                        attr_map.insert(attr.name, attr.value);
                     }
 
                     let root = Element {
@@ -353,7 +354,7 @@ impl Element {
         let mut attributes = Vec::with_capacity(self.attributes.len());
         for (k, v) in &self.attributes {
             attributes.push(Attribute {
-                name: Name::local(k),
+                name: k.borrow(),
                 value: v,
             });
         }
@@ -480,6 +481,42 @@ impl Element {
             Some(Cow::Owned(full_text))
         }
     }
+
+    /// Get a reference to the value of an attribute matching the provided predicate.
+    ///
+    /// Note that this will be slower than searching `attributes` directly as
+    /// it iterates over the entries in the map.
+    pub fn get_attribute<P: AttributePredicate>(&self, k: P) -> Option<&String> {
+        self.attributes
+            .iter()
+            .find(|pair| k.match_attribute(pair.0))
+            .map(|pair| pair.1)
+    }
+
+    /// Get a &mut to the value of an attribute matching the provided predicate.
+    ///
+    /// Note that this will be slower than searching `attributes` directly as
+    /// it iterates over the entries in the map.
+    pub fn get_mut_attribute<P: AttributePredicate>(&mut self, k: P) -> Option<&mut String> {
+        self.attributes
+            .iter_mut()
+            .find(|pair| k.match_attribute(pair.0))
+            .map(|pair| pair.1)
+    }
+
+    /// Find an attribute matching the provided predicate, remove, and return its value.
+    ///
+    /// Note that this will be slower than operating on `attributes` directly as
+    /// it iterates over the entries in the map.
+    pub fn take_attribute<P: AttributePredicate>(&mut self, k: P) -> Option<String> {
+        if let Some(key) = self.attributes
+                .keys()
+                .find(|name| k.match_attribute(name)).cloned() {
+
+            return self.attributes.remove(&key)
+        }
+        None
+    }
 }
 
 /// A predicate for matching elements.
@@ -540,5 +577,31 @@ where
                 .as_ref()
                 .map(|ns| ns == &self.1)
                 .unwrap_or(false)
+    }
+}
+
+/// A predicate for matching attributes.
+///
+/// The default implementations allow you to match by attribute name or a tuple of
+/// attribute name and namespace.
+pub trait AttributePredicate {
+    fn match_attribute(&self, n: &AttributeName) -> bool;
+}
+
+impl<'a, 'b> AttributePredicate for (&'a str, Option<&'b str>)
+{
+    fn match_attribute(&self, n: &AttributeName) -> bool {
+        n.local_name == self.0 && match (&n.namespace, &self.1) {
+            (None, None) => true,
+            (Some(ns1), Some(ns2)) => ns1 == ns2,
+            _ => false
+        }
+    }
+}
+
+impl<'a> AttributePredicate for &'a str {
+    /// Search by attribute name
+    fn match_attribute(&self, n: &AttributeName) -> bool {
+        n.local_name == *self
     }
 }
