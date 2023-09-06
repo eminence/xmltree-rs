@@ -1,7 +1,7 @@
 xmltree-rs
 ==========
 
-[Documention](https://docs.rs/xmltree/)
+[Documentation](https://docs.rs/xmltree/)
 
 A small library for parsing an XML file into an in-memory tree structure.
 
@@ -24,7 +24,7 @@ xmltree = "0.10"
 
 * `attribute-sorted` - change the data structure that stores attributes to one that uses sorted order. This changes the type definition.
 
-## Compatability with xml-rs
+## Compatibility with xml-rs
 This crate will export some types from the xml-rs crate.  If your own crate also uses the xml-rs
 crate, but with a different version, the types may be incompatible.  One way to solve this is to
 only use the exported types, but sometimes that is not always possible.  In those cases you should
