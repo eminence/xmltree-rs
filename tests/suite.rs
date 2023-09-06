@@ -298,5 +298,8 @@ fn test_decl() {
     let e = Element::new("n");
     let mut output = Vec::new();
     e.write_with_config(&mut output, c).unwrap();
-    assert_eq!(String::from_utf8(output).unwrap(), "<?xml version=\"1.0\" encoding=\"UTF-8\"?><n />");
+    assert_eq!(
+        String::from_utf8(output).unwrap(),
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?><n />"
+    );
 }

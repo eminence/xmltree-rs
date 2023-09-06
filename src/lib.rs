@@ -271,7 +271,10 @@ impl Element {
         Element::parse_all_with_config(r, parser_config)
     }
 
-    pub fn parse_all_with_config<R: Read>(r: R, parser_config: ParserConfig) -> Result<Vec<XMLNode>, ParseError> {
+    pub fn parse_all_with_config<R: Read>(
+        r: R,
+        parser_config: ParserConfig,
+    ) -> Result<Vec<XMLNode>, ParseError> {
         let mut reader = EventReader::new_with_config(r, parser_config);
         let mut root_nodes = Vec::new();
         loop {
@@ -322,7 +325,9 @@ impl Element {
     pub fn parse<R: Read>(r: R) -> Result<Element, ParseError> {
         let nodes = Element::parse_all(r)?;
         for node in nodes {
-            if let XMLNode::Element(elem) = node { return Ok(elem) }
+            if let XMLNode::Element(elem) = node {
+                return Ok(elem);
+            }
         }
         // This assume the underlying xml library throws an error on no root element
         unreachable!();
@@ -331,7 +336,9 @@ impl Element {
     pub fn parse_with_config<R: Read>(r: R, config: ParserConfig) -> Result<Element, ParseError> {
         let nodes = Element::parse_all_with_config(r, config)?;
         for node in nodes {
-            if let XMLNode::Element(elem) = node { return Ok(elem) }
+            if let XMLNode::Element(elem) = node {
+                return Ok(elem);
+            }
         }
         // This assume the underlying xml library throws an error on no root element
         unreachable!();
