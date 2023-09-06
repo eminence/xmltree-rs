@@ -28,7 +28,7 @@
 //!
 //!
 //! ```
-use xml;
+
 
 #[cfg(all(feature = "attribute-order", not(feature = "attribute-sorted")))]
 /// The type used to store element attributes.
