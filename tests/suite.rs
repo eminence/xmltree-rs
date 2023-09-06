@@ -88,13 +88,13 @@ fn test_mut() {
 fn test_mal_01() {
     // some tests for error handling
 
-    let data = r##"
+    let data = r#"
         <?xml version="1.0" encoding="utf-8" standalone="yes"?>
         <names>
             <name first="bob" last="jones />
             <name first="elizabeth" last="smith" />
         </names>
-    "##;
+    "#;
 
     let names_element = Element::parse(data.as_bytes());
     if let Err(ParseError::MalformedXml(..)) = names_element {
@@ -127,13 +127,13 @@ fn test_mal_02() {
 fn test_mal_03() {
     // some tests for error handling
 
-    let data = r##"
+    let data = r#"
         <?xml version="1.0" encoding="utf-8" standalone="yes"?>
         <names>
             <name first="bob" last="jones"></badtag>
             <name first="elizabeth" last="smith" />
         </names>
-    "##;
+    "#;
 
     let names_element = Element::parse(data.as_bytes());
     if let Err(ParseError::MalformedXml(..)) = names_element {
@@ -155,7 +155,7 @@ fn test_new() {
 
 #[test]
 fn test_take() {
-    let data_xml_1 = r##"
+    let data_xml_1 = r#"
         <?xml version="1.0" encoding="utf-8" standalone="yes"?>
         <names>
             <name first="bob" last="jones"></name>
@@ -164,15 +164,15 @@ fn test_take() {
                 <child />
             </remove_me>
         </names>
-    "##;
+    "#;
 
-    let data_xml_2 = r##"
+    let data_xml_2 = r#"
         <?xml version="1.0" encoding="utf-8" standalone="yes"?>
         <names>
             <name first="bob" last="jones"></name>
             <name first="elizabeth" last="smith" />
         </names>
-    "##;
+    "#;
 
     let mut data_1 = Element::parse(data_xml_1.trim().as_bytes()).unwrap();
     let data_2 = Element::parse(data_xml_2.trim().as_bytes()).unwrap();
@@ -242,26 +242,26 @@ fn test_ns() {
 
 #[test]
 fn test_text() {
-    let data = r##"
+    let data = r#"
         <?xml version="1.0" encoding="utf-8" standalone="yes"?>
         <elem><inner/></elem>
-    "##;
+    "#;
 
     let elem = Element::parse(data.trim().as_bytes()).unwrap();
     assert!(elem.get_text().is_none());
 
-    let data = r##"
+    let data = r#"
         <?xml version="1.0" encoding="utf-8" standalone="yes"?>
         <elem>hello world<inner/></elem>
-    "##;
+    "#;
 
     let elem = Element::parse(data.trim().as_bytes()).unwrap();
     assert_eq!(elem.get_text().unwrap(), Cow::Borrowed("hello world"));
 
-    let data = r##"
+    let data = r#"
         <?xml version="1.0" encoding="utf-8" standalone="yes"?>
         <elem>hello <inner/>world</elem>
-    "##;
+    "#;
 
     let elem = Element::parse(data.trim().as_bytes()).unwrap();
     assert_eq!(
@@ -269,10 +269,10 @@ fn test_text() {
         Cow::from("hello world".to_owned())
     );
 
-    let data = r##"
+    let data = r#"
         <?xml version="1.0" encoding="utf-8" standalone="yes"?>
         <elem>hello <inner/><![CDATA[<world>]]></elem>
-    "##;
+    "#;
 
     let elem = Element::parse(data.trim().as_bytes()).unwrap();
     assert_eq!(
