@@ -153,7 +153,7 @@ pub struct Element {
     /// By default, this is a `HashMap`, but there are two optional features that can change this:
     ///
     /// * If the "attribute-order" feature is enabled, then this is an [IndexMap](https://docs.rs/indexmap/2/indexmap/),
-    /// which will retain item insertion order.
+    ///   which will retain item insertion order.
     /// * If the "attribute-sorted" feature is enabled, then this is a [`std::collections::BTreeMap`], which maintains keys in sorted order.
     pub attributes: AttributeMap<String, String>,
 
