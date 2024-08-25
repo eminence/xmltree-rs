@@ -29,7 +29,6 @@
 //!
 //! ```
 
-
 #[cfg(all(feature = "attribute-order", not(feature = "attribute-sorted")))]
 /// The type used to store element attributes.
 pub type AttributeMap<K, V> = indexmap::map::IndexMap<K, V>;
@@ -153,7 +152,7 @@ pub struct Element {
     ///
     /// By default, this is a `HashMap`, but there are two optional features that can change this:
     ///
-    /// * If the "attribute-order" feature is enabled, then this is an [IndexMap](https://docs.rs/indexmap/1.4.0/indexmap/),
+    /// * If the "attribute-order" feature is enabled, then this is an [IndexMap](https://docs.rs/indexmap/2/indexmap/),
     /// which will retain item insertion order.
     /// * If the "attribute-sorted" feature is enabled, then this is a [`std::collections::BTreeMap`], which maintains keys in sorted order.
     pub attributes: AttributeMap<String, String>,
