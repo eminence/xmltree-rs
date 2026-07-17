@@ -59,6 +59,11 @@ pub use xml::reader::ParserConfig;
 use xml::reader::{EventReader, XmlEvent};
 pub use xml::writer::{EmitterConfig, Error};
 
+// TODO: the derived Debug, Clone, and PartialEq impls recurse over the
+// nesting depth (through `Element::children`) and can overflow the stack
+// on deeply nested documents. Iterative implementations are possible
+// without changing semantics.
+// Related issue #58
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum XMLNode {
     Element(Element),
@@ -131,6 +136,13 @@ impl XMLNode {
     }
 }
 
+// TODO: the derived Debug, Clone, and PartialEq impls recurse over the
+// nesting depth and can overflow the stack on deeply nested documents.
+// The implicit drop glue for the `children` tree recurses as well; an
+// iterative `Drop` impl would fix that, but it is a breaking change
+// (fields can no longer be moved out of a type with a `Drop` impl), so it
+// needs a deliberate semver decision.
+// Related issue #58
 /// Represents an XML element.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Element {
@@ -196,14 +208,63 @@ impl std::error::Error for ParseError {
     }
 }
 
-fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Result<Element, ParseError> {
+/// Moves every `Element` child of `elem` onto `stack`, leaving
+/// `elem.children` empty.
+fn push_element_children(elem: &mut Element, stack: &mut Vec<Element>) {
+    for node in elem.children.drain(..) {
+        if let XMLNode::Element(child) = node {
+            stack.push(child);
+        }
+    }
+}
+
+/// Flattens the trees rooted at `roots` iteratively, so that dropping
+/// them does not recurse over the nesting depth. The implicit drop glue
+/// walks `children` recursively and overflows the stack on deeply nested
+/// documents (see the TODO on `Element`), so error paths that already
+/// hold a partially or fully assembled tree must dismantle it this way.
+///
+/// TODO: if `Element` ever grows an iterative `Drop` impl (a breaking
+/// change, see issue #58 and the TODO on `Element`), these manual
+/// error-path dismantles become unnecessary and can be removed.
+fn flatten_trees(mut roots: Vec<Element>) {
+    let mut stack = Vec::new();
+    for root in &mut roots {
+        push_element_children(root, &mut stack);
+    }
+    while let Some(mut elem) = stack.pop() {
+        push_element_children(&mut elem, &mut stack);
+    }
+}
+
+/// Dismantles the partially built tree held by `elem` and `parents`
+/// without recursive drop glue (see `flatten_trees`) and returns `err`.
+fn fail_build(elem: &mut Element, parents: &mut Vec<Element>, err: ParseError) -> ParseError {
+    let mut roots = std::mem::take(parents);
+    roots.push(std::mem::replace(elem, Element::new("")));
+    flatten_trees(roots);
+    err
+}
+
+fn build<B: Read>(reader: &mut EventReader<B>, root: Element) -> Result<Element, ParseError> {
+    // Build the tree iteratively: `elem` is the element currently being
+    // filled, `parents` holds its still-open ancestors. Nesting depth is
+    // therefore bounded by heap memory instead of the thread stack. When an
+    // EndElement closes the root (no parent left), the document is complete.
+    let mut parents: Vec<Element> = Vec::new();
+    let mut elem = root;
     loop {
         match reader.next() {
             Ok(XmlEvent::EndElement { ref name }) => {
-                if name.local_name == elem.name {
-                    return Ok(elem);
-                } else {
-                    return Err(ParseError::CannotParse);
+                if name.local_name != elem.name {
+                    return Err(fail_build(&mut elem, &mut parents, ParseError::CannotParse));
+                }
+                match parents.pop() {
+                    Some(mut parent) => {
+                        parent.children.push(XMLNode::Element(elem));
+                        elem = parent;
+                    }
+                    None => return Ok(elem),
                 }
             }
             Ok(XmlEvent::StartElement {
@@ -228,8 +289,8 @@ fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Result<Elem
                     attributes: attr_map,
                     children: Vec::new(),
                 };
-                elem.children
-                    .push(XMLNode::Element(build(reader, new_elem)?));
+                parents.push(elem);
+                elem = new_elem;
             }
             Ok(XmlEvent::Characters(s)) => elem.children.push(XMLNode::Text(s)),
             Ok(XmlEvent::Whitespace(..)) => (),
@@ -239,10 +300,16 @@ fn build<B: Read>(reader: &mut EventReader<B>, mut elem: Element) -> Result<Elem
                 .children
                 .push(XMLNode::ProcessingInstruction(name, data)),
             Ok(XmlEvent::StartDocument { .. }) | Ok(XmlEvent::EndDocument) => {
-                return Err(ParseError::CannotParse)
+                return Err(fail_build(&mut elem, &mut parents, ParseError::CannotParse));
             }
             Ok(XmlEvent::Doctype { .. }) => (),
-            Err(e) => return Err(ParseError::MalformedXml(e)),
+            Err(e) => {
+                return Err(fail_build(
+                    &mut elem,
+                    &mut parents,
+                    ParseError::MalformedXml(e),
+                ));
+            }
         }
     }
 }
@@ -317,7 +384,20 @@ impl Element {
                 Ok(XmlEvent::EndElement { .. }) => (),
                 Ok(XmlEvent::EndDocument) => return Ok(root_nodes),
                 Ok(XmlEvent::Doctype { .. }) => (),
-                Err(e) => return Err(ParseError::MalformedXml(e)),
+                Err(e) => {
+                    // Completed root trees may be deeply nested; flatten
+                    // them iteratively so the error return does not drop
+                    // them through the recursive drop glue.
+                    let roots = root_nodes
+                        .drain(..)
+                        .filter_map(|node| match node {
+                            XMLNode::Element(elem) => Some(elem),
+                            _ => None,
+                        })
+                        .collect();
+                    flatten_trees(roots);
+                    return Err(ParseError::MalformedXml(e));
+                }
             }
         }
     }
@@ -330,8 +410,10 @@ impl Element {
                 return Ok(elem);
             }
         }
-        // This assume the underlying xml library throws an error on no root element
-        unreachable!();
+        // Reached only if the document contained no root element. xml-rs
+        // currently enforces the root requirement itself, so this is
+        // defense in depth: an error, never a panic.
+        Err(ParseError::CannotParse)
     }
 
     pub fn parse_with_config<R: Read>(r: R, config: ParserConfig) -> Result<Element, ParseError> {
@@ -341,22 +423,32 @@ impl Element {
                 return Ok(elem);
             }
         }
-        // This assume the underlying xml library throws an error on no root element
-        unreachable!();
+        // Reached only if the document contained no root element. xml-rs
+        // currently enforces the root requirement itself, so this is
+        // defense in depth: an error, never a panic.
+        Err(ParseError::CannotParse)
     }
 
-    fn _write<B: Write>(&self, emitter: &mut xml::writer::EventWriter<B>) -> Result<(), Error> {
-        use xml::attribute::Attribute;
-        use xml::name::Name;
-        use xml::writer::events::XmlEvent;
-
-        let mut name = Name::local(&self.name);
+    /// Builds the `Name` for this element, carrying namespace and prefix
+    /// information if present. Shared by start-tag and end-tag emission.
+    fn xml_name(&self) -> xml::name::Name<'_> {
+        let mut name = xml::name::Name::local(&self.name);
         if let Some(ref ns) = self.namespace {
             name.namespace = Some(ns);
         }
         if let Some(ref p) = self.prefix {
             name.prefix = Some(p);
         }
+        name
+    }
+
+    fn write_start_tag<B: Write>(
+        &self,
+        emitter: &mut xml::writer::EventWriter<B>,
+    ) -> Result<(), Error> {
+        use xml::attribute::Attribute;
+        use xml::name::Name;
+        use xml::writer::events::XmlEvent;
 
         let mut attributes = Vec::with_capacity(self.attributes.len());
         for (k, v) in &self.attributes {
@@ -374,27 +466,58 @@ impl Element {
         };
 
         emitter.write(XmlEvent::StartElement {
-            name,
+            name: self.xml_name(),
             attributes: Cow::Owned(attributes),
             namespace,
-        })?;
-        for node in &self.children {
-            match node {
-                XMLNode::Element(elem) => elem._write(emitter)?,
-                XMLNode::Text(text) => emitter.write(XmlEvent::Characters(text))?,
-                XMLNode::Comment(comment) => emitter.write(XmlEvent::Comment(comment))?,
-                XMLNode::CData(comment) => emitter.write(XmlEvent::CData(comment))?,
-                XMLNode::ProcessingInstruction(name, data) => match data.to_owned() {
-                    Some(string) => emitter.write(XmlEvent::ProcessingInstruction {
-                        name,
-                        data: Some(&string),
-                    })?,
-                    None => emitter.write(XmlEvent::ProcessingInstruction { name, data: None })?,
-                },
+        })
+    }
+
+    fn write_end_tag<B: Write>(
+        &self,
+        emitter: &mut xml::writer::EventWriter<B>,
+    ) -> Result<(), Error> {
+        use xml::writer::events::XmlEvent;
+
+        emitter.write(XmlEvent::EndElement {
+            name: Some(self.xml_name()),
+        })
+    }
+
+    fn _write<B: Write>(&self, emitter: &mut xml::writer::EventWriter<B>) -> Result<(), Error> {
+        use xml::writer::events::XmlEvent;
+
+        // Walk the tree iteratively with an explicit stack of
+        // (element, next child index) frames, so that nesting depth is
+        // bounded by heap memory instead of the thread stack.
+        self.write_start_tag(emitter)?;
+        let mut stack: Vec<(&Element, usize)> = vec![(self, 0)];
+        while let Some(top) = stack.last_mut() {
+            let elem: &Element = top.0;
+            if top.1 < elem.children.len() {
+                let node = &elem.children[top.1];
+                top.1 += 1;
+                match node {
+                    XMLNode::Element(child) => {
+                        child.write_start_tag(emitter)?;
+                        stack.push((child, 0));
+                    }
+                    XMLNode::Text(text) => emitter.write(XmlEvent::Characters(text))?,
+                    XMLNode::Comment(comment) => emitter.write(XmlEvent::Comment(comment))?,
+                    XMLNode::CData(cdata) => emitter.write(XmlEvent::CData(cdata))?,
+                    XMLNode::ProcessingInstruction(name, data) => match data {
+                        Some(string) => emitter.write(XmlEvent::ProcessingInstruction {
+                            name,
+                            data: Some(string.as_str()),
+                        })?,
+                        None => {
+                            emitter.write(XmlEvent::ProcessingInstruction { name, data: None })?
+                        }
+                    },
+                }
+            } else if let Some((elem, _)) = stack.pop() {
+                elem.write_end_tag(emitter)?;
             }
-            // elem._write(emitter)?;
         }
-        emitter.write(XmlEvent::EndElement { name: Some(name) })?;
 
         Ok(())
     }
@@ -470,8 +593,8 @@ impl Element {
     /// Returns the inner text/cdata of this element, if any.
     ///
     /// If there are multiple text/cdata nodes, they will be all concatenated into one string.
-    pub fn get_text<'a>(&'a self) -> Option<Cow<'a, str>> {
-        let text_nodes: Vec<&'a str> = self
+    pub fn get_text(&self) -> Option<Cow<'_, str>> {
+        let text_nodes: Vec<&str> = self
             .children
             .iter()
             .filter_map(|node| node.as_text().or_else(|| node.as_cdata()))
@@ -520,7 +643,7 @@ where
     }
 }
 
-impl<'a> ElementPredicate for &'a str {
+impl ElementPredicate for &str {
     /// Search by tag name
     fn match_element(&self, e: &Element) -> bool {
         (*self,).match_element(e)

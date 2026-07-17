@@ -149,8 +149,11 @@ fn bench_new(b: &mut Bencher) {
 
 #[bench]
 fn bench_take(b: &mut Bencher) {
-    let data_xml_1 = r##"
-        <?xml version="1.0" encoding="utf-8" standalone="yes"?>
+    // The XML spec only allows `<?xml` at the very first byte of the
+    // document; any leading whitespace (e.g. a newline from an indented
+    // raw string) makes recent xml-rs versions reject the input as
+    // malformed. Keep these raw strings starting at column zero.
+    let data_xml_1 = r##"<?xml version="1.0" encoding="utf-8" standalone="yes"?>
         <names>
             <name first="bob" last="jones"></name>
             <name first="elizabeth" last="smith" />
@@ -160,8 +163,7 @@ fn bench_take(b: &mut Bencher) {
         </names>
     "##;
 
-    let data_xml_2 = r##"
-        <?xml version="1.0" encoding="utf-8" standalone="yes"?>
+    let data_xml_2 = r##"<?xml version="1.0" encoding="utf-8" standalone="yes"?>
         <names>
             <name first="bob" last="jones"></name>
             <name first="elizabeth" last="smith" />

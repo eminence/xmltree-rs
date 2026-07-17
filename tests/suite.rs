@@ -303,3 +303,73 @@ fn test_decl() {
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?><n />"
     );
 }
+
+#[test]
+fn test_comment_only_document_errors() {
+    // A document without a root element is rejected. xml-rs itself
+    // enforces the root requirement at the lexer level, so this surfaces
+    // as MalformedXml rather than CannotParse.
+    let data = r#"<?xml version="1.0"?><!-- nothing but a comment -->"#;
+
+    match Element::parse(data.as_bytes()) {
+        Err(ParseError::MalformedXml(_)) => {}
+        other => panic!("expected MalformedXml, got {:?}", other.is_ok()),
+    }
+
+    match Element::parse_with_config(data.as_bytes(), ParserConfig::new()) {
+        Err(ParseError::MalformedXml(_)) => {}
+        other => panic!("expected MalformedXml, got {:?}", other.is_ok()),
+    }
+}
+
+#[test]
+fn test_parse_all_comment_only() {
+    // parse_all is likewise rejected by xml-rs before any nodes are
+    // produced: the root requirement applies to the stream, not to our
+    // tree assembly.
+    let data = r#"<?xml version="1.0"?><!-- first --><!-- second -->"#;
+
+    match Element::parse_all(data.as_bytes()) {
+        Err(ParseError::MalformedXml(_)) => {}
+        other => panic!("expected MalformedXml, got {:?}", other.is_ok()),
+    }
+}
+
+#[test]
+fn test_roundtrip_all_node_types() {
+    // Every XMLNode variant must survive a parse -> write -> parse cycle:
+    // attributes, text, comment, CDATA, processing instruction, and
+    // nested elements, in order.
+    let data = r#"<?xml version="1.0"?>
+<root a="1" b="2">text before<!-- a comment --><child key="value">inner</child><![CDATA[<raw>&data;]]><?target some data?>text after</root>"#;
+
+    let e = Element::parse(data.as_bytes()).unwrap();
+    let mut buf = Vec::new();
+    e.write(&mut buf).unwrap();
+    let e2 = Element::parse(Cursor::new(&buf)).unwrap();
+    assert_eq!(e, e2);
+
+    assert_eq!(e.attributes.get("a").unwrap(), "1");
+    assert_eq!(e.attributes.get("b").unwrap(), "2");
+    assert!(e.children.iter().any(|n| n.as_comment().is_some()));
+    assert!(e.children.iter().any(|n| n.as_cdata().is_some()));
+    assert!(e
+        .children
+        .iter()
+        .any(|n| n.as_processing_instruction().is_some()));
+}
+
+#[test]
+fn test_write_prefixed_end_tag() {
+    // Start AND end tags must both carry the namespace prefix.
+    let data = r#"<x:root xmlns:x="urn:test"><x:child /></x:root>"#;
+
+    let e = Element::parse(data.as_bytes()).unwrap();
+    let mut buf = Vec::new();
+    e.write(&mut buf).unwrap();
+    let out = String::from_utf8(buf).unwrap();
+
+    assert!(out.contains("<x:root"), "start tag lost prefix: {}", out);
+    assert!(out.contains("<x:child"), "child tag lost prefix: {}", out);
+    assert!(out.contains("</x:root>"), "end tag lost prefix: {}", out);
+}
